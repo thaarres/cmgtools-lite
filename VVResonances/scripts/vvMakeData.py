@@ -59,10 +59,10 @@ if options.data==2:
 
 
         
-
     
 
 data=MergedPlotter(dataPlotters)
+
 
 pvars=options.vars.split(',')
 pmins=options.mins.split(',')
@@ -88,6 +88,10 @@ if len(pvars)==2:
 
 
 if len(pvars)==3:
+    print "z ",pvars[2], "y ", pvars[1], "x ", pvars[0]
+    print "binsz ",int(pbins[2])," minz ", float(pmins[2])," maxz ", float(pmaxes[2])
+    print "binsy ",int(pbins[1])," miny ", float(pmins[1])," maxy ", float(pmaxes[1])
+    print "binsx ",int(pbins[0])," minx ", float(pmins[0])," maxx ", float(pmaxes[0])
     histo=data.drawTH3(pvars[2]+":"+pvars[1]+":"+pvars[0],options.cut,"1",int(pbins[0]),float(pmins[0]),float(pmaxes[0]),int(pbins[1]),float(pmins[1]),float(pmaxes[1]),int(pbins[2]),float(pmins[2]),float(pmaxes[2]))
 #    if options.zeroNegative:
 #        for i in range(0,int(pbins[0])+2):

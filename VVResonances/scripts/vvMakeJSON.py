@@ -3,6 +3,7 @@
 import ROOT
 from array import array
 import os, sys, re, optparse,pickle,shutil,json
+ROOT.gROOT.SetBatch(True)
 
 def returnString(func):
     if func.GetName().find("pol")!=-1:

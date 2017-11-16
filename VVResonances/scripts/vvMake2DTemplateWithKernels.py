@@ -25,7 +25,8 @@ parser.add_option("-y","--miny",dest="miny",type=float,help="bins",default=0)
 parser.add_option("-Y","--maxy",dest="maxy",type=float,help="conditional bins split by comma",default=1)
 parser.add_option("-w","--weights",dest="weights",help="additional weights",default='')
 parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help="use gen mass for det resolution",default=False)
-
+parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
+parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
 
 def mirror(histo,histoNominal,name):
     newHisto =copy.deepcopy(histoNominal) 
@@ -49,9 +50,7 @@ def expandHisto(histo,options):
             bin=histogram.GetBin(i,j)
             histogram.SetBinContent(bin,graph.Eval(x,0,"S"))
     return histogram
-        
-
-
+      
 def conditional(hist):
     for i in range(1,hist.GetNbinsY()+1):
         proj=hist.ProjectionX("q",i,i)
@@ -61,7 +60,7 @@ def conditional(hist):
             continue
         for j in range(1,hist.GetNbinsX()+1):
             hist.SetBinContent(j,i,hist.GetBinContent(j,i)/integral)
-
+            
 def smoothTail(hist):
     hist.Scale(1.0/hist.Integral())
     expo=ROOT.TF1("expo","expo",1000,8000)
@@ -123,18 +122,19 @@ for filename in os.listdir(args[0]):
 data=MergedPlotter(dataPlotters)
 
 fcorr=ROOT.TFile(options.res)
-scale_x=fcorr.Get("scalexHisto")
-scale_y=fcorr.Get("scaleyHisto")
-res_x=fcorr.Get("resxHisto")
-res_y=fcorr.Get("resyHisto")
+scale_x=fcorr.Get("scaleyHisto")
+scale_y=fcorr.Get("scalexHisto")
+res_x=fcorr.Get("resyHisto")
+res_y=fcorr.Get("resxHisto")
 
 variables=options.vars.split(',')
+leg = options.vars.split(',')[0].split('_')[1]
 
 binsx=[]
 for i in range(0,options.binsx+1):
     binsx.append(options.minx+i*(options.maxx-options.minx)/options.binsx)
 
-binsy=[30.,40.,50.,60.,70.,80.,90.,100.,110.,120.,140.,150.,160.,180.,210., 240., 270., 300., 330., 360., 390., 410., 440., 470., 500., 530., 560., 590.,610.]    #28
+binsy=[1000+i*100 for i in range(61)]
 
 scaleUp = ROOT.TH1F(scale_x)
 scaleUp.SetName("scaleUp")
@@ -157,44 +157,46 @@ histogram_altshape_scale_down = ROOT.TH2F("histo_altshape_ScaleDown","histo_alts
 mjet_mvv_altshape2 = ROOT.TH2F("mjet_mvv_altshape2","mjet_mvv_altshape2",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
 histogram_altshape2 = ROOT.TH2F("histo_altshape2","histo_altshape2",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
+mjet_mvv_nominal_3D = ROOT.TH3F("mjet_mvv_nominal_3D","mjet_mvv_nominal_3D",options.binsx,options.minx,options.maxx,options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
+
 #systematics
 histograms=[
     histogram,
-    histogram_scale_up,
-    histogram_scale_down,
-    histogram_altshapeUp,
-    histogram_altshape_scale_up,
-    histogram_altshape_scale_down,    
-    histogram_altshape2
+    #histogram_scale_up,
+    #histogram_scale_down,
+    #histogram_altshapeUp,
+    #histogram_altshape_scale_up,
+    #histogram_altshape_scale_down,    
+    #histogram_altshape2
 ]
 
 #ok lets populate!
 
 maxEvents = -1
-varsDataSet = 'jj_l1_gen_pt,'+variables[1]+','+variables[0]
+varsDataSet = 'jj_%s_gen_pt,%s,%s'%(leg,variables[1],variables[0])
 
 for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
-
- #if plotter.filename != 'QCD_Pt-15to7000': continue
  
  #Nominal histogram Pythia8
- if plotter.filename.find(sampleTypes[0]) != -1:
+ if plotter.filename.find(sampleTypes[0].replace('.root','')) != -1:
   print "Preparing nominal histogram for sampletype " ,sampleTypes[0]
   print "filename: ", plotter.filename, " preparing central values histo"
  
   #histI=plotter.drawTH1(variables[0],options.cut,"1",1,0,1000000000)
   #norm=histI.Integral()
   #y:x
-  histI2D=plotter.drawTH2("jj_l1_softDrop_mass:jj_LV_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
+  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"Softdrop mass","M_{JJ} mass","GeV","GeV","COLZ" )
+  hist3D=plotter.drawTH3("jj_LV_mass:jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{JJ} mass","GeV","Softdrop mass","GeV","COLZ" )
 
   print " - Creating dataset - "
-  dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
+  #dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
+  dataset=plotterNW.makeDataSet(varsDataSet,options.cut,options.firstEv,options.lastEv)
 
   print " - Creating 2D gaussian template - "
   histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
   if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scale_x,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scale_x,scale_y,res_x,res_y,histTMP)
+   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scale_x,scale_y,res_x,res_y,histTMP)
+  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scale_x,scale_y,res_x,res_y,histTMP)
 
   #if histTMP.Integral()>0:
   # histTMP.Scale(histI.Integral()/histTMP.Integral())
@@ -207,52 +209,55 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histTMP.Scale(histI2D.Integral()/histTMP.Integral())
    histogram.Add(histTMP)
    mjet_mvv_nominal.Add(histI2D)
+   mjet_mvv_nominal_3D.Add(hist3D)
    
   #histI.Delete()  	  
   histTMP.Delete()
 
-  print " - Creating 2D gaussian template scale up - "
-  histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
-  if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scaleUp,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scaleUp,scale_y,res_x,res_y,histTMP)
+  #print " - Creating 2D gaussian template scale up - "
+  #histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
+  #if not(options.usegenmass): 
+  # datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scaleUp,scale_y,res_x,res_y,histTMP)
+  #else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scaleUp,scale_y,res_x,res_y,histTMP)
 
-  if histTMP.Integral()>0:
-   histTMP.Scale(histI2D.Integral()/histTMP.Integral())
-   histogram_scale_up.Add(histTMP)
+  #if histTMP.Integral()>0:
+  # histTMP.Scale(histI2D.Integral()/histTMP.Integral())
+  # histogram_scale_up.Add(histTMP)
     	  
-  histTMP.Delete()
+  #histTMP.Delete()
 
-  print " - Creating 2D gaussian template scale down - "
-  histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
-  if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scaleDown,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scaleDown,scale_y,res_x,res_y,histTMP)
+  #print " - Creating 2D gaussian template scale down - "
+  #histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
+  #if not(options.usegenmass): 
+  # datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scaleDown,scale_y,res_x,res_y,histTMP)
+  #else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scaleDown,scale_y,res_x,res_y,histTMP)
 
-  if histTMP.Integral()>0:
-   histTMP.Scale(histI2D.Integral()/histTMP.Integral())
-   histogram_scale_down.Add(histTMP)
+  #if histTMP.Integral()>0:
+  # histTMP.Scale(histI2D.Integral()/histTMP.Integral())
+  # histogram_scale_down.Add(histTMP)
     
-  histI2D.Delete()	  
-  histTMP.Delete()
+  histI2D.Delete()	
+  hist3D.Delete()  
+  #histTMP.Delete()
     
  if len(sampleTypes)<2: continue 
- elif plotter.filename.find(sampleTypes[1]) != -1: #alternative shape Herwig
+ elif plotter.filename.find(sampleTypes[1].replace('.root','')) != -1: #alternative shape Herwig
   print "Preparing alternative shapes for sampletype " ,sampleTypes[1]
   print "filename: ", plotter.filename, " preparing alternate shape histo"
 
   #histI=plotter.drawTH1(variables[0],options.cut,"1",1,0,1000000000)
   #norm=histI.Integral()
-  histI2D=plotter.drawTH2("jj_l1_softDrop_mass:jj_LV_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
+  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
 
   print " - Creating dataset - "
-  dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
+  #dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
+  dataset=plotterNW.makeDataSet(varsDataSet,options.cut,options.firstEv,options.lastEv)
 
   print " - Creating 2D gaussian template - "
   histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
   if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scale_x,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scale_x,scale_y,res_x,res_y,histTMP)
+   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scale_x,scale_y,res_x,res_y,histTMP)
+  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scale_x,scale_y,res_x,res_y,histTMP)
 
   #if histTMP.Integral()>0:
   #  histTMP.Scale(histI.Integral()/histTMP.Integral())
@@ -272,8 +277,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   print " - Creating 2D gaussian template scale up - "
   histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
   if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scaleUp,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scaleUp,scale_y,res_x,res_y,histTMP)
+   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scaleUp,scale_y,res_x,res_y,histTMP)
+  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scaleUp,scale_y,res_x,res_y,histTMP)
 
   if histTMP.Integral()>0:
     histTMP.Scale(histI2D.Integral()/histTMP.Integral())
@@ -284,8 +289,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   print " - Creating 2D gaussian template scale down - "
   histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
   if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scaleDown,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scaleDown,scale_y,res_x,res_y,histTMP)
+   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scaleDown,scale_y,res_x,res_y,histTMP)
+  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scaleDown,scale_y,res_x,res_y,histTMP)
 
   if histTMP.Integral()>0:
     histTMP.Scale(histI2D.Integral()/histTMP.Integral())
@@ -295,23 +300,24 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   histTMP.Delete()
     
  if len(sampleTypes)<3: continue 
- elif plotter.filename.find(sampleTypes[2]) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
+ elif plotter.filename.find(sampleTypes[2].replace('.root','')) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
   print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
   print "filename: ", plotter.filename, " preparing alternate shape histo"
 
   #histI=plotter.drawTH1(variables[0],options.cut,"1",1,0,1000000000)
   #norm=histI.Integral()
 
-  histI2D=plotter.drawTH2("jj_l1_softDrop_mass:jj_LV_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
+  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
   histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
   print " - Creating dataset - "
-  dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
+  #dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
+  dataset=plotterNW.makeDataSet(varsDataSet,options.cut,options.firstEv,options.lastEv)
 
   print " - Creating 2D gaussian template - "
   if not(options.usegenmass): 
-   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_pt',scale_x,scale_y,res_x,res_y,histTMP)
-  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_l1_gen_softDrop_mass',scale_x,scale_y,res_x,res_y,histTMP)
+   datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_pt'%(leg),scale_x,scale_y,res_x,res_y,histTMP)
+  else: datamaker=ROOT.cmg.GaussianSumTemplateMaker(dataset,variables[0],variables[1],'jj_%s_gen_softDrop_mass'%(leg),scale_x,scale_y,res_x,res_y,histTMP)
 
   #if histTMP.Integral()>0:
   #  histTMP.Scale(histI.Integral()/histTMP.Integral())
@@ -350,11 +356,26 @@ for hist in histograms:
 mjet_mvv_nominal.Write()
 mjet_mvv_altshapeUp.Write()
 mjet_mvv_altshape2.Write()
+mjet_mvv_nominal_3D.Write()
 
 # ##Mirror Herwig shape
-histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
-conditional(histogram_altshapeDown)
-histogram_altshapeDown.Write()
+#histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
+#conditional(histogram_altshapeDown)
+#histogram_altshapeDown.Write()
+
+alpha=1.5/610.
+histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha)
+conditional(histogram_pt_down)
+histogram_pt_down.Write()
+conditional(histogram_pt_up)
+histogram_pt_up.Write()
+
+alpha=1.5*55.
+h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1)
+conditional(h1)
+h1.Write()
+conditional(h2)
+h2.Write()
         		
 f.Close()
 

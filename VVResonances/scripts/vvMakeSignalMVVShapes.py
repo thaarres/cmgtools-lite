@@ -8,6 +8,7 @@ from CMGTools.VVResonances.plotting.StackPlotter import StackPlotter
 from CMGTools.VVResonances.statistics.Fitter import Fitter
 from math import log
 import os, sys, re, optparse,pickle,shutil,json
+ROOT.gROOT.SetBatch(True)
 
 def returnString(func):
     st='0'
@@ -25,8 +26,6 @@ parser.add_option("-f","--scaleFactors",dest="scaleFactors",help="Additional sca
 
 (options,args) = parser.parse_args()
 #define output dictionary
-
-ROOT.gROOT.SetBatch(True)
 
 samples={}
 graphs={'MEAN':ROOT.TGraphErrors(),'SIGMA':ROOT.TGraphErrors(),'ALPHA':ROOT.TGraphErrors(),'N':ROOT.TGraphErrors(),'SCALESIGMA':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors()}
@@ -59,7 +58,7 @@ scaleFactors=options.scaleFactors.split(',')
 #Now we have the samples: Sort the masses and run the fits
 N=0
 for mass in sorted(samples.keys()):
-    if mass>6000: continue
+
     print 'fitting',str(mass) 
     plotter=TreePlotter(args[0]+'/'+samples[mass]+'.root','tree')
     plotter.addCorrectionFactor('genWeight','tree')
@@ -71,20 +70,16 @@ for mass in sorted(samples.keys()):
     fitter=Fitter(['MVV'])
     fitter.signalResonanceCBGaus('model','MVV',mass)
     fitter.w.var("MH").setVal(mass)
-
-    histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.8*mass,1.2*mass),"1",140,700,8000)
-
+    histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.8*mass,1.2*mass),"1",1000,0,8000)
 
     fitter.importBinnedData(histo,['MVV'],'data')
-    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])#,ROOT.RooFit.Range(1000,8000)])
-    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])#,ROOT.RooFit.Range(1000,8000)])
-    # fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])#,ROOT.RooFit.Range(1000,8000)])
+    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
+    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
 
-    #fitter.projection("model","data","MVV","debugVV_"+options.output+"_"+str(mass)+".root")
-    fitter.projection("model","data","MVV","debugVV_"+options.output+"_"+str(mass)+".png","M_{jj} (GeV)",mass)
-    fitter.w.Print()
+    fitter.projection("model","data","MVV","debugVV_"+options.output+"_"+str(mass)+".root")
+    fitter.projection("model","data","MVV","debugVV_"+options.output+"_"+str(mass)+".png")
+
     for var,graph in graphs.iteritems():
-
         value,error=fitter.fetch(var)
         graph.SetPoint(N,mass,value)
         graph.SetPointError(N,0.0,error)
@@ -96,3 +91,4 @@ F.cd()
 for name,graph in graphs.iteritems():
     graph.Write(name)
 F.Close()
+            

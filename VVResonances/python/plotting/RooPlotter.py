@@ -1,5 +1,7 @@
 import ROOT
 import copy
+import sys
+
 def convertToPoisson(h):
     graph = ROOT.TGraphAsymmErrors()
     q = (1-0.6827)/2.
@@ -720,15 +722,14 @@ class RooPlotter(object):
             else:
                 name=('shapeBkg_'+self.contributions[i]['name']+"_"+cat+self.contributions[i]['suffix'])
                 backgrounds.append(name)
-                
-        
-
+               
+	    print "***************///////////////// ", name, cat
             if rangeStr=="":    
                 self.w.pdf("model_s").getPdf(cat).plotOn(self.frame,ROOT.RooFit.Components(name),ROOT.RooFit.Name(data['name']),ROOT.RooFit.Invisible(),ROOT.RooFit.Normalization(1.0,ROOT.RooAbsReal.RelativeExpected))
             else:
                 self.w.pdf("model_s").getPdf(cat).plotOn(self.frame,ROOT.RooFit.Components(name),ROOT.RooFit.Name(data['name']),ROOT.RooFit.Invisible(),ROOT.RooFit.Normalization(1.0,ROOT.RooAbsReal.RelativeExpected),ROOT.RooFit.ProjectionRange(','.join(projRange)))
 
-                
+                 
             curve=self.frame.getCurve(data['name'])
             histo = ROOT.TH1D("histo_"+name,"histo",nBins,binArray)
             histo.SetLineColor(data['linecolor'])
@@ -742,7 +743,7 @@ class RooPlotter(object):
             if not data['signal']:    
                 self.histoSum.Add(histo)
             self.contributions[i]['histo']=histo    
-
+	    
         if (not visError) and (self.fitResult != None)  and doUncBand:
             if rangeStr=="":
                 self.w.pdf("model_s").getPdf(cat).plotOn(self.frame,ROOT.RooFit.Components(",".join(backgrounds)),ROOT.RooFit.Name('bkgError'),ROOT.RooFit.Invisible(),ROOT.RooFit.Normalization(1.0,ROOT.RooAbsReal.RelativeExpected),ROOT.RooFit.VisualizeError(self.fitResult))

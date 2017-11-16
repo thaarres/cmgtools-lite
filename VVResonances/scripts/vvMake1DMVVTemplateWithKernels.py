@@ -24,10 +24,24 @@ parser.add_option("-x","--minx",dest="minx",type=float,help="bins",default=0)
 parser.add_option("-X","--maxx",dest="maxx",type=float,help="conditional bins split by comma",default=1)
 parser.add_option("-w","--weights",dest="weights",help="additional weights",default='')
 parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help="use gen mass for det resolution",default=False)
+parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
+parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
 
 (options,args) = parser.parse_args()     
 
-
+def unequalScale(histo,name,alpha,power=1):
+    newHistoU =copy.deepcopy(histo) 
+    newHistoU.SetName(name+"Up")
+    newHistoD =copy.deepcopy(histo) 
+    newHistoD.SetName(name+"Down")
+    for i in range(1,histo.GetNbinsX()+1):
+        x= histo.GetXaxis().GetBinCenter(i)
+        nominal=histo.GetBinContent(i)
+        factor = 1+alpha*pow(x,power) 
+        newHistoU.SetBinContent(i,nominal*factor)
+        newHistoD.SetBinContent(i,nominal/factor)
+    return newHistoU,newHistoD 
+    
 def mirror(histo,histoNominal,name):
     newHisto =copy.deepcopy(histoNominal) 
     newHisto.SetName(name)
@@ -140,14 +154,15 @@ maxEvents = -1
 for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
 
  #Nominal histogram Pythia8
- if plotter.filename.find(sampleTypes[0]) != -1: 
+ if plotter.filename.find(sampleTypes[0].replace('.root','')) != -1: 
    print "Preparing nominal histogram for sampletype " ,sampleTypes[0]
    print "filename: ", plotter.filename, " preparing central values histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)   
    histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
    
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+   #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)   
    if not(options.usegenmass): 
@@ -171,14 +186,15 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histTMP.Delete()
 
  if len(sampleTypes)<2: continue
- elif plotter.filename.find(sampleTypes[1]) != -1: #alternative shape Herwig
+ elif plotter.filename.find(sampleTypes[1].replace('.root','')) != -1: #alternative shape Herwig
    print "Preparing alternative shapes for sampletype " ,sampleTypes[1]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
    histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
 
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+   #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
    if not(options.usegenmass): 
@@ -202,14 +218,15 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histTMP.Delete()
 		          	      
  if len(sampleTypes)<3: continue
- elif plotter.filename.find(sampleTypes[2]) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
+ elif plotter.filename.find(sampleTypes[2].replace('.root','')) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
    print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
    histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
 
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+   #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
    if not(options.usegenmass): 
@@ -243,11 +260,22 @@ for hist in histograms:
  hist.Write(hist.GetName())
  finalHistograms[hist.GetName()]=hist
 
-histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
-histogram_altshapeDown.Write()
+#histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
+#histogram_altshapeDown.Write()
+
+alpha=1.5/5000
+histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT",alpha)
+histogram_pt_down.Write()
+histogram_pt_up.Write()
+
+alpha=1.5*1000
+histogram_opt_down,histogram_opt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT",alpha,-1)
+histogram_opt_down.Write()
+histogram_opt_up.Write()
 
 f.Close()
 
+'''
 histograms.append(histogram_altshapeDown)
 print "Drawing debugging plot ", "debug_"+options.output.replace(".root",".png") 
 canv = ROOT.TCanvas("c1","c1",800,600)
@@ -266,5 +294,5 @@ for i,hist in enumerate(histograms):
  leg.AddEntry(hist,hist.GetName(),"L")
 leg.Draw("same")
 canv.SaveAs("debug_"+options.output.replace(".root",".png") )
-
+'''
 

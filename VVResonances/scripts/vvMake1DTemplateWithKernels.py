@@ -104,7 +104,7 @@ for filename in os.listdir(args[0]):
             dataPlotters[-1].addCorrectionFactor('genWeight','tree')
             dataPlotters[-1].addCorrectionFactor('puWeight','tree')
             for w in weights_:
-							if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
+	     if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
             dataPlotters[-1].filename=fname
             dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
             dataPlottersNW[-1].addCorrectionFactor('puWeight','tree')
@@ -114,7 +114,6 @@ for filename in os.listdir(args[0]):
             dataPlottersNW[-1].filename=fname
 	    
 data=MergedPlotter(dataPlotters)
-
 fcorr=ROOT.TFile(options.res)
 
 scale = fcorr.Get("scale"+options.resHisto+"Histo")
@@ -169,26 +168,28 @@ histograms=[
     histogram_altshape2
 	]
 
+leg = options.var.split('_')[1]
+
 maxEvents = -1
 #ok lets populate!
 for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
 
  #Nominal histogram Pythia8
- if plotter.filename.find(sampleTypes[0]) != -1: 
+ if plotter.filename.find(sampleTypes[0].replace('.root','')) != -1: 
    print "Preparing nominal histogram for sampletype " ,sampleTypes[0]
    print "filename: ", plotter.filename, " preparing central values histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)   
-   histI2=plotter.drawTH1('jj_l1_softDrop_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
+   histI2=plotter.drawTH1('jj_%s_softDrop_mass'%leg,options.cut,"1",options.binsx,options.minx,options.maxx)
 
    print " - Creating dataset - "   
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,'+options.var,options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,maxEvents)     
 
    print " - Creating 1D gaussian template - "   
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)   
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scale,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scale,res,histTMP) 
    
    #if histTMP.Integral()>0:
    # histTMP.Scale(histI.Integral()/histTMP.Integral())
@@ -205,8 +206,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print " - Creating 1D gaussian template scale up - "
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scaleUp,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scaleUp,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scaleUp,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scaleUp,res,histTMP) 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_nominal_scale_up.Add(histTMP)
@@ -216,8 +217,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print " - Creating 1D gaussian template scale down - "   
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scaleDown,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scaleDown,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scaleDown,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scaleDown,res,histTMP) 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_nominal_scale_down.Add(histTMP)
@@ -226,21 +227,21 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histI2.Delete()
     	
  if len(sampleTypes)<2: continue
- elif plotter.filename.find(sampleTypes[1]) != -1: #alternative shape Herwig
+ elif plotter.filename.find(sampleTypes[1].replace('.root','')) != -1: #alternative shape Herwig
    print "Preparing alternative shapes for sampletype " ,sampleTypes[1]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
-   histI2=plotter.drawTH1('jj_l1_softDrop_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
+   histI2=plotter.drawTH1('jj_%s_softDrop_mass'%leg,options.cut,"1",options.binsx,options.minx,options.maxx)
 
    print " - Creating dataset - "
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,'+options.var,options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,maxEvents)     
 
    print " - Creating 1D gaussian template - "   
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scale,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scale,res,histTMP) 
    
    #if histTMP.Integral()>0:
    # histTMP.Scale(histI.Integral()/histTMP.Integral())
@@ -257,8 +258,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print " - Creating 1D gaussian template scale up - "
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scaleUp,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scaleUp,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scaleUp,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scaleUp,res,histTMP) 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_altshape_scale_up.Add(histTMP)
@@ -268,8 +269,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print " - Creating 1D gaussian template scale down - "   
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scaleDown,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scaleDown,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scaleDown,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scaleDown,res,histTMP) 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_altshape_scale_down.Add(histTMP)
@@ -278,21 +279,21 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histI2.Delete()
    		          	      
  if len(sampleTypes)<3: continue
- elif plotter.filename.find(sampleTypes[2]) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
+ elif plotter.filename.find(sampleTypes[2].replace('.root','')) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
    print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
-   histI2=plotter.drawTH1('jj_l1_softDrop_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
+   histI2=plotter.drawTH1('jj_%s_softDrop_mass'%leg,options.cut,"1",options.binsx,options.minx,options.maxx)
  
    print " - Creating dataset - "
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,'+options.var,options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,maxEvents)     
    
    print " - Creating 1D gaussian template - "
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
    if not(options.usegenmass): 
-    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
-   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
+    datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_pt'%leg,scale,res,histTMP)
+   else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_%s_gen_softDrop_mass'%leg,scale,res,histTMP) 
    
    #if histTMP.Integral()>0:
    # histTMP.Scale(histI.Integral()/histTMP.Integral())
@@ -322,6 +323,7 @@ histogram_altshapeDown.Write()
 
 f.Close()
 
+'''
 histograms.append(histogram_altshapeDown)
 print "Drawing debugging plot ", "debug_"+options.output.replace(".root",".png") 
 canv = ROOT.TCanvas("c1","c1",800,600)
@@ -340,7 +342,7 @@ for i,hist in enumerate(histograms):
  leg.AddEntry(hist,hist.GetName(),"L")
 leg.Draw("same")
 canv.SaveAs("debug_"+options.output.replace(".root",".png") )
-
+'''
 
 
 

@@ -119,6 +119,7 @@ for plotter in dataPlotters:
   if mjetTMP.Integral()>0:
    mjet_nominal.Add(mjetTMP)
    histoCoarse_nominal.Add(histoCoarseTMP)
+  print "coarse ",histoCoarseTMP.Integral()," mjet ",mjetTMP.Integral()
   mjetTMP.Delete() 
   histoCoarseTMP.Delete()
   
@@ -147,11 +148,13 @@ for plotter in dataPlotters:
    histoCoarse_altshape2.Add(histoCoarseTMP)
   mjetTMP.Delete() 
   histoCoarseTMP.Delete()
-  
+
+print "before expanding: coarse ",  histoCoarse_nominal.Integral()," mjet ",mjet_nominal.Integral()
 #histoCoarse=data.drawTH1(options.var,options.cut,"1",options.binsx/options.factor,options.minx,options.maxx)
 expandHisto(histoCoarse_nominal,histogram_nominal)
 expandHisto(histoCoarse_altshapeUp,histogram_altshapeUp)
 expandHisto(histoCoarse_altshape2,histogram_altshape2)
+print "after expanding: coarse ",  histogram_nominal.Integral()," mjet ",mjet_nominal.Integral()
 
 f=ROOT.TFile(options.output,"RECREATE")
 f.cd()

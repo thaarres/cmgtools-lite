@@ -233,7 +233,7 @@ class TreePlotter(PlotterBase):
         return self.drawEff1D(hD,hN,var,denom,num,titlex,units)
 
 
-    def makeDataSet(self,var,cut,maxN=-1):
+    def makeDataSet(self,var,cut,firstEv=0,lastEv=-1):
         variables=var.split(',')
         self.cache=ROOT.TFile("cache.root","RECREATE")
         w=ROOT.RooWorkspace("w","w")
@@ -247,7 +247,10 @@ class TreePlotter(PlotterBase):
         argset.add(w.var('weight'))
         
         data=ROOT.RooDataSet("data","data",argset,"weight")
-        reduced = self.tree.CopyTree(cut)
+	if lastEv == -1: lastEv = self.tree.GetEntries()
+        print lastEv,firstEv
+	reduced = self.tree.CopyTree(cut,"",lastEv,firstEv)
+	print "done reduced"
         N=0
         for event in reduced:
             weight = 1.0
@@ -260,11 +263,12 @@ class TreePlotter(PlotterBase):
                     weight=weight*getattr(event,c['value'])[0]
 
             for v in variables:
+                #argset2.find(v).setVal(getattr(event,v))
                 argset2.find(v).setVal(getattr(event,v)[0])
             data.add(argset2,weight)
-            N=N+1
-            if maxN >0 and N>maxN:
-                return data
+            #N=N+1
+            #if maxN >0 and N>maxN:
+            #    return data
         return data    
 
 

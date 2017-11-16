@@ -52,9 +52,11 @@ GaussianSumTemplateMaker::GaussianSumTemplateMaker(const RooDataSet* dataset, co
 	y=output->GetYaxis()->GetBinCenter(j);
 	//	bin=output->GetBin(i,j);
 	output->Fill(x,y,reweight*dataset->weight()*gaus2D(x,y,scalex,scaley,resx,resy));
+	//std::cout << "bx " << i << " by " << j << " x " << x << " y " << y << " gen pt " << genpt << " sx " << scalex << " sy " << sy;
+	//std::cout << " rx " << resx << " ry " << resy << " g " << gaus2D(x,y,scalex,scaley,resx,resy) << " wg " << reweight*dataset->weight()*gaus2D(x,y,scalex,scaley,resx,resy) << std::endl;
       }
     }
-
+    
   } 
 
 

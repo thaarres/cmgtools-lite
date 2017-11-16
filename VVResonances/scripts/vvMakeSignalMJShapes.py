@@ -8,6 +8,7 @@ from CMGTools.VVResonances.plotting.StackPlotter import StackPlotter
 from CMGTools.VVResonances.statistics.Fitter import Fitter
 from math import log
 import os, sys, re, optparse,pickle,shutil,json
+ROOT.gROOT.SetBatch(True)
 
 def returnString(func):
     st='0'
@@ -28,8 +29,6 @@ parser.add_option("-f","--fix",dest="fixPars",help="Fixed parameters",default=""
 
 (options,args) = parser.parse_args()
 #define output dictionary
-
-ROOT.gROOT.SetBatch(True)
 
 samples={}
 graphs={'mean':ROOT.TGraphErrors(),'sigma':ROOT.TGraphErrors(),'alpha':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'slope':ROOT.TGraphErrors(),'alpha2':ROOT.TGraphErrors(),'n2':ROOT.TGraphErrors()}
@@ -54,6 +53,7 @@ for filename in os.listdir(args[0]):
 
     print 'found',filename,'mass',str(mass) 
 
+leg = options.mvv.split('_')[1]
 
 #Now we have the samples: Sort the masses and run the fits
 N=0
@@ -92,7 +92,7 @@ for mass in sorted(samples.keys()):
     fitter.importBinnedData(histo,['x'],'data')
     fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
     fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
-    fitter.projection("model","data","x","debugJJ_"+options.output+"_"+str(mass)+".png")
+    fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_"+str(mass)+".png")
 
     for var,graph in graphs.iteritems():
         value,error=fitter.fetch(var)

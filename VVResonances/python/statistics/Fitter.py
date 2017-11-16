@@ -333,9 +333,9 @@ class Fitter(object):
         self.w.factory("mean[80,50,200]")
         self.w.factory("sigma[10,2,40]")
         self.w.factory("alpha[3,0.5,10]")
-        self.w.factory("n[2.,0.,10.]")
+        self.w.factory("n[2]")
         self.w.factory("alpha2[3,0.5,10]")
-        self.w.factory("n2[2.,0.,10.]")
+        self.w.factory("n2[2]")
 
         peak = ROOT.RooDoubleCB(name+'S','modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
         getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name+'S'))
@@ -367,9 +367,9 @@ class Fitter(object):
         self.w.factory("mean[80,50,200]")
         self.w.factory("sigma[10,3,40]")
         self.w.factory("alpha[1,0.5,10]")
-        self.w.factory("n[2.,0.,10.]")
+        self.w.factory("n[2]")
         self.w.factory("alpha2[1,0.5,10]")
-        self.w.factory("n2[2.,0.,10.]")
+        self.w.factory("n2[2]")
         self.w.factory("slope[0.0]")
         self.w.factory("f[0.0]")
 

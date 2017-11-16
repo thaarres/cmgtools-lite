@@ -50,12 +50,16 @@ for s in tmp:
     systC[tmp2[0]]=tmp2[1]
 '''
 
+
 inputx=ROOT.TFile(options.inputX)
 inputy=ROOT.TFile(options.inputY)
 output=ROOT.TFile(options.output,"RECREATE")
 
 
 makeHisto("histo",inputx,"histo_nominal",inputy,"histo_nominal",output)
+
+makeHisto("histo_altshape2",inputx,"histo_altshape2",inputy,"histo_altshape2",output)
+
 makeHisto("histo_altshapeXUp",inputx,"histo_altshapeUp",inputy,"histo_nominal",output)
 makeHisto("histo_altshapeXDown",inputx,"histo_altshapeDown",inputy,"histo_nominal",output)
 makeHisto("histo_altshapeYUp",inputx,"histo_nominal",inputy,"histo_altshapeUp",output)
@@ -63,13 +67,26 @@ makeHisto("histo_altshapeYDown",inputx,"histo_nominal",inputy,"histo_altshapeDow
 makeHisto("histo_altshapeUp",inputx,"histo_altshapeUp",inputy,"histo_altshapeUp",output)
 makeHisto("histo_altshapeDown",inputx,"histo_altshapeDown",inputy,"histo_altshapeDown",output)
 
-makeHisto("histo_PTXUp",inputx,"histo_nominal_ScaleUp",inputy,"histo_nominal",output)
-makeHisto("histo_PTXDown",inputx,"histo_nominal_ScaleDown",inputy,"histo_nominal",output)
-makeHisto("histo_PTYUp",inputx,"histo_nominal",inputy,"histo_nominal_ScaleUp",output)
-makeHisto("histo_PTYDown",inputx,"histo_nominal",inputy,"histo_nominal_ScaleDown",output)
+#makeHisto("histo_ScaleXUp",inputx,"histo_nominal_ScaleUp",inputy,"histo_nominal",output)
+#makeHisto("histo_ScaleXDown",inputx,"histo_nominal_ScaleDown",inputy,"histo_nominal",output)
+#makeHisto("histo_ScaleYUp",inputx,"histo_nominal",inputy,"histo_nominal_ScaleUp",output)
+#makeHisto("histo_ScaleYDown",inputx,"histo_nominal",inputy,"histo_nominal_ScaleDown",output)
+#makeHisto("histo_ScaleUp",inputx,"histo_nominal_ScaleUp",inputy,"histo_nominal_ScaleUp",output)
+#makeHisto("histo_ScaleDown",inputx,"histo_nominal_ScaleDown",inputy,"histo_nominal_ScaleDown",output)
 
-makeHisto("histo_PTUp",inputx,"histo_nominal_ScaleUp",inputy,"histo_nominal_ScaleUp",output)
-makeHisto("histo_PTDown",inputx,"histo_nominal_ScaleDown",inputy,"histo_nominal_ScaleDown",output)
+makeHisto("histo_PTXUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal",output)
+makeHisto("histo_PTXDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal",output)
+makeHisto("histo_PTYUp",inputx,"histo_nominal",inputy,"histo_nominal_PTUp",output)
+makeHisto("histo_PTYDown",inputx,"histo_nominal",inputy,"histo_nominal_PTDown",output)
+makeHisto("histo_PTUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal_PTUp",output)
+makeHisto("histo_PTDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTDown",output)
+
+makeHisto("histo_OPTXUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal",output)
+makeHisto("histo_OPTXDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal",output)
+makeHisto("histo_OPTYUp",inputx,"histo_nominal",inputy,"histo_nominal_OPTUp",output)
+makeHisto("histo_OPTYDown",inputx,"histo_nominal",inputy,"histo_nominal_OPTDown",output)
+makeHisto("histo_OPTUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",output)
+makeHisto("histo_OPTDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",output)
 
 '''
 for systName,systNewName in systC.iteritems():

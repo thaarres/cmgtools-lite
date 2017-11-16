@@ -339,7 +339,7 @@ class DataCardMaker:
 
         f.close()
 
-    def addHistoShapeFromFile(self,name,observables,filename,histoname,systematics=[],conditional = False,order=0,newTag=""):       
+    def addHistoShapeFromFile(self,name,observables,filename,histoname,systematics=[],conditional = False,order=0,newTag=""):     
         varset=ROOT.RooArgSet()
         varlist=ROOT.RooArgList()
         varPointers=[]
@@ -359,6 +359,7 @@ class DataCardMaker:
 
         #Load PDF
         histo=FR.Get(histoname)
+	print histo.GetName()
 
 
         if len(systematics)>0:
@@ -369,6 +370,8 @@ class DataCardMaker:
             pdfName="_".join([name,self.tag])
 
         roohist = ROOT.RooDataHist(histName,histName,varlist,histo)      
+	varset.Print()
+	varlist.Print()
         pdf=ROOT.RooHistPdf(pdfName,pdfName,varset,roohist,order)
         getattr(self.w,'import')(roohist,ROOT.RooFit.Rename(histName))
         getattr(self.w,'import')(pdf,ROOT.RooFit.Rename(pdfName))
@@ -401,8 +404,19 @@ class DataCardMaker:
             if len(observables)==1:
                 total=ROOT.FastVerticalInterpHistPdf(pdfName,pdfName,self.w.var(observables[0]),pdfList, coeffList)
             elif len(observables)==2:
-                total=ROOT.FastVerticalInterpHistPdf2D(pdfName,pdfName,self.w.var(observables[0]),self.w.var(observables[1]),conditional,pdfList, coeffList)
-            getattr(self.w,'import')(total,ROOT.RooFit.Rename(pdfName))
+                total=ROOT.FastVerticalInterpHistPdf2D(pdfName,pdfName,self.w.var(observables[0]),self.w.var(observables[1]),conditional,pdfList, coeffList,1,-1)
+                #total=ROOT.FastVerticalInterpHistPdf2D(pdfName,pdfName,self.w.var(observables[0]),self.w.var(observables[1]),conditional,pdfList, coeffList)
+            elif len(observables)==3:
+                #total=ROOT.FastVerticalInterpHistPdf3D(pdfName,pdfName,self.w.var(observables[0]),self.w.var(observables[1]),self.w.var(observables[2]),conditional,pdfList, coeffList,1,-1)
+                print len(observables)
+		print "var 0"
+		self.w.var(observables[0]).Print()
+		print "var 1"
+		self.w.var(observables[1]).Print()
+		print "var 2"
+		self.w.var(observables[2]).Print()
+		total=ROOT.FastVerticalInterpHistPdf3D(pdfName,pdfName,self.w.var(observables[0]),self.w.var(observables[1]),self.w.var(observables[2]),conditional,pdfList, coeffList,1,-1)
+	    getattr(self.w,'import')(total,ROOT.RooFit.Rename(pdfName))
 
 
     def addMJJParametricBackgroundShapeErfExp(self,name,variable,jsonFile,systP0={},systP1={},systP2={}):
@@ -862,7 +876,12 @@ class DataCardMaker:
         pdfName2="_".join([pdf2,self.tag])
         self.w.factory("PROD::{name}({name1},{name2})".format(name=pdfName,name1=pdfName1,name2=pdfName2))
 
-
+    def product3D(self,name,pdf1,pdf2,pdf3):
+        pdfName="_".join([name,self.tag])
+        pdfName1="_".join([pdf1,self.tag])
+        pdfName2="_".join([pdf2,self.tag])
+        pdfName3="_".join([pdf3,self.tag])
+        self.w.factory("PROD::{name}({name1},{name2},{name3})".format(name=pdfName,name1=pdfName1,name2=pdfName2,name3=pdfName3))
 
 
 
@@ -1137,7 +1156,7 @@ class DataCardMaker:
 
 
         self.rootFile.cd()
-        self.w.Write()
+        self.w.Write("w",0,2000000000)
         self.rootFile.Close()
             
     
@@ -1146,7 +1165,7 @@ class DataCardMaker:
     def importBinnedData(self,filename,histoname,poi,name = "data_obs",scale=1):
         f=ROOT.TFile(filename)
         histogram=f.Get(histoname)
-        histogram.Scale(scale)
+        histogram.Scale(scale)	
         cList = ROOT.RooArgList()
         for i,p in enumerate(poi):
             cList.add(self.w.var(p))
