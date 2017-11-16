@@ -122,7 +122,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1"):
   resFile=filename+"_"+name+"_detectorResponse_"+p+".root"	
   print "=========== PURITY: ", p
   cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],cuts['acceptanceMJ']])    
-  rootFile=filename+"_"+name+"_MVV_"+p+"_test.root"
+  rootFile=filename+"_"+name+"_MVV_"+p+".root"
   cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV)
   os.system(cmd)
 
@@ -157,12 +157,12 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1):
    sys.exit()
    os.system(cmd)
                	  
-#makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-#makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-#makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-#makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
-#makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 #makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
@@ -173,4 +173,4 @@ makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonre
 mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0)
-#makeNormalizations("data","JJ",dataTemplate,1)
+makeNormalizations("data","JJ",dataTemplate,1)
