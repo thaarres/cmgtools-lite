@@ -153,8 +153,6 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1):
    rootFile=filename+"_"+p+".root"
    cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptance']])
    cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}"  samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
-   print cmd
-   sys.exit()
    os.system(cmd)
                	  
 makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
