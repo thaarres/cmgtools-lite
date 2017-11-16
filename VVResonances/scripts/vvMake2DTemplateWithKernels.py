@@ -28,6 +28,25 @@ parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help
 parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
 parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
 
+def unequalScale(histo,name,alpha,power=1):
+    newHistoU =copy.deepcopy(histo) 
+    newHistoU.SetName(name+"Up")
+    newHistoD =copy.deepcopy(histo) 
+    newHistoD.SetName(name+"Down")
+    maxFactor = max(pow(histo.GetXaxis().GetXmax(),power),pow(histo.GetXaxis().GetXmin(),power))
+    for i in range(1,histo.GetNbinsX()+1):
+        x= histo.GetXaxis().GetBinCenter(i)
+        for j in range(1,histo.GetNbinsY()+1):
+            nominal=histo.GetBinContent(i,j)
+            factor = 1+alpha*pow(x,power) 
+            newHistoU.SetBinContent(i,j,nominal*factor)
+            newHistoD.SetBinContent(i,j,nominal/factor)
+    if newHistoU.Integral()>0.0:        
+        newHistoU.Scale(1.0/newHistoU.Integral())        
+    if newHistoD.Integral()>0.0:        
+        newHistoD.Scale(1.0/newHistoD.Integral())        
+    return newHistoU,newHistoD 
+    
 def mirror(histo,histoNominal,name):
     newHisto =copy.deepcopy(histoNominal) 
     newHisto.SetName(name)
