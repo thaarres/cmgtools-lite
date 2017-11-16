@@ -17,20 +17,50 @@ git checkout v6.3.1
 scram b clean; scram b -j 8
 ```
 
-Checkout the VV statistical tools
+Fork cmgtools from https://github.com/Diboson3D/cmgtools-lite and checkout the VV statistical tools
 
 ```
 cd ../..
-git clone https://github.com/jngadiub/cmgtools-lite.git -b qstarStat CMGTools
+export GITUSER=`git config user.github`
+git clone https://github.com/${GITUSER}/cmgtools-lite CMGTools
+cd CMGTools
+git remote add Diboson3D https://github.com/Diboson3D/cmgtools-lite
+git fetch Diboson3D
+git checkout -b 3DVVstat Diboson3D/3DVVstat
 scram b -j 8
+cd VVResonances/interactive
+ln -s samples_location sample
 ```
 
-Run the main code to produce the inputs to the combine
+Current sample location with random sorting of jet1 and jet2
+
+```
+/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/
+```
+
+Make the 3D templates
  
 ```
-cd VVResonances/interactive
-ln -s samples_location samples
-python makeInputs_qStar.py
+python makeInputs.py
+```
+
+Run closure test of 3D templates versus simulation with Projections3DHisto.C script
+
+Create datacard and workspace and run post fit
+
+```
+python makeCard.py
+text2workspace.py datacard_JJ_HPHP_13TeV.txt -o JJ_BulkGWW_HPHP_13TeV_workspace.root
+python runPostFit.py
+```
+
+Run the limits with combine and make final plot
+
+```
+vvSubmitLimits.py JJ_BulkGWW_HPHP_13TeV_workspace.root -s 100 -q 1nd -m 1200 -M 4200
+find higgsCombineTest.Asymptotic.* -size +1500c | xargs hadd Limits_BulkGWW_HPHP_13TeV.root
+vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 (expected limits)
+vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 -b 0 (expected+observed limits)
 ```
 
 Further instructions on how to run the code can be found at:
