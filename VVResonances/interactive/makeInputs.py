@@ -30,13 +30,13 @@ dataTemplate="JetHT"
 nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 
 minMJ=55.0
-maxMJ=610.0
+maxMJ=215.0
 
 minMVV=1000.0
-maxMVV=7000.0
+maxMVV=5000.0
 
-binsMJ=277
-binsMVV=160
+binsMJ=80
+binsMVV=100
 
 cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMVV=minMVV,maxMVV=maxMVV,minMJ=minMJ,maxMJ=maxMJ)
 cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>0&&jj_l2_gen_softDrop_mass>0&&jj_gen_partialMass>0)'
@@ -171,4 +171,4 @@ makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonre
 mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0)
-makeNormalizations("data","JJ",dataTemplate,1)
+# makeNormalizations("data","JJ",dataTemplate,1)
