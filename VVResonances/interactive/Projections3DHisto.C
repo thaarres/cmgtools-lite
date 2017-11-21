@@ -3,10 +3,10 @@ void Projections3DHisto(){
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 
-TFile* fin = new TFile("highstat3D/JJ_nonRes_2D_HPHP.root","READ");
+TFile* fin = new TFile("JJ_nonRes_2D_HPHP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 
-TFile* finMC = new TFile("highstat3D/JJ_nonRes_COND2D_HPHP_l1.root","READ");
+TFile* finMC = new TFile("JJ_nonRes_COND2D_HPHP_l1.root","READ");
 TH3F* hinMC = (TH3F*)finMC->Get("mjet_mvv_nominal_3D");
 //TH3F* hinMChw = (TH3F*)finMC->Get("mjet_mvv_altshapeUp_3D");
 //TH3F* hinMCmg = (TH3F*)finMC->Get("mjet_mvv_altshape2_3D");
