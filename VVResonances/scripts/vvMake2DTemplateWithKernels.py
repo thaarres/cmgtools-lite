@@ -153,7 +153,7 @@ binsx=[]
 for i in range(0,options.binsx+1):
     binsx.append(options.minx+i*(options.maxx-options.minx)/options.binsx)
 
-binsy=[1000+i*100 for i in range(61)]
+binsy=[1000+i*100 for i in range(41)]
 
 scaleUp = ROOT.TH1F(scale_x)
 scaleUp.SetName("scaleUp")
