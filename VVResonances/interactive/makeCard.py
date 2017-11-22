@@ -29,6 +29,7 @@ for p in purities:
    
  #QCD
  rootFile="JJ_nonRes_2D_"+p+".root"
+ rootFile="test_"+p+".root"
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",[],False,0)    
  #card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTX:CMS_VV_JJ_nonRes_PTX','OPTX:CMS_VV_JJ_nonRes_OPTX','OPTY:CMS_VV_JJ_nonRes_OPTY','PTY:CMS_VV_JJ_nonRes_PTY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
  card.addFixedYieldFromFile("nonRes",1,"JJ_"+p+".root","nonRes")
