@@ -90,11 +90,12 @@ N=0
 for mass,info in data.iteritems():
     print 'Setting mass',mass,info
 
-    if not ('exp' in info.keys() and '+1sigma' in info.keys() and '+2sigma' in info.keys() and '-1sigma' in info.keys() and '-2sigma' in info.keys() \
-                and 'obs' in info.keys()):
+    if not ('exp' in info.keys() and '+1sigma' in info.keys() and '+2sigma' in info.keys() and '-1sigma' in info.keys() and '-2sigma' in info.keys()):
         print 'Incomplete file'
         continue
-    
+    if options.blind==1 and not 'obs' in info.keys():
+        print 'Incomplete file'
+        continue
 
     band68.SetPoint(N,mass,info['exp'])
     band95.SetPoint(N,mass,info['exp'])
@@ -103,7 +104,8 @@ for mass,info in data.iteritems():
     line_minus1.SetPoint(N,mass,info['-1sigma'])
     line_minus2.SetPoint(N,mass,info['-2sigma'])
 
-    bandObs.SetPoint(N,mass,info['obs'])
+    if options.blind==1:
+        bandObs.SetPoint(N,mass,info['obs'])
     band68.SetPointError(N,0.0,0.0,info['exp']-info['-1sigma'],info['+1sigma']-info['exp'])
     band95.SetPointError(N,0.0,0.0,info['exp']-info['-2sigma'],info['+2sigma']-info['exp'])
     N=N+1
@@ -138,10 +140,10 @@ band68.SetLineStyle(7)
 band68.SetMarkerStyle(0)
 
 band95.SetFillColor(ROOT.kYellow)
-
-bandObs.SetLineWidth(3)
-bandObs.SetLineColor(ROOT.kBlack)
-bandObs.SetMarkerStyle(20)
+if options.blind==1:
+    bandObs.SetLineWidth(3)
+    bandObs.SetLineColor(ROOT.kBlack)
+    bandObs.SetMarkerStyle(20)
 
 line_plus1.SetLineWidth(1)
 line_plus1.SetLineColor(ROOT.kGreen+1)
@@ -177,7 +179,7 @@ else:
 c.Update()
 c.RedrawAxis()
 
-if options.blind==0:
+if options.blind==1:
     bandObs.Draw("PLsame")
 
 
