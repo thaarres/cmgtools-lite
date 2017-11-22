@@ -23,7 +23,7 @@ options+= ' -c "((HLT_JJ)*(run>500) + (run<500))*(njj>0&&Flag_goodVertices&&Flag
 options+= ' -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "80,80,100" -m "55.0,55.0,1000.0" -M "215.0,215.0,5000.0" -f 1.0 -n "nonRes"'
 options+= ' /afs/cern.ch/user/j/jngadiub/workdir/VVAnalysisWith2DFit/CMGToolsForStat74X/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive/samples'
 #FileList = "List.txt" # list with all the file directories
-queue = "1nd" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
+queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 ########   customization end   #########
 
 path = os.getcwd()

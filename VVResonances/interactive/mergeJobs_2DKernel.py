@@ -1,6 +1,6 @@
 import ROOT
 from ROOT import *
-import os, copy
+import os,copy,sys
 
 def unequalScale(histo,name,alpha,power=1):
     newHistoU =copy.deepcopy(histo) 
@@ -54,9 +54,87 @@ def conditional(hist):
             continue
         for j in range(1,hist.GetNbinsX()+1):
             hist.SetBinContent(j,i,hist.GetBinContent(j,i)/integral)
+	    
+sampledir = 'samples'
+jobdir = 'tmp'
+outdir = 'res'
+
+exit_flag = False
+
+jobsPerSample = {}
+
+samples = []
+for f in os.listdir(sampledir):
+ if f.find('.root') != -1 and f.find('QCD') != -1: samples.append(f.replace('.root',''))
+
+for s in samples:
+ filelist = []
+ for t in os.listdir(jobdir):
+  if t.find(s) == -1: continue
+  jobid = t[t.rfind('_')+1:len(t)]
+  found = False
+  for o in os.listdir(outdir):
+   if o.find(s) != -1 and o.find('_'+jobid+'_') != -1:
+    found = True
+    filelist.append(outdir+"/"+o)
+    break
+  if not found:
+   print "SAMPLE ",s," JOBID ",jobid," NOT FOUND"
+   exit_flag = True
+ jobsPerSample[s] = filelist
+
+
+if exit_flag:
+ print "Mergin not done: some files are missing. Exiting!"
+ sys.exit()
+ 
+
+os.system('rm -r '+outdir+'_out')
+os.system('mkdir '+outdir+'_out')
+
+for s in jobsPerSample.keys():
+
+ factor = 1./float(len(jobsPerSample[s]))
+ print "sample: ", s,"number of files:",len(jobsPerSample[s]),"adding histo with scale factor:",factor
+
+ outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_COND2D_HPHP_l1_%s.root'%(s),'RECREATE')
+  
+ finalHistos = {}
+ finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",80,55,215,40,1000,5000)
+ finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",80,55,215,100,1000,5000)
+ finalHistos['mjet_mvv_nominal_3D'] = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",80,55,215,80,55,215,100,1000,5000)
+    
+ for f in jobsPerSample[s]:
+
+  inf = ROOT.TFile.Open(f,'READ')
+    
+  for h in inf.GetListOfKeys():
+  
+   for k in finalHistos.keys():
+    if h.GetName() == k:
+
+     histo = ROOT.TH1F()
+     histo = inf.Get(h.GetName())
+
+     finalHistos[h.GetName()].Add(histo,factor)
+   
+ print "Write file: ",outdir+'_out/JJ_nonRes_COND2D_HPHP_l1_%s.root'%(s)
+   
+ outf.cd()  
+ 
+ for k in finalHistos.keys():
+  finalHistos[k].SetTitle(k)
+  finalHistos[k].Write(k)
+   
+ outf.Close()
+ outf.Delete()
+
+
+
+
   
 # read out files
-filelist = os.listdir('./res/')
+filelist = os.listdir('./'+outdir+'_out/')
 
 mg_files = []
 pythia_files = []
@@ -64,26 +142,26 @@ herwig_files = []
 
 for f in filelist:
  if f.find('COND2D') == -1: continue
- if f.find('QCD_HT') != -1: mg_files.append('./res/'+f)
- elif f.find('QCD_Pt_') != -1: pythia_files.append('./res/'+f)
- else: herwig_files.append('./res/'+f)
+ if f.find('QCD_HT') != -1: mg_files.append('./'+outdir+'_out/'+f)
+ elif f.find('QCD_Pt_') != -1: pythia_files.append('./'+outdir+'_out/'+f)
+ else: herwig_files.append('./'+outdir+'_out/'+f)
 
 #now hadd them
-cmd = 'hadd -f JJ_nonRes_COND2D_HPHP_l2_altshape2.root '
+cmd = 'hadd -f JJ_nonRes_COND2D_HPHP_l1_altshape2.root '
 for f in mg_files:
  cmd += f
  cmd += ' '
 print cmd
 os.system(cmd)
 
-cmd = 'hadd -f JJ_nonRes_COND2D_HPHP_l2_altshapeUp.root '
+cmd = 'hadd -f JJ_nonRes_COND2D_HPHP_l1_altshapeUp.root '
 for f in herwig_files:
  cmd += f
  cmd += ' '
 print cmd
 os.system(cmd)
  
-cmd = 'hadd -f JJ_nonRes_COND2D_HPHP_l2_nominal.root '
+cmd = 'hadd -f JJ_nonRes_COND2D_HPHP_l1_nominal.root '
 for f in pythia_files:
  cmd += f
  cmd += ' '
@@ -91,9 +169,9 @@ print cmd
 os.system(cmd)
 
 #now retrieve histos
-fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l2_altshape2.root','READ')
-fhadd_herwig = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l2_altshapeUp.root','READ')
-fhadd_pythia = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l2_nominal.root','READ')
+fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l1_altshape2.root','READ')
+fhadd_herwig = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l1_altshapeUp.root','READ')
+fhadd_pythia = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l1_nominal.root','READ')
 
 mjet_mvv_nominal_3D = fhadd_pythia.Get('mjet_mvv_nominal_3D') 
 mjet_mvv_nominal_3D.SetName('mjet_mvv_nominal_3D')
@@ -137,7 +215,7 @@ histo_altshape2.SetTitle('histo_altshape2_coarse')
 #histo_altshape2 = fhadd_pythia.Get('histo_nominal_coarse')
 
 #save everything in the final out file after renaming and do usual operations on histos
-outf = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l2.root','RECREATE') 
+outf = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l1.root','RECREATE') 
 
 mjet_mvv_nominal.Write('mjet_mvv_nominal')
 mjet_mvv_altshapeUp.Write('mjet_mvv_altshapeUp')

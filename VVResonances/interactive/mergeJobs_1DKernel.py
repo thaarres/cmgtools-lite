@@ -1,6 +1,6 @@
+import os,sys,time,copy
 import ROOT
 from ROOT import *
-import os, copy
 
 def unequalScale(histo,name,alpha,power=1):
     newHistoU =copy.deepcopy(histo) 
@@ -25,18 +25,90 @@ def mirror(histo,histoNominal,name):
         nominal=histoNominal.GetBinContent(i)/intNominal
         newHisto.SetBinContent(i,histoNominal.GetBinContent(i)*nominal/up)
     return newHisto 
+    
+sampledir = 'samples'
+jobdir = 'tmp'
+outdir = 'res'
+
+exit_flag = False
+
+jobsPerSample = {}
+
+samples = []
+for f in os.listdir(sampledir):
+ if f.find('.root') != -1 and f.find('QCD') != -1: samples.append(f.replace('.root',''))
+
+for s in samples:
+ filelist = []
+ for t in os.listdir(jobdir):
+  if t.find(s) == -1: continue
+  jobid = t[t.rfind('_')+1:len(t)]
+  found = False
+  for o in os.listdir(outdir):
+   if o.find(s) != -1 and o.find('_'+jobid+'_') != -1:
+    found = True
+    filelist.append(outdir+"/"+o)
+    break
+  if not found:
+   print "SAMPLE ",s," JOBID ",jobid," NOT FOUND"
+   exit_flag = True
+ jobsPerSample[s] = filelist
+
+
+if exit_flag:
+ print "Mergin not done: some files are missing. Exiting!"
+ sys.exit()
+ 
+
+os.system('rm -r '+outdir+'_out')
+os.system('mkdir '+outdir+'_out')
+
+for s in jobsPerSample.keys():
+
+ factor = 1./float(len(jobsPerSample[s]))
+ print "sample: ", s,"number of files:",len(jobsPerSample[s]),"adding histo with scale factor:",factor
+ 
+ outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_MVV_HPHP_%s.root'%(s),'RECREATE')
+  
+ finalHistos = {}
+ finalHistos['histo_nominal'] = ROOT.TH1F("histo_nominal_out","histo_nominal_out",100,1000,5000)
+ finalHistos['mvv_nominal'] = ROOT.TH1F("mvv_nominal_out","mvv_nominal_out",100,1000,5000)
+    
+ for f in jobsPerSample[s]:
+    
+  inf = ROOT.TFile.Open(f,'READ')
+    
+  for h in inf.GetListOfKeys():
+  
+   if (h.GetName() == 'histo_nominal' and h.GetTitle() == 'histo_nominal') or (h.GetName() == 'mvv_nominal' and h.GetTitle() == 'mvv_nominal'):
+
+    histo = ROOT.TH1F()
+    histo = inf.Get(h.GetName())
+
+    finalHistos[h.GetName()].Add(histo,factor)
+      
+   
+ print "Write file: ",outdir+'_out/JJ_nonRes_MVV_HPHP_%s.root'%(s)
+   
+ outf.cd()  
+ finalHistos['histo_nominal'].Write('histo_nominal')
+ finalHistos['mvv_nominal'].Write('mvv_nominal')
+   
+ outf.Close()
+ outf.Delete()
+
 
 # read out files
-filelist = os.listdir('./res')
+filelist = os.listdir('./'+outdir+'_out'+'/')
 
 mg_files = []
 pythia_files = []
 herwig_files = []
 
 for f in filelist:
- if f.find('QCD_HT') != -1: mg_files.append('./res/'+f)
- elif f.find('QCD_Pt_') != -1: pythia_files.append('./res/'+f)
- else: herwig_files.append('./res/'+f)
+ if f.find('QCD_HT') != -1: mg_files.append('./'+outdir+'_out'+'/'+f)
+ elif f.find('QCD_Pt_') != -1: pythia_files.append('./'+outdir+'_out'+'/'+f)
+ else: herwig_files.append('./'+outdir+'_out'+'/'+f)
 
 #now hadd them
 cmd = 'hadd -f JJ_nonRes_MVV_HPHP_altshape2.root '
@@ -125,4 +197,4 @@ histogram_opt_down.SetTitle('histo_nominal_OPTDown')
 histogram_opt_down.Write('histo_nominal_OPTDown')
 histogram_opt_up.SetName('histo_nominal_OPTUp')
 histogram_opt_up.SetTitle('histo_nominal_OPTUp')
-histogram_opt_up.Write('histo_nominal_OPTUp')
+histogram_opt_up.Write('histo_nominal_OPTUp')  

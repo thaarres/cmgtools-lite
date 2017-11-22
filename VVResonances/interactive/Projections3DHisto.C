@@ -6,8 +6,8 @@ gStyle->SetOptTitle(0);
 TFile* fin = new TFile("JJ_nonRes_2D_HPHP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 
-TFile* finMC = new TFile("JJ_nonRes_COND2D_HPHP_l1.root","READ");
-TH3F* hinMC = (TH3F*)finMC->Get("mjet_mvv_nominal_3D");
+TFile* finMC = new TFile("JJ_HPHP.root","READ");
+TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
 
 int binsx = hin->GetNbinsX();
 float xmin = hin->GetXaxis()->GetXmin();
@@ -28,15 +28,8 @@ std::vector<TH1F*> hx;
 std::vector<TH1F*> hy;
 std::vector<TH1F*> hz;
 std::vector<TH1F*> hxMC;
-std::vector<TH1F*> hxMChw;
-std::vector<TH1F*> hxMCmg;
 std::vector<TH1F*> hyMC;
-std::vector<TH1F*> hyMChw;
-std::vector<TH1F*> hyMCmg;
 std::vector<TH1F*> hzMC;
-std::vector<TH1F*> hzMChw;
-std::vector<TH1F*> hzMCmg;
-std::vector<TH1F*> hzMC2;
 
 int zbinMin[4] = {1,1,hin->GetZaxis()->FindBin(1600),hin->GetZaxis()->FindBin(5000)};
 int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1600),hin->GetZaxis()->FindBin(5000),binsz};
@@ -55,15 +48,15 @@ for(int i=0; i<4; ++i){
  hxMC.push_back((TH1F*)hinMC->ProjectionX(ss.str().c_str(),1,binsy,zbinMin[i],zbinMax[i]));
  ss.str(""); ss << "pyMC_" << i << std::endl;
  hyMC.push_back((TH1F*)hinMC->ProjectionY(ss.str().c_str(),1,binsx,zbinMin[i],zbinMax[i])); 
-  
+   
 }
 
 for(int i=0; i<4; ++i){
   
  hx[i]->Scale(scale[i]);
  hy[i]->Scale(scale[i]);
- hxMC[i]->Scale(hx[i]->Integral()/hxMC[i]->Integral());
- hyMC[i]->Scale(hy[i]->Integral()/hyMC[i]->Integral());
+ hxMC[i]->Scale(scale[i]);
+ hyMC[i]->Scale(scale[i]);
   
  hx[i]->SetLineColor(colors[i]);
  hx[i]->SetMarkerColor(colors[i]);
@@ -71,15 +64,17 @@ for(int i=0; i<4; ++i){
  hy[i]->SetMarkerColor(colors[i]);
  hxMC[i]->SetLineColor(colors[i]);
  hxMC[i]->SetMarkerColor(colors[i]);
+ hxMC[i]->SetMarkerStyle(20);
  hxMC[i]->SetMarkerSize(0.5);
  hyMC[i]->SetLineColor(colors[i]);
  hyMC[i]->SetMarkerColor(colors[i]); 
+ hyMC[i]->SetMarkerStyle(20);
  hyMC[i]->SetMarkerSize(0.5);
 
 }
 
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
-leg->AddEntry(hxMC[0],"Simulation","P");
+leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");
 leg->AddEntry(hx[0],"Template","L");
 leg->AddEntry(hx[1],"1 < m_{jj} < 1.6 TeV");
 leg->AddEntry(hx[2],"1.6 < m_{jj} < 5 TeV");
@@ -110,9 +105,7 @@ for(int i=0; i<5; ++i){
  hz.push_back((TH1F*)hin->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
  ss.str(""); ss << "pzMC_" << i << std::endl;
  hzMC.push_back((TH1F*)hinMC->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
- ss.str(""); ss << "pzMC2_" << i << std::endl;
- hzMC2.push_back((TH1F*)hinMC2->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
-  
+   
 }
 
 for(int i=0; i<5; ++i){
@@ -124,12 +117,13 @@ for(int i=0; i<5; ++i){
  hz[i]->SetMarkerColor(colors[i]);
  hzMC[i]->SetLineColor(colors[i]);
  hzMC[i]->SetMarkerColor(colors[i]);
+ hzMC[i]->SetMarkerStyle(20);
  hzMC[i]->SetMarkerSize(0.5);
-   
+    
 }
 
 TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
-leg2->AddEntry(hzMC[0],"Simulation","P");
+leg2->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg2->AddEntry(hz[0],"Template","L");
 leg2->AddEntry(hz[1],"55 < m_{jet} < 70 GeV");
 leg2->AddEntry(hz[2],"70 < m_{jet} < 100 GeV");
@@ -159,8 +153,8 @@ TH1F* hz_OPTZDown = (TH1F*)hin_OPTZDown->ProjectionZ("pz_OPTZDown",xbinMin[0],xb
 hz_OPTZDown->SetLineColor(210);
 
 TLegend* leg3 = new TLegend(0.6,0.55,0.95,0.8);
-leg3->AddEntry(hzMC[0],"Simulation","P");
-leg3->AddEntry(hz[0],"Template nominal","L");
+leg3->AddEntry(hzMC[0],"Simulation (Madgraph)","LP");
+leg3->AddEntry(hz[0],"Template (Pythia8)","L");
 leg3->AddEntry(hz_PTZUp,"p_{T} syst. up/down","L");
 leg3->AddEntry(hz_OPTZUp,"1/p_{T} syst. up/down","L");
 

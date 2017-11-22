@@ -175,4 +175,4 @@ makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonre
 mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0)
-# makeNormalizations("data","JJ",dataTemplate,1)
+makeNormalizations("data","JJ",dataTemplate,1)
