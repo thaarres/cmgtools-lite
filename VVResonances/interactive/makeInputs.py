@@ -6,6 +6,8 @@ cat['HP1'] = 'jj_l1_tau2/jj_l1_tau1<0.35'
 cat['HP2'] = 'jj_l2_tau2/jj_l2_tau1<0.35'
 cat['LP1'] = 'jj_l1_tau2/jj_l1_tau1>0.35&&jj_l1_tau2/jj_l1_tau1<0.75'
 cat['LP2'] = 'jj_l2_tau2/jj_l2_tau1>0.35&&jj_l2_tau2/jj_l2_tau1<0.75'
+cat['NP1'] = 'jj_l1_tau2/jj_l1_tau1>0.75'
+cat['NP2'] = 'jj_l2_tau2/jj_l2_tau1>0.75'
 
 cuts={}
 
@@ -14,10 +16,11 @@ cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(njj>0&&Flag_goodVertices&&Fl
 cuts['HPHP'] = '('+cat['HP1']+'&&'+cat['HP2']+')'
 cuts['LPLP'] = '('+cat['LP1']+'&&'+cat['LP2']+')'
 cuts['HPLP'] = '(('+cat['HP1']+'&&'+cat['LP2']+')||('+cat['LP1']+'&&'+cat['HP2']+'))'
+cuts['NP'] = '(('+cat['LP1']+'&&'+cat['NP2']+')||('+cat['NP1']+'&&'+cat['LP2']+'))'
 
 cuts['nonres'] = '1'
 
-purities=['HPHP','HPLP','LPLP']
+purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
@@ -90,7 +93,6 @@ def makeDetectorResponse(name,filename,template,addCut="1"):
   print "=========== PURITY: ", p
   cut='*'.join([cuts['common'],cuts[p],'(jj_l1_gen_softDrop_mass>10&&jj_l2_gen_softDrop_mass>10&&jj_gen_partialMass>0)',addCut])
   resFile=filename+"_"+name+"_detectorResponse_"+p+".root"		 
-  #cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "150,200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
   cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
   os.system(cmd)
   
@@ -152,7 +154,7 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1):
   for p in purities:
    rootFile=filename+"_"+p+".root"
    cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptance']])
-   cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}"  samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
+   cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l2_softDrop_mass,jj_l1_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}"  samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
    os.system(cmd)
                	  
 makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
@@ -161,14 +163,16 @@ makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
 makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
 makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+#do not use these
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 #makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 #makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
+#
 makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'])
 makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0)
-# makeNormalizations("data","JJ",dataTemplate,1)
+makeNormalizations("data","JJ",dataTemplate,1)
