@@ -30,8 +30,9 @@ for p in purities:
  #QCD
  rootFile="JJ_nonRes_2D_"+p+".root"
  rootFile="test_"+p+".root"
- card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",[],False,0)    
- #card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTX:CMS_VV_JJ_nonRes_PTX','OPTX:CMS_VV_JJ_nonRes_OPTX','OPTY:CMS_VV_JJ_nonRes_OPTY','PTY:CMS_VV_JJ_nonRes_PTY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
+ print rootFile
+ card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
+ #card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['altshapeXY:CMS_VV_JJ_nonRes_altshapeXY','altshapeZ:CMS_VV_JJ_nonRes_altshapeZ'],False,0)    
  card.addFixedYieldFromFile("nonRes",1,"JJ_"+p+".root","nonRes")
 
  #DATA
@@ -61,12 +62,12 @@ for p in purities:
  card.addSystematic("CMS_res_prunedj","param",[0.0,0.2])
 
  #alternative shapes
- card.addSystematic("CMS_VV_JJ_nonRes_PTX","param",[0.0,0.333])
- card.addSystematic("CMS_VV_JJ_nonRes_PTY","param",[0.0,0.333])
+ card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
  card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.333])
- card.addSystematic("CMS_VV_JJ_nonRes_OPTX","param",[0.0,0.333])
- card.addSystematic("CMS_VV_JJ_nonRes_OPTY","param",[0.0,0.333])
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTXY","param",[0.0,0.333])
  card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,0.333])
+ #card.addSystematic("CMS_VV_JJ_nonRes_altshapeXY","param",[0.0,0.333])
+ #card.addSystematic("CMS_VV_JJ_nonRes_altshapeZ","param",[0.0,0.333])
     
  card.makeCard()
 

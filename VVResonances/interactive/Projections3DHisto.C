@@ -6,11 +6,9 @@ gStyle->SetOptTitle(0);
 TFile* fin = new TFile("JJ_nonRes_2D_HPHP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 
+TFile* finMC = new TFile("JJ_HPHP.root","READ");
+TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
 
-TFile* finMC = new TFile("JJ_nonRes_COND2D_HPHP_l1.root","READ");
-TH3F* hinMC = (TH3F*)finMC->Get("mjet_mvv_nominal_3D");
-//TH3F* hinMChw = (TH3F*)finMC->Get("mjet_mvv_altshapeUp_3D");
-//TH3F* hinMCmg = (TH3F*)finMC->Get("mjet_mvv_altshape2_3D");
 
 int binsx = hin->GetNbinsX();
 float xmin = hin->GetXaxis()->GetXmin();
@@ -31,14 +29,8 @@ std::vector<TH1F*> hx;
 std::vector<TH1F*> hy;
 std::vector<TH1F*> hz;
 std::vector<TH1F*> hxMC;
-std::vector<TH1F*> hxMChw;
-std::vector<TH1F*> hxMCmg;
 std::vector<TH1F*> hyMC;
-std::vector<TH1F*> hyMChw;
-std::vector<TH1F*> hyMCmg;
 std::vector<TH1F*> hzMC;
-std::vector<TH1F*> hzMChw;
-std::vector<TH1F*> hzMCmg;
 
 int zbinMin[4] = {1,1,hin->GetZaxis()->FindBin(1600),hin->GetZaxis()->FindBin(5000)};
 int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1600),hin->GetZaxis()->FindBin(5000),binsz};
@@ -57,17 +49,7 @@ for(int i=0; i<4; ++i){
  hxMC.push_back((TH1F*)hinMC->ProjectionX(ss.str().c_str(),1,binsy,zbinMin[i],zbinMax[i]));
  ss.str(""); ss << "pyMC_" << i << std::endl;
  hyMC.push_back((TH1F*)hinMC->ProjectionY(ss.str().c_str(),1,binsx,zbinMin[i],zbinMax[i])); 
-
- //ss.str(""); ss << "pxMChw_" << i << std::endl;
- //hxMChw.push_back((TH1F*)hinMChw->ProjectionX(ss.str().c_str(),1,binsy,zbinMin[i],zbinMax[i]));
- //ss.str(""); ss << "pyMChw_" << i << std::endl;
- //hyMChw.push_back((TH1F*)hinMChw->ProjectionY(ss.str().c_str(),1,binsx,zbinMin[i],zbinMax[i])); 
- 
- //ss.str(""); ss << "pxMCmg_" << i << std::endl;
- //hxMCmg.push_back((TH1F*)hinMChw->ProjectionX(ss.str().c_str(),1,binsy,zbinMin[i],zbinMax[i]));
- //ss.str(""); ss << "pyMCmg_" << i << std::endl;
- //hyMCmg.push_back((TH1F*)hinMCmg->ProjectionY(ss.str().c_str(),1,binsx,zbinMin[i],zbinMax[i])); 
-  
+   
 }
 
 for(int i=0; i<4; ++i){
@@ -83,15 +65,17 @@ for(int i=0; i<4; ++i){
  hy[i]->SetMarkerColor(colors[i]);
  hxMC[i]->SetLineColor(colors[i]);
  hxMC[i]->SetMarkerColor(colors[i]);
+ hxMC[i]->SetMarkerStyle(20);
  hxMC[i]->SetMarkerSize(0.5);
  hyMC[i]->SetLineColor(colors[i]);
  hyMC[i]->SetMarkerColor(colors[i]); 
+ hyMC[i]->SetMarkerStyle(20);
  hyMC[i]->SetMarkerSize(0.5);
 
 }
 
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
-leg->AddEntry(hxMC[0],"Simulation","P");
+leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");
 leg->AddEntry(hx[0],"Template","L");
 leg->AddEntry(hx[1],"1 < m_{jj} < 1.6 TeV");
 leg->AddEntry(hx[2],"1.6 < m_{jj} < 5 TeV");
@@ -109,8 +93,8 @@ for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
 
-int xbinMin[5] = {1,hin->GetXaxis()->FindBin(55),hin->GetXaxis()->FindBin(100),hin->GetXaxis()->FindBin(150),hin->GetXaxis()->FindBin(300)};
-int xbinMax[5] = {binsx,hin->GetXaxis()->FindBin(100),hin->GetXaxis()->FindBin(150),hin->GetXaxis()->FindBin(300),binsx};
+int xbinMin[5] = {1,hin->GetXaxis()->FindBin(55),hin->GetXaxis()->FindBin(70),hin->GetXaxis()->FindBin(100),hin->GetXaxis()->FindBin(150)};
+int xbinMax[5] = {binsx,hin->GetXaxis()->FindBin(70),hin->GetXaxis()->FindBin(100),hin->GetXaxis()->FindBin(150),binsx};
 
 float scalez[5] = {1.,1.,1.,1.,1.};
 
@@ -122,12 +106,7 @@ for(int i=0; i<5; ++i){
  hz.push_back((TH1F*)hin->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
  ss.str(""); ss << "pzMC_" << i << std::endl;
  hzMC.push_back((TH1F*)hinMC->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
-
- //ss.str(""); ss << "pzMChw_" << i << std::endl;
- //hzMChw.push_back((TH1F*)hinMChw->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
- //ss.str(""); ss << "pzMCmg_" << i << std::endl;
- //hzMCmg.push_back((TH1F*)hinMCmg->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
-  
+   
 }
 
 for(int i=0; i<5; ++i){
@@ -139,17 +118,18 @@ for(int i=0; i<5; ++i){
  hz[i]->SetMarkerColor(colors[i]);
  hzMC[i]->SetLineColor(colors[i]);
  hzMC[i]->SetMarkerColor(colors[i]);
+ hzMC[i]->SetMarkerStyle(20);
  hzMC[i]->SetMarkerSize(0.5);
-  
+    
 }
 
 TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
-leg2->AddEntry(hzMC[0],"Simulation","P");
+leg2->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg2->AddEntry(hz[0],"Template","L");
-leg2->AddEntry(hz[1],"55 < m_{jet} < 100 GeV");
-leg2->AddEntry(hz[2],"100 < m_{jet} < 150 GeV");
-leg2->AddEntry(hz[3],"150 < m_{jet} < 210 GeV");
-leg2->AddEntry(hz[4],"300 < m_{jet} < 610 GeV");
+leg2->AddEntry(hz[1],"55 < m_{jet} < 70 GeV");
+leg2->AddEntry(hz[2],"70 < m_{jet} < 100 GeV");
+leg2->AddEntry(hz[3],"100 < m_{jet} < 150 GeV");
+leg2->AddEntry(hz[4],"150 < m_{jet} < 215 GeV");
 
 TCanvas* cz = new TCanvas("cz","cz");
 cz->SetLogy();
@@ -173,14 +153,9 @@ hz_OPTZUp->SetLineColor(210);
 TH1F* hz_OPTZDown = (TH1F*)hin_OPTZDown->ProjectionZ("pz_OPTZDown",xbinMin[0],xbinMax[0],xbinMin[0],xbinMax[0]);
 hz_OPTZDown->SetLineColor(210);
 
-//hzMCmg[0]->SetLineColor(kBlack);
-//hzMCmg[0]->SetLineStyle(2);
-//hzMChw[0]->SetLineColor(kRed);
-//hzMChw[0]->SetLineStyle(2);
-
 TLegend* leg3 = new TLegend(0.6,0.55,0.95,0.8);
-leg3->AddEntry(hzMC[0],"Simulation","P");
-leg3->AddEntry(hz[0],"Template nominal","L");
+leg3->AddEntry(hzMC[0],"Simulation (Madgraph)","LP");
+leg3->AddEntry(hz[0],"Template (Pythia8)","L");
 leg3->AddEntry(hz_PTZUp,"p_{T} syst. up/down","L");
 leg3->AddEntry(hz_OPTZUp,"1/p_{T} syst. up/down","L");
 
@@ -197,10 +172,10 @@ hzMC[0]->Draw("same");
 leg3->Draw();
 
 
-TH3F* hin_PTXUp = (TH3F*)fin->Get("histo_PTXUp");
-TH3F* hin_PTXDown = (TH3F*)fin->Get("histo_PTXDown");
-TH3F* hin_OPTXUp = (TH3F*)fin->Get("histo_OPTXUp");
-TH3F* hin_OPTXDown = (TH3F*)fin->Get("histo_OPTXDown");
+TH3F* hin_PTXUp = (TH3F*)fin->Get("histo_PTXYUp");
+TH3F* hin_PTXDown = (TH3F*)fin->Get("histo_PTXYDown");
+TH3F* hin_OPTXUp = (TH3F*)fin->Get("histo_OPTXYUp");
+TH3F* hin_OPTXDown = (TH3F*)fin->Get("histo_OPTXYDown");
 
 TH1F* hx_PTXUp = (TH1F*)hin_PTXUp->ProjectionX("px_PTXUp",1,binsy,zbinMin[0],zbinMax[0]);
 hx_PTXUp->SetLineColor(kMagenta);
@@ -221,8 +196,8 @@ hx_OPTXDown->Draw("HISTsame");
 hxMC[0]->Draw("same");
 leg3->Draw();
 
-TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTYUp");
-TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTYDown");
+TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTXYUp");
+TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTXYDown");
 TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTYUp");
 TH3F* hin_OPTYDown = (TH3F*)fin->Get("histo_OPTYDown");
 
