@@ -51,7 +51,9 @@ for k in range(1,hmcin.GetNbinsZ()+1):
   for i in range(1,hmcin.GetNbinsX()+1):
    evs = hmcin.GetBinContent(i,j,k)*35900.
    #if evs >= 1:
-   err = math.sqrt(evs)
+   #err = math.sqrt(evs)
+   if evs > 0: err = hmcin.GetBinError(i,j,k)*evs/hmcin.GetBinContent(i,j,k)
+   else: err = 0.
    hout.SetBinContent(i,j,k,evs)
    hout.SetBinError(i,j,k,err)
 

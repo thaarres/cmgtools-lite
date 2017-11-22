@@ -50,7 +50,7 @@ ScriptName = "vvMake2DTemplateWithKernels.py"
 options = ''
 options += ' -c "((HLT_JJ)*(run>500) + (run<500))*(njj>0&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_eeBadScFilter&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.)*(jj_l1_tau2/jj_l1_tau1<0.35&&jj_l2_tau2/jj_l2_tau1<0.35)*1*(jj_l1_gen_softDrop_mass>0&&jj_l2_gen_softDrop_mass>0&&jj_gen_partialMass>0)"'
 options += ' -v "jj_l1_gen_softDrop_mass,jj_gen_partialMass"'
-options += ' -b 277 -B 160 -x 55.0 -X 610.0 -y 1000.0 -Y 7000.0'
+options += ' -b 80 -B 100 -x 55.0 -X 215.0 -y 1000.0 -Y 5000.0'
 options+= ' -r /afs/cern.ch/user/j/jngadiub/workdir/VVAnalysisWith2DFit/CMGToolsForStat74X/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive/JJ_nonRes_detectorResponse_HPHP.root'
 options+= ' /afs/cern.ch/user/j/jngadiub/workdir/VVAnalysisWith2DFit/CMGToolsForStat74X/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive/samples'
 

@@ -46,6 +46,7 @@ for filename in os.listdir(args[0]):
         
 
     mass = float(fname.split('_')[-1])
+    if mass < 1200: continue
 
     if mass<options.minMass:
         continue
@@ -78,7 +79,7 @@ for mass in sorted(samples.keys()):
 
 
 
-func = ROOT.TF1("func",options.function,0,13000)
+func = ROOT.TF1("func",options.function,options.min,options.max)
 yieldgraph.Fit(func,"R")
 
 

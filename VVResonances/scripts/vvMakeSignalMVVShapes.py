@@ -23,6 +23,8 @@ parser.add_option("-c","--cut",dest="cut",help="Cut to apply for shape",default=
 parser.add_option("-o","--output",dest="output",help="Output JSON",default='')
 parser.add_option("-V","--MVV",dest="mvv",help="mVV variable",default='')
 parser.add_option("-f","--scaleFactors",dest="scaleFactors",help="Additional scale factors separated by comma",default='')
+parser.add_option("-m","--minMVV",dest="min",type=float,help="mVV variable",default=1)
+parser.add_option("-M","--maxMVV",dest="max",type=float, help="mVV variable",default=1)
 
 (options,args) = parser.parse_args()
 #define output dictionary
@@ -41,9 +43,9 @@ for filename in os.listdir(args[0]):
     if ext.find("root") ==-1:
         continue
         
-
+    
     mass = float(fname.split('_')[-1])
-
+    if mass < 1200: continue
         
 
     samples[mass] = fname
@@ -57,6 +59,9 @@ scaleFactors=options.scaleFactors.split(',')
 
 #Now we have the samples: Sort the masses and run the fits
 N=0
+
+Fhists=ROOT.TFile("massHISTOS_"+options.output,"RECREATE")
+
 for mass in sorted(samples.keys()):
 
     print 'fitting',str(mass) 
@@ -70,8 +75,9 @@ for mass in sorted(samples.keys()):
     fitter=Fitter(['MVV'])
     fitter.signalResonanceCBGaus('model','MVV',mass)
     fitter.w.var("MH").setVal(mass)
-    histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.8*mass,1.2*mass),"1",1000,0,8000)
-
+    histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.8*mass,1.2*mass),"1",1000,options.min,options.max)
+    Fhists.cd()
+    histo.Write("%i"%mass)
     fitter.importBinnedData(histo,['MVV'],'data')
     fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
     fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
@@ -85,7 +91,8 @@ for mass in sorted(samples.keys()):
         graph.SetPointError(N,0.0,error)
                 
     N=N+1
-        
+Fhists.Write()
+Fhists.Close()        
 F=ROOT.TFile(options.output,"RECREATE")
 F.cd()
 for name,graph in graphs.iteritems():
