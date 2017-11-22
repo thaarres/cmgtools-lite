@@ -40,8 +40,8 @@ def getPavetext():
   addInfo.SetTextAlign(12)
   return addInfo
     
-def getCanvas():
-	 c1 =TCanvas("c","",800,600)
+def getCanvas(w=800,h=600):
+	 c1 =TCanvas("c","",w,h)
 	 return c1
 
 def doYield():
@@ -83,12 +83,14 @@ def doYield():
 		l.Draw("same")
 		cmslabel_sim(c,'2016',11)
 		c.Update()
-		# sleep(100000)
+		sleep(100000)
 		c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/signalFit/Yield_"+var+"_fit.png")
 		
 def doMVVFit():
-	FHPLP = TFile("debug_JJ_BulkGWW_MVV_HPLP.json.root","READ")
-	FHPHP = TFile("debug_JJ_BulkGWW_MVV_HPHP.json.root","READ")
+	# FHPLP = TFile("debug_JJ_BulkGWW_MVV_HPLP.json.root","READ")
+# 	FHPHP = TFile("debug_JJ_BulkGWW_MVV_HPHP.json.root","READ")
+	FHPLP = TFile("debug_JJ_BulkGWW_MVV.json.root","READ")
+	FHPHP = TFile("debug_JJ_BulkGWW_MVV.json.root","READ")
 	
 	vars = ["MEAN","SIGMA","ALPHA","N","SCALESIGMA","f"]
 	for var in vars:
@@ -108,8 +110,9 @@ def doMVVFit():
 		beautify(fHPLP ,414,1,8)
 		beautify(fHPHP ,611,1,4)
 		
-		l.AddEntry(fHPLP,"HPLP","L")
-		l.AddEntry(fHPHP,"HPHP","L")
+		# l.AddEntry(fHPLP,"HPLP","L")
+		# l.AddEntry(fHPHP,"HPHP","L")
+		l.AddEntry(fHPHP,var,"L")
 		
 		gHPLP.GetXaxis().SetTitle("M_{VV} (GeV)")
 		gHPLP.GetYaxis().SetTitle(var)
@@ -130,7 +133,7 @@ def doMVVFit():
 		l.Draw("same")
 		cmslabel_sim(c,'2016',11)
 		c.Update()
-		c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/signalFit/MVV_"+var+"_fit.png")
+		c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/signalFit/MVV_combined_"+var+"_fit.png")
 		
 def doMJFit():
 	FHPLP = TFile("debug_JJ_BulkGWW_MJl1_HPLP.json.root","READ")
@@ -357,10 +360,10 @@ def compKernelMVV():
 	for p in purities:
 		hists = []
 		files = []
-		fLP = TFile("JJ_nonRes_MVV_"+p+".root","READ")
-		fHP = TFile("JJ_nonRes_MVV_"+p+"_NP.root","READ")
-		files.append(fLP)
-		files.append(fHP)
+		fNominal = TFile("JJ_nonRes_MVV_"+p+".root","READ")
+		fCombined = TFile("JJ_nonRes_MVV_"+p+"_NP.root","READ")
+		files.append(fNominal)
+		files.append(fCombined)
 		
 		
 		hists = []
@@ -391,22 +394,177 @@ def compKernelMVV():
 		hists[0][0].GetYaxis().SetTitle("A.U")
 		hists[0][0].GetYaxis().SetNdivisions(9,1,0)
 		hists[0][0].GetYaxis().SetTitleOffset(1.5)	
-		hists[0][0].GetXaxis().SetRangeUser(1000.   , 5200)
+		hists[0][0].GetXaxis().SetRangeUser(1000.   , 4900)
 		hists[0][0].Draw("histPE")
 		for h in hists:
 			h[0].Draw("samehistPE")
 			h[1].Draw("sameLhist")
 		
 		l.Draw("same")
-		sleep(10)
+		sleep(100)
 		c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/bkgFit/compare_1Dkernel"+p+".png")
-		
 
+def doKernel2D():
+	files = []
+	fLP = TFile("JJ_nonRes_COND2D_HPLP_l1.root","READ")
+	fHP = TFile("JJ_nonRes_COND2D_HPHP_l1.root","READ")
+	files.append(fLP)
+	files.append(fHP)
+	cols = [611,414]
+	c = getCanvas()
+	c.SetLogy()
+	l = getLegend(0.60010112,0.723362,0.90202143,0.879833)
+	hists = []
+	for i,f in enumerate(files):
+		hsts = []
+	
+		fromKernel  = f.Get("histo_nominal")
+		fromSim     = f.Get("mjet_mvv_nominal")
+		fromKernelY = fromKernel.ProjectionX()
+		fromSimY 	= fromSim.ProjectionX()
+		fromKernelY .SetName("kernel"+f.GetName().replace(".root","").split("_")[3])
+		fromSimY 	.SetName("sim"+f.GetName().replace(".root","").split("_")[3])
+
+		beautify(fromKernelY,cols[i])
+		beautify(fromSimY   ,cols[i])
+		l.AddEntry(fromKernelY,"%s,From Kernel    "%(f.GetName().replace(".root","").split("_")[3]),"L")
+		l.AddEntry(fromSimY   ,"%s,From Simulation"%(f.GetName().replace(".root","").split("_")[3]),"PE")
+		
+		hsts.append(fromSimY)
+		hsts.append(fromKernelY)
+		hists.append(hsts)
+	hists[0][0].GetXaxis().SetTitle("M_{jet} (GeV)")
+	hists[0][0].GetYaxis().SetTitle("A.U")
+	hists[0][0].GetYaxis().SetNdivisions(9,1,0)
+	hists[0][0].GetYaxis().SetTitleOffset(1.5)	
+	# hists[0][0].GetXaxis().SetRangeUser(1000.   , 5200)
+	hists[0][0].DrawNormalized("histPE")
+	for h in hists:
+		h[0].DrawNormalized("samehistPE")
+		h[1].DrawNormalized("sameLhist")
+	
+	l.Draw("same")
+	c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/bkgFit/2Dkernel_Mjet.png")		
+	
+	c = getCanvas()
+	c.SetLogy()
+	l = getLegend(0.60010112,0.723362,0.90202143,0.879833)
+	hists = []
+	for i,f in enumerate(files):
+		hsts = []
+	
+		fromKernel  = f.Get("histo_nominal")
+		fromSim     = f.Get("mjet_mvv_nominal")
+		fromKernelY = fromKernel.ProjectionY()
+		fromSimY 	= fromSim.ProjectionY()
+		fromKernelY .SetName("kernel"+f.GetName().replace(".root","").split("_")[3])
+		fromSimY 	.SetName("sim"+f.GetName().replace(".root","").split("_")[3])
+
+		beautify(fromKernelY,cols[i])
+		beautify(fromSimY   ,cols[i])
+		l.AddEntry(fromKernelY,"%s,From Kernel    "%(f.GetName().replace(".root","").split("_")[3]),"L")
+		l.AddEntry(fromSimY   ,"%s,From Simulation"%(f.GetName().replace(".root","").split("_")[3]),"PE")
+		
+		hsts.append(fromSimY)
+		hsts.append(fromKernelY)
+		hists.append(hsts)
+	hists[0][0].GetXaxis().SetTitle("M_{jj} (GeV)")
+	hists[0][0].GetYaxis().SetTitle("A.U")
+	hists[0][0].GetYaxis().SetNdivisions(9,1,0)
+	hists[0][0].GetYaxis().SetTitleOffset(1.5)	
+	# hists[0][0].GetXaxis().SetRangeUser(1000.   , 5200)
+	hists[0][0].DrawNormalized("histPE")
+	for h in hists:
+		h[0].DrawNormalized("samehistPE")
+		h[1].DrawNormalized("sameLhist")
+	
+	l.Draw("same")
+	c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/bkgFit/2Dkernel_Mjj.png")
+
+def compSignalMVV():
+	
+	masses = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500]
+	
+	
+	files = []
+	fHP  = TFile("massHISTOS_JJ_BulkGWW_MVV_HPHP.root","READ")
+	fLP = TFile("massHISTOS_JJ_BulkGWW_MVV_HPLP.root","READ")
+	files.append(fHP)
+	files.append(fLP)
+	
+	
+	histsHP = []
+	histsLP = []
+	l = getLegend(0.80010112,0.723362,0.90202143,0.879833)
+	cols = [611,414]
+	for m in masses:
+		hHP = fHP.Get("%i"%m)
+		hLP = fLP.Get("%i"%m)
+		hHP.SetName(hHP.GetName()+"HP")
+		hLP.SetName(hLP.GetName()+"LP")
+		hHP.SetLineColor(cols[0])
+		hLP.SetLineColor(cols[1])
+		hHP.SetFillColor(0)
+		hLP.SetFillColor(0)
+		hHP.Rebin(10)
+		hLP.Rebin(10)
+		if m == masses[0]:
+			l.AddEntry(hHP   ,"HPHP","L")
+			l.AddEntry(hLP   ,"HPLP","L")
+				
+		histsHP.append(hHP)
+		histsLP.append(hLP)
+		
+	c = getCanvas()
+	
+	histsHP[0].GetXaxis().SetTitle("M_{jj} (GeV)")
+	histsHP[0].GetYaxis().SetTitle("A.U")
+	histsHP[0].GetYaxis().SetNdivisions(9,1,0)
+	histsHP[0].GetYaxis().SetTitleOffset(1.5)
+	histsHP[0].GetXaxis().SetRangeUser(1000,5200)
+	histsHP[0].DrawNormalized("hist")
+	for hp,lp in zip(histsHP,histsLP):
+		hp.DrawNormalized("hist same")
+		lp.DrawNormalized("hist same")
+	
+	l.Draw("same")
+	c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/signalFit/comparePurities_MVV.png")
+	
+	
+	
+	# histsHP[0].GetXaxis().SetRangeUser(1000,5200)
+	c = getCanvas(1600,600)
+	c.Divide(2,5)
+	legs = []
+	for i,(m,hp,lp) in enumerate(zip(masses,histsHP,histsLP)):
+		hp.Scale(1./hp.Integral())
+		lp.Scale(1./lp.Integral())
+		hp.Divide(lp)
+		hp.SetMarkerColor(1)
+		hp.GetXaxis().SetRangeUser(m*0.80,m*1.2)
+		hp.GetYaxis().SetRangeUser(0,2)
+		hp.GetYaxis().SetNdivisions(3,0,0)
+		hp.GetXaxis().SetTitle("M = %i GeV"%m)
+		hp.GetYaxis().SetTitle("HP/LP")
+		hp.GetYaxis().SetTitleSize(0.7)
+		hp.GetYaxis().SetLabelSize(0.16)
+		hp.GetXaxis().SetTitleSize(0.7)
+		c.cd(i+1)
+		hp.Draw("M")
+		l = getLegend(0.80010112,0.723362,0.90202143,0.879833)
+		l.SetName("l%i"%m)
+		l.SetTextSize(0.2)
+		l.AddEntry(hp   ,"%i"%m,"LEP")
+		l.Draw("same")
+		legs.append(l)
+	c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/signalFit/comparePurities_MVVratio.png")
+		
 if __name__ == '__main__':
 	# doMJFit()
-	# doMVVFit()
+	doMVVFit()
 	# doResolution()
 	# doYield()
 	# doKernelMVV()
-	compKernelMVV()
-
+	# compKernelMVV()
+	# doKernel2D()
+	# compSignalMVV()
