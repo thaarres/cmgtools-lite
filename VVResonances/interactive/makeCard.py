@@ -16,7 +16,7 @@ for p in purities:
  #SIGNAL
  card.addMVVSignalParametricShape2("BulkGWW_MVV","MJJ","JJ_BulkGWW_MVV.json",{'CMS_scale_j':1},{'CMS_res_j':1.0})
 
- if p=='LP':
+ if p=='HPLP':
      card.addMJJSignalParametricShape("Wqq","MJ","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
      card.addParametricYieldWithUncertainty("XqW",0,"JJ_BulkGWW_MJl1_"+p+".json",1,'CMS_tau21_PtDependence','((0.054/0.041)*(-log(MH/600)))',0.041)
  else:
@@ -51,7 +51,7 @@ for p in purities:
  #tau21 
  if p=='HPHP':
      card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1+0.14})
- if p=='LP':
+ if p=='HPLP':
      card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1-0.33})
                
  #pruned mass scale    

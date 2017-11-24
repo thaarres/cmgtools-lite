@@ -9,4 +9,7 @@ __init__.py
 *cc.d
 *.pcm
 LSFJOB*/
+*.pdf
+*.png
+*.root
 
