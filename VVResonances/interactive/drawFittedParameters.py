@@ -560,10 +560,10 @@ def compSignalMVV():
 	c.SaveAs("/eos/user/t/thaarres/www/vvana/3D/LP/signalFit/comparePurities_MVVratio.png")
 		
 if __name__ == '__main__':
-	# doMJFit()
+	doMJFit()
 	doMVVFit()
+	doYield()
 	# doResolution()
-	# doYield()
 	# doKernelMVV()
 	# compKernelMVV()
 	# doKernel2D()
