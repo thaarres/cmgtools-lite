@@ -25,6 +25,8 @@ parser.add_option("-V","--MVV",dest="mvv",help="mVV variable",default='')
 parser.add_option("-f","--scaleFactors",dest="scaleFactors",help="Additional scale factors separated by comma",default='')
 parser.add_option("-m","--minMVV",dest="min",type=float,help="mVV variable",default=1)
 parser.add_option("-M","--maxMVV",dest="max",type=float, help="mVV variable",default=1)
+parser.add_option("-r","--minMX",dest="minMX",type=float, help="smallest Mx to fit ",default=1000.0)
+parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fit " ,default=7000.0)
 
 (options,args) = parser.parse_args()
 #define output dictionary
@@ -45,7 +47,7 @@ for filename in os.listdir(args[0]):
         
     
     mass = float(fname.split('_')[-1])
-    if mass < 1200: continue
+    if mass < options.minMX or mass > options.maxMX: continue
         
 
     samples[mass] = fname
