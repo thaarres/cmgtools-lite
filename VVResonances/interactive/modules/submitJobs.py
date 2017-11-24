@@ -8,6 +8,7 @@ from ROOT import *
 import subprocess, thread
 
 timeCheck = "30"
+userName=os.environ['USER']
 def waitForBatchJobs( jobname, remainingjobs, listOfJobs, userName, timeCheck="30"):
 	if listOfJobs-remainingjobs < listOfJobs:
 	    time.sleep(float(timeCheck))
@@ -20,10 +21,13 @@ def waitForBatchJobs( jobname, remainingjobs, listOfJobs, userName, timeCheck="3
 	else:
 	    print "Jobs finished! Allow some time for files to be saved to your home directory"
 	    time.sleep(5)
-	    noutcmd = "ls res/ | wc -l"
+	    noutcmd = "ls res"+jobname+"/ | wc -l"
 	    result = subprocess.Popen(noutcmd, stdout=subprocess.PIPE, shell=True)
 	    nout =  int(result.stdout.read())
-	    print "Done! Have %i out of %i files in res/ directory. Return to main script"%(nout,listOfJobs)
+	    if listOfJobs-nout > 0: 
+			print "Uooh! Missing %i jobs. Resubmit when merging. Now return to main script" %int(listOfJobs-nout)
+	    else:
+			print "Done! Have %i out of %i files in res%s directory. Return to main script"%(nout,listOfJobs,jobname)
 	    return
         
 def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
@@ -31,8 +35,8 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	for k,v in minEv.iteritems():
 
 	  for j in range(len(v)):
-	   os.system("mkdir tmp/"+str(k).replace(".root","")+"_"+str(j+1))
-	   os.chdir("tmp/"+str(k).replace(".root","")+"_"+str(j+1))
+	   os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
+	   os.chdir("tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
 	  
 	   with open('job_%s_%i.sh'%(k.replace(".root",""),j+1), 'w') as fout:
 	      fout.write("#!/bin/sh\n")
@@ -43,7 +47,7 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
 	      fout.write("cd "+str(path)+"\n")
 	      fout.write("cmsenv\n")
-	      fout.write(cmd+" -o res/"+OutputFileNames+"_"+str(j+1)+"_"+k+" -s "+k+" -e "+str(minEv[k][j])+" -E "+str(maxEv[k][j])+"\n")
+	      fout.write(cmd+" -o res"+jobname+"/"+OutputFileNames+"_"+str(j+1)+"_"+k+" -s "+k+" -e "+str(minEv[k][j])+" -E "+str(maxEv[k][j])+"\n")
 	      fout.write("echo 'STOP---------------'\n")
 	      fout.write("echo\n")
 	      fout.write("echo\n")
@@ -108,26 +112,23 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 
 	cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {infolder} '.format(rootFile=rootFile,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,infolder=samples)
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
-	queue = "1nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
+	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 	path = os.getcwd()
-	try: os.system("rm -r tmp")
+	try: os.system("rm -r tmp"+jobName)
 	except: print "No tmp/ directory"
-	os.system("mkdir tmp")
-	try: os.stat("res") 
-	except: os.mkdir("res")
+	os.system("mkdir tmp"+jobName)
+	try: os.stat("res"+jobName) 
+	except: os.mkdir("res"+jobName)
 	print
 
 	#### Creating and sending jobs #####
-	 
-	jobname = jobName
-	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path)
+	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
 	
 	print
 	print "your jobs:"
 	os.system("bjobs")
-	userName=os.environ['USER']
-	waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	  
 	print
@@ -164,23 +165,21 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 	path = os.getcwd()
-	try: os.system("rm -r tmp")
+	try: os.system("rm -r tmp"+jobName)
 	except: print "No tmp/ directory"
-	os.system("mkdir tmp")
-	try: os.stat("res") 
-	except: os.mkdir("res")
+	os.system("mkdir tmp"+jobName)
+	try: os.stat("res"+jobName) 
+	except: os.mkdir("res"+jobName)
 	print
 
 	#### Creating and sending jobs #####
-	 
-	jobname = jobName
-	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path)
+	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
 	
 	print
 	print "your jobs:"
 	os.system("bjobs")
 	userName=os.environ['USER']
-	waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	  
 	print
@@ -254,18 +253,10 @@ def conditional(hist):
         for j in range(1,hist.GetNbinsX()+1):
             hist.SetBinContent(j,i,hist.GetBinContent(j,i)/integral)
 
-def merge1DMVVTemplate(jobList,files):
-	
-	print "Merging 1D templates"
-	print
-	print "Jobs to merge :   " ,jobList
-	print "Files ran over:   " ,files
-	
-	outdir = 'res'
-	
-	exit_flag = False
-
+def getJobs(files,jobList,outdir):
+	resubmit = []
 	jobsPerSample = {}
+	exit_flag = False
 
 	for s in files:
 	 s = s.replace('.root','')
@@ -282,10 +273,51 @@ def merge1DMVVTemplate(jobList,files):
 	  if not found:
 	   print "SAMPLE ",s," JOBID ",jobid," NOT FOUND"
 	   exit_flag = True
+	   resubmit.append(s+"_"+jobid)
 	 if len(filelist) > 0: jobsPerSample[s] = filelist
+	return resubmit, jobsPerSample,exit_flag	 
+	
+def reSubmit(jobdir,resubmit,jobname):
+ jobs = []
+ for o in os.listdir(jobdir):
+	 for jobs in resubmit:
+		 if o.find(jobs) != -1: 
+			 jobfolder = jobdir+"/"+jobs+"/"
+			 os.chdir(jobfolder)
+			 script = "job_"+jobs+".sh"
+			 cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
+			 print cmd
+			 jobs.append(cmd)
+			 os.system("chmod 755 %s"%script)
+			 os.system(cmd)
+			 os.chdir("../..")
+ return jobs
+ 	
+def merge1DMVVTemplate(jobList,files,jobname):
+	
+	print "Merging 1D templates"
+	print
+	print "Jobs to merge :   " ,jobList
+	print "Files ran over:   " ,files
+	
+	outdir = 'res'+jobname
+	jobdir = 'tmp'+jobname
+	
+	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
 	
 	if exit_flag:
-	 print "Some files are missing. Exit without merging!"
+	 submit = raw_input("The following files are missing: %s. Do you  want to resubmit the jobs to the batch system before merging? [y/n] "%resubmit)
+	 if submit == 'y' or submit=='Y':
+		 print "Resubmitting jobs:"
+		 jobs = reSubmit(jobdir,resubmit,jobname)
+		 waitForBatchJobs(jobname,len(resubmit),len(resubmit), userName, timeCheck)
+		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+		 if exit_flag: 
+			 print "Job crashed again! Please resubmit manually before attempting to merge again"
+			 for j in jobs: print j 
+			 sys.exit()
+	 else:
+		 print "Some files are missing. Exit without merging!"
 	 sys.exit()
  
 	try: 
@@ -448,42 +480,36 @@ def merge1DMVVTemplate(jobList,files):
 		
 		fhadd_madgraph.Close()
 		
-	os.system('rm -r '+outdir+'_out')
-	os.system('rm -r '+outdir)
+	os.system('rm -rf '+outdir+'_out/')
+	# os.system('rm -rf '+outdir+'/')
 
-def merge2DTemplate(jobList,files):  
+def merge2DTemplate(jobList,files,jobname):  
 	
 	print "Merging 2D templates"
 	print
 	print "Jobs to merge :   " ,jobList
 	print "Files ran over:   " ,files
 	
-	outdir = 'res'
+	outdir = 'res'+jobname
+	jobdir = 'tmp'+jobname
 	
-	exit_flag = False
-
-	jobsPerSample = {}
-
-	for s in files:
-	 s = s.replace('.root','')
-	 filelist = []
-	 for t in jobList:
-	  if t.find(s) == -1: continue
-	  jobid = t.split("_")[-1]
-	  found = False
-	  for o in os.listdir(outdir):
-	   if o.find(s) != -1 and o.find('_'+jobid+'_') != -1:
-	    found = True
-	    filelist.append(outdir+"/"+o)
-	    break
-	  if not found:
-	   print "SAMPLE ",s," JOBID ",jobid," NOT FOUND"
-	   exit_flag = True
-	 if len(filelist) > 0: jobsPerSample[s] = filelist
+	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
 	
 	if exit_flag:
-	 print "Some files are missing. Exit without merging!"
+	 submit = raw_input("The following files are missing: %s. Do you  want to resubmit the jobs to the batch system before merging? [y/n] "%resubmit)
+	 if submit == 'y' or submit=='Y':
+		 print "Resubmitting jobs:"
+		 jobs = reSubmit(jobdir,resubmit,jobname)
+		 waitForBatchJobs(jobname,len(resubmit),len(resubmit), userName, timeCheck)
+		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+		 if exit_flag: 
+			 print "Job crashed again! Please resubmit manually before attempting to merge again"
+			 for j in jobs: print j 
+			 sys.exit()
+	 else:
+		 print "Some files are missing. Exit without merging!"
 	 sys.exit()
+	
  
 	try: 
 		os.stat(outdir+'_out') 
@@ -717,7 +743,7 @@ def merge2DTemplate(jobList,files):
 		fhadd_madgraph.Close()
 		
 	os.system('rm -r '+outdir+'_out')
-	os.system('rm -r '+outdir)
+	# os.system('rm -r '+outdir)
 	
 def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,factor,name,data,jobname,samples):
 	print 
@@ -751,22 +777,20 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	
 
 	path = os.getcwd()
-	try: os.system("rm -r tmp")
+	try: os.system("rm -r tmp"+jobname)
 	except: print "No tmp/ directory"
-	os.system("mkdir tmp")
-	try: os.stat("res") 
-	except: os.mkdir("res")
+	os.system("mkdir tmp"+jobname)
+	try: os.stat("res"+jobname) 
+	except: os.mkdir("res"+jobname)
 	print
 
 	#### Creating and sending jobs #####
-	 
-	jobname = jobName
 	joblist = []
 	##### loop for creating and sending jobs #####
 	for x in range(1, int(NumberOfJobs)+1):
 	 
-	   os.system("mkdir tmp/"+str(files[x-1]).replace(".root",""))
-	   os.chdir("tmp/"+str(files[x-1]).replace(".root",""))
+	   os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir("tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	 
 	   with open('job_%s.sh'%files[x-1].replace(".root",""), 'w') as fout:
 	      fout.write("#!/bin/sh\n")
@@ -777,7 +801,7 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
 	      fout.write("cd "+str(path)+"\n")
 	      fout.write("cmsenv\n")
-	      fout.write(cmd+" -o "+path+"/res/"+OutputFileNames+"_"+files[x-1]+" -s "+files[x-1]+"\n")
+	      fout.write(cmd+" -o "+path+"/res"+jobname+"/"+OutputFileNames+"_"+files[x-1]+" -s "+files[x-1]+"\n")
 	      fout.write("echo 'STOP---------------'\n")
 	      fout.write("echo\n")
 	      fout.write("echo\n")
@@ -799,21 +823,21 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	print
 	return joblist, files
 
-def mergeData(jobList, files):
+def mergeData(jobList, files,jobname):
 	# read out files
-	filelist = os.listdir('./res/')
+	filelist = os.listdir('./res'+jobname+'/')
 
 	mg_files     = []
 	pythia_files = []
 	herwig_files = []
 	data_files   = []
 
-	for f in jobList:
+	for f in filelist:
 	 #if f.find('COND2D') == -1: continue
-	 if f.find('QCD_HT')    != -1: mg_files.append('./res/'+f)
-	 elif f.find('QCD_Pt_') != -1: pythia_files.append('./res/'+f)
-	 elif f.find('JetHT')   != -1: data_files.append('./res/'+f)
-	 else: herwig_files.append('./res/'+f)
+	 if f.find('QCD_HT')    != -1: mg_files.append('./res'+jobname+'/'+f)
+	 elif f.find('QCD_Pt_') != -1: pythia_files.append('./res'+jobname+'/'+f)
+	 elif f.find('JetHT')   != -1: data_files.append('./res'+jobname+'/'+f)
+	 else: herwig_files.append('./res'+jobname+'/'+f)
 
 	#now hadd them
 	if len(mg_files) > 0:
@@ -848,27 +872,27 @@ def mergeData(jobList, files):
 		print cmd
 		os.system(cmd)
 	
-
-	# fin = ROOT.TFile.Open('JJ_HPHP_nominal.root','READ')
-	# hmcin = fin.Get('nonRes')
-	#
-	# fout = ROOT.TFile.Open('JJ_HPHP.root','RECREATE')
-	# hout = ROOT.TH3F('data','data',hmcin.GetNbinsX(),hmcin.GetXaxis().GetXmin(),hmcin.GetXaxis().GetXmax(),hmcin.GetNbinsY(),hmcin.GetYaxis().GetXmin(),hmcin.GetYaxis().GetXmax(),hmcin.GetNbinsZ(),hmcin.GetZaxis().GetXmin(),hmcin.GetZaxis().GetXmax())
-	# hmcout = ROOT.TH3F('nonRes','nonRes',hmcin.GetNbinsX(),hmcin.GetXaxis().GetXmin(),hmcin.GetXaxis().GetXmax(),hmcin.GetNbinsY(),hmcin.GetYaxis().GetXmin(),hmcin.GetYaxis().GetXmax(),hmcin.GetNbinsZ(),hmcin.GetZaxis().GetXmin(),hmcin.GetZaxis().GetXmax())
-	# hmcout.Add(hmcin)
-	#
-	# for k in range(1,hmcin.GetNbinsZ()+1):
-	#  for j in range(1,hmcin.GetNbinsY()+1):
-	#   for i in range(1,hmcin.GetNbinsX()+1):
-	#    evs = hmcin.GetBinContent(i,j,k)*35900.
-	#    #if evs >= 1:
-	#    err = math.sqrt(evs)
-	#    hout.SetBinContent(i,j,k,evs)
-	#    hout.SetBinError(i,j,k,err)
-	#
-	# hout.Write()
-	# hmcout.Write()
-	#
-	# fin.Close()
-	# fout.Close()
-			
+def makePseudodata(infile):
+	print "Making pseudodata from infile " ,infile
+	fin = ROOT.TFile.Open(infile,'READ')
+	hmcin = fin.Get('nonRes')
+	
+	fout = ROOT.TFile.Open('JJ_HPHP.root','RECREATE')
+	hout = ROOT.TH3F('data','data',hmcin.GetNbinsX(),hmcin.GetXaxis().GetXmin(),hmcin.GetXaxis().GetXmax(),hmcin.GetNbinsY(),hmcin.GetYaxis().GetXmin(),hmcin.GetYaxis().GetXmax(),hmcin.GetNbinsZ(),hmcin.GetZaxis().GetXmin(),hmcin.GetZaxis().GetXmax())
+	hmcout = ROOT.TH3F('nonRes','nonRes',hmcin.GetNbinsX(),hmcin.GetXaxis().GetXmin(),hmcin.GetXaxis().GetXmax(),hmcin.GetNbinsY(),hmcin.GetYaxis().GetXmin(),hmcin.GetYaxis().GetXmax(),hmcin.GetNbinsZ(),hmcin.GetZaxis().GetXmin(),hmcin.GetZaxis().GetXmax())
+	hmcout.Add(hmcin)
+	
+	for k in range(1,hmcin.GetNbinsZ()+1):
+	 for j in range(1,hmcin.GetNbinsY()+1):
+	  for i in range(1,hmcin.GetNbinsX()+1):
+	   evs = hmcin.GetBinContent(i,j,k)*35900.
+	   #if evs >= 1:
+	   err = math.sqrt(evs)
+	   hout.SetBinContent(i,j,k,evs)
+	   hout.SetBinError(i,j,k,err)
+	
+	hout.Write()
+	hmcout.Write()
+	
+	fin.Close()
+	fout.Close()
