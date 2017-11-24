@@ -2,43 +2,43 @@ import ROOT
 from ROOT import *
 import math
 import os
-#
-# # read out files
-# filelist = os.listdir('./res/')
-#
-# mg_files = []
-# pythia_files = []
-# herwig_files = []
-#
-# for f in filelist:
-#  #if f.find('COND2D') == -1: continue
-#  if f.find('QCD_HT') != -1: mg_files.append('./res/'+f)
-#  elif f.find('QCD_Pt_') != -1: pythia_files.append('./res/'+f)
-#  else: herwig_files.append('./res/'+f)
-#
-# #now hadd them
-# cmd = 'hadd -f JJ_nonRes_HPHP_altshape2.root '
-# for f in mg_files:
-#  cmd += f
-#  cmd += ' '
-# print cmd
-# os.system(cmd)
-#
-# cmd = 'hadd -f JJ_nonRes_HPHP_altshapeUp.root '
-# for f in herwig_files:
-#  cmd += f
-#  cmd += ' '
-# print cmd
-# os.system(cmd)
-#
-# cmd = 'hadd -f JJ_nonRes_HPHP_nominal.root '
-# for f in pythia_files:
-#  cmd += f
-#  cmd += ' '
-# print cmd
-# os.system(cmd)
 
-fin = ROOT.TFile.Open('JJ_HPHP_nominal.root','READ')
+# read out files
+filelist = os.listdir('./res/')
+
+mg_files = []
+pythia_files = []
+herwig_files = []
+
+for f in filelist:
+ #if f.find('COND2D') == -1: continue
+ if f.find('QCD_HT') != -1: mg_files.append('./res/'+f)
+ elif f.find('QCD_Pt_') != -1: pythia_files.append('./res/'+f)
+ else: herwig_files.append('./res/'+f)
+
+#now hadd them
+cmd = 'hadd -f JJ_nonRes_HPHP_altshape2.root '
+for f in mg_files:
+ cmd += f
+ cmd += ' '
+print cmd
+os.system(cmd)
+
+cmd = 'hadd -f JJ_nonRes_HPHP_altshapeUp.root '
+for f in herwig_files:
+ cmd += f
+ cmd += ' '
+print cmd
+os.system(cmd)
+ 
+cmd = 'hadd -f JJ_nonRes_HPHP_nominal.root '
+for f in pythia_files:
+ cmd += f
+ cmd += ' '
+print cmd
+os.system(cmd)
+
+fin = ROOT.TFile.Open('JJ_nonRes_HPHP_nominal.root','READ')
 hmcin = fin.Get('nonRes')
 
 fout = ROOT.TFile.Open('JJ_HPHP.root','RECREATE')
