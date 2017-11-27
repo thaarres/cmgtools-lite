@@ -27,8 +27,8 @@ purities=['HPHP','HPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
-BRWW=1.
-BRZZ=1.
+BRWW=1.*0.001
+BRZZ=1.*0.001
 
 dataTemplate="JetHT"
 # nonResTemplate="QCD_Pt_" #high stat
