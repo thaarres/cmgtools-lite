@@ -3,7 +3,7 @@ import json
 
 class Fitter(object):
     def __init__(self,poi = ['x']):
-        self.cache=ROOT.TFile("cache.root","RECREATE")
+        self.cache=ROOT.TFile("cache%i.root"%(random.randint(0, 1e+6)),"RECREATE")
         self.cache.cd()
 
         self.w=ROOT.RooWorkspace("w","w")
