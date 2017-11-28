@@ -1,5 +1,6 @@
 import ROOT
 import json
+from numpy import random
 
 class Fitter(object):
     def __init__(self,poi = ['x']):

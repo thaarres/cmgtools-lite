@@ -4,6 +4,7 @@ from array import array
 import pickle
 from PlotterBase import PlotterBase
 from array import array
+from numpy import random
 
 class TreePlotter(PlotterBase):
 
