@@ -23,7 +23,7 @@ cuts['NP'] = '(('+cat['LP1']+'&&'+cat['NP2']+')||('+cat['NP1']+'&&'+cat['LP2']+'
 cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
-purities=['HPLP']
+purities=['HPHP','HPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -31,8 +31,8 @@ BRWW=1.*0.001
 BRZZ=1.*0.001
 
 dataTemplate="JetHT"
-nonResTemplate="QCD_Pt_" #high stat
-# nonResTemplate="QCD_Pt-" #low stat --> use this for tests
+# nonResTemplate="QCD_Pt_" #high stat
+nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 
 minMJ=55.0
 maxMJ=215.0
@@ -96,9 +96,8 @@ def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP
   os.system(cmd)
 
 def makeDetectorResponse(name,filename,template,addCut="1"):
- for p in purities:
-   cut='*'.join([cuts['common'],cuts[p],'(jj_l1_gen_softDrop_mass>10&&jj_l2_gen_softDrop_mass>10&&jj_gen_partialMass>0)',addCut])
-   resFile=filename+"_"+name+"_detectorResponse_"+p+".root"		 
+   cut='*'.join([cuts['common'],'(jj_l1_gen_softDrop_mass>10&&jj_l2_gen_softDrop_mass>10&&jj_gen_partialMass>0)',addCut])
+   resFile=filename+"_"+name+"_detectorResponse.root"		 
    cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
    os.system(cmd)
   
@@ -106,7 +105,7 @@ def makeBackgroundShapesMJKernel(name,filename,template,leg,addCut="1"):
  
  #template += ",QCD_Pt-,QCD_HT"
  for p in purities:
-  resFile=filename+"_"+name+"_detectorResponse_"+p+".root"	
+  resFile=filename+"_"+name+"_detectorResponse.root"	
   print "=========== PURITY: ", p
   cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],cuts['acceptanceMVV']])
   rootFile=filename+"_"+name+"_MJ"+leg+"_"+p+".root"  	      
@@ -125,10 +124,9 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
 
 def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobname="1DMVV"):
  pwd = os.getcwd()
- template += ",QCD_Pt-,QCD_HT"
  for p in purities:
   print " Working on purity: ", p
-  resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse_"+p+".root"	
+  resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse.root"	
   rootFile = filename+"_"+name+"_MVV_"+p+".root"
   print "Reading " ,resFile
   print "Saving to ",rootFile
@@ -136,6 +134,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobname="1DM
   samples = pwd +"/samples"
 
   if submitToBatch:
+    template += ",QCD_Pt-,QCD_HT"
     from modules.submitJobs import Make1DMVVTemplateWithKernels,merge1DMVVTemplate
     jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobname)
     merge1DMVVTemplate(jobList,files,jobname,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
@@ -145,7 +144,6 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobname="1DM
 
 def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobName="2DMVV"):
  pwd = os.getcwd()	
- template += ",QCD_Pt-,QCD_HT"
  for p in purities:
   print " Working on purity: ", p
   resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse.root"
@@ -156,10 +154,9 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobN
   samples = pwd +"/samples" 
   
   if submitToBatch:
+    template += ",QCD_Pt-,QCD_HT"
     from modules.submitJobs import Make2DTemplateWithKernels,merge2DTemplate
-    # jobList, files = Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobName)
-    jobList = ["QCD_HT1000to1500_1","QCD_HT1000to1500_10","QCD_HT1000to1500_11","QCD_HT1000to1500_12","QCD_HT1000to1500_13","QCD_HT1000to1500_14","QCD_HT1000to1500_15","QCD_HT1000to1500_16","QCD_HT1000to1500_2","QCD_HT1000to1500_3","QCD_HT1000to1500_4","QCD_HT1000to1500_5","QCD_HT1000to1500_6","QCD_HT1000to1500_7","QCD_HT1000to1500_8","QCD_HT1000to1500_9","QCD_HT100to200_1","QCD_HT1500to2000_1","QCD_HT1500to2000_10","QCD_HT1500to2000_11","QCD_HT1500to2000_12","QCD_HT1500to2000_13","QCD_HT1500to2000_14","QCD_HT1500to2000_2","QCD_HT1500to2000_3","QCD_HT1500to2000_4","QCD_HT1500to2000_5","QCD_HT1500to2000_6","QCD_HT1500to2000_7","QCD_HT1500to2000_8","QCD_HT1500to2000_9","QCD_HT2000toInf_1","QCD_HT2000toInf_2","QCD_HT2000toInf_3","QCD_HT2000toInf_4","QCD_HT2000toInf_5","QCD_HT2000toInf_6","QCD_HT2000toInf_7","QCD_HT2000toInf_8","QCD_HT200to300_1","QCD_HT300to500_1","QCD_HT500to700_1","QCD_HT500to700_2","QCD_HT700to1000_1","QCD_HT700to1000_10","QCD_HT700to1000_11","QCD_HT700to1000_12","QCD_HT700to1000_13","QCD_HT700to1000_14","QCD_HT700to1000_15","QCD_HT700to1000_16","QCD_HT700to1000_17","QCD_HT700to1000_18","QCD_HT700to1000_19","QCD_HT700to1000_2","QCD_HT700to1000_20","QCD_HT700to1000_21","QCD_HT700to1000_22","QCD_HT700to1000_23","QCD_HT700to1000_24","QCD_HT700to1000_25","QCD_HT700to1000_26","QCD_HT700to1000_3","QCD_HT700to1000_4","QCD_HT700to1000_5","QCD_HT700to1000_6","QCD_HT700to1000_7","QCD_HT700to1000_8","QCD_HT700to1000_9","QCD_Pt-15to7000_1","QCD_Pt-15to7000_10","QCD_Pt-15to7000_2","QCD_Pt-15to7000_3","QCD_Pt-15to7000_4","QCD_Pt-15to7000_5","QCD_Pt-15to7000_6","QCD_Pt-15to7000_7","QCD_Pt-15to7000_8","QCD_Pt-15to7000_9","QCD_Pt_1000to1400_1","QCD_Pt_1000to1400_10","QCD_Pt_1000to1400_11","QCD_Pt_1000to1400_12","QCD_Pt_1000to1400_13","QCD_Pt_1000to1400_2","QCD_Pt_1000to1400_3","QCD_Pt_1000to1400_4","QCD_Pt_1000to1400_5","QCD_Pt_1000to1400_6","QCD_Pt_1000to1400_7","QCD_Pt_1000to1400_8","QCD_Pt_1000to1400_9","QCD_Pt_1400to1800_1","QCD_Pt_1400to1800_2","QCD_Pt_1400to1800_3","QCD_Pt_1400to1800_4","QCD_Pt_170to300_1","QCD_Pt_1800to2400_1","QCD_Pt_1800to2400_2","QCD_Pt_1800to2400_3","QCD_Pt_2400to3200_1","QCD_Pt_300to470_1","QCD_Pt_300to470_10","QCD_Pt_300to470_11","QCD_Pt_300to470_12","QCD_Pt_300to470_13","QCD_Pt_300to470_14","QCD_Pt_300to470_2","QCD_Pt_300to470_3","QCD_Pt_300to470_4","QCD_Pt_300to470_5","QCD_Pt_300to470_6","QCD_Pt_300to470_7","QCD_Pt_300to470_8","QCD_Pt_300to470_9","QCD_Pt_3200toInf_1","QCD_Pt_470to600_1","QCD_Pt_470to600_10","QCD_Pt_470to600_11","QCD_Pt_470to600_12","QCD_Pt_470to600_13","QCD_Pt_470to600_14","QCD_Pt_470to600_15","QCD_Pt_470to600_16","QCD_Pt_470to600_17","QCD_Pt_470to600_18","QCD_Pt_470to600_19","QCD_Pt_470to600_2","QCD_Pt_470to600_20","QCD_Pt_470to600_21","QCD_Pt_470to600_3","QCD_Pt_470to600_4","QCD_Pt_470to600_5","QCD_Pt_470to600_6","QCD_Pt_470to600_7","QCD_Pt_470to600_8","QCD_Pt_470to600_9","QCD_Pt_600to800_1","QCD_Pt_600to800_10","QCD_Pt_600to800_11","QCD_Pt_600to800_12","QCD_Pt_600to800_13","QCD_Pt_600to800_14","QCD_Pt_600to800_15","QCD_Pt_600to800_16","QCD_Pt_600to800_17","QCD_Pt_600to800_18","QCD_Pt_600to800_19","QCD_Pt_600to800_2","QCD_Pt_600to800_20","QCD_Pt_600to800_21","QCD_Pt_600to800_22","QCD_Pt_600to800_23","QCD_Pt_600to800_24","QCD_Pt_600to800_25","QCD_Pt_600to800_26","QCD_Pt_600to800_27","QCD_Pt_600to800_28","QCD_Pt_600to800_29","QCD_Pt_600to800_3","QCD_Pt_600to800_30","QCD_Pt_600to800_31","QCD_Pt_600to800_32","QCD_Pt_600to800_33","QCD_Pt_600to800_34","QCD_Pt_600to800_35","QCD_Pt_600to800_36","QCD_Pt_600to800_37","QCD_Pt_600to800_38","QCD_Pt_600to800_39","QCD_Pt_600to800_4","QCD_Pt_600to800_5","QCD_Pt_600to800_6","QCD_Pt_600to800_7","QCD_Pt_600to800_8","QCD_Pt_600to800_9","QCD_Pt_800to1000_1","QCD_Pt_800to1000_10","QCD_Pt_800to1000_11","QCD_Pt_800to1000_12","QCD_Pt_800to1000_13","QCD_Pt_800to1000_14","QCD_Pt_800to1000_15","QCD_Pt_800to1000_16","QCD_Pt_800to1000_17","QCD_Pt_800to1000_18","QCD_Pt_800to1000_19","QCD_Pt_800to1000_2","QCD_Pt_800to1000_20","QCD_Pt_800to1000_21","QCD_Pt_800to1000_22","QCD_Pt_800to1000_23","QCD_Pt_800to1000_24","QCD_Pt_800to1000_25","QCD_Pt_800to1000_3","QCD_Pt_800to1000_4","QCD_Pt_800to1000_5","QCD_Pt_800to1000_6","QCD_Pt_800to1000_7","QCD_Pt_800to1000_8","QCD_Pt_800to1000_9"]
-    files = ["QCD_HT1000to1500.root","QCD_HT100to200.root","QCD_HT1500to2000.root ","QCD_HT2000toInf.root","QCD_HT200to300.root","QCD_HT300to500.root","QCD_HT500to700.root","QCD_HT700to1000.root","QCD_Pt-15to7000.root","QCD_Pt_1000to1400.root","QCD_Pt_1400to1800.root","QCD_Pt_170to300.root","QCD_Pt_1800to2400.root","QCD_Pt_2400to3200.root","QCD_Pt_300to470.root","QCD_Pt_3200toInf.root","QCD_Pt_470to600.root","QCD_Pt_600to800.root","QCD_Pt_800to1000.root"]
+    jobList, files = Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobName)
     merge2DTemplate(jobList,files,jobName,p,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
   else:
     cmd='vvMake2DTemplateWithKernels.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass"  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
@@ -191,7 +188,6 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
     os.system(cmd)
 	
 
-
 makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
 makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
 makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
@@ -212,4 +208,4 @@ mergeBackgroundShapes("nonRes","JJ")
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"normNR")
 # makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
 from modules.submitJobs import makePseudodata
-for p in purities: makePseudodata("JJ_nonRes_%s_nominal.root"%p,p)
+for p in purities: makePseudodata("JJ_nonRes_%s_nominal.root"%p,p) #remove this when running on data!!
