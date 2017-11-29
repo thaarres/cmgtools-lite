@@ -61,6 +61,9 @@ makeHisto("histo_PTDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTD
 print "   - pt (x,y) up/down"
 makeHisto("histo_PTXYUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
 makeHisto("histo_PTXYDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTDown",inputz,"histo_nominal",output)
+#print "   - pt2 z up/down"
+makeHisto("histo_PT2Up",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PT2Up",output)
+makeHisto("histo_PT2Down",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PT2Down",output)
 
 print "   - Opt x up/down"
 makeHisto("histo_OPTXUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
@@ -77,6 +80,9 @@ makeHisto("histo_OPTDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_O
 print "   - Opt (x,y) up/down"
 makeHisto("histo_OPTXYUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
 makeHisto("histo_OPTXYDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",inputz,"histo_nominal",output)
+#print "   - Opt2 z up/down"
+makeHisto("histo_OPT2Up",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PT2Up",output)
+makeHisto("histo_OPT2Down",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PT2Down",output)
 
 print "  - herwig x"
 makeHisto("histo_altshapeXUp",inputx,"histo_altshapeUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
@@ -93,6 +99,7 @@ makeHisto("histo_altshapeXYDown",inputx,"histo_altshapeDown",inputy,"histo_altsh
 
 print "Merge herwig"
 makeHisto("histo_altshapeUp",inputx,"histo_altshapeUp",inputy,"histo_altshapeUp",inputz,"histo_altshapeUp",output)
+makeHisto("histo_altshapeDown",inputx,"histo_altshapeDown",inputy,"histo_altshapeDown",inputz,"histo_altshapeDown",output)
 print "Merge madgraph"
 makeHisto("histo_altshape2",inputx,"histo_altshape2",inputy,"histo_altshape2",inputz,"histo_altshape2",output)
 

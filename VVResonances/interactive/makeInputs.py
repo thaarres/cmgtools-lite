@@ -31,8 +31,9 @@ BRWW=1.*0.001
 BRZZ=1.*0.001
 
 dataTemplate="JetHT"
-nonResTemplate="QCD_Pt_" #high stat
-# nonResTemplate="QCD_Pt-" #low stat --> use this for tests
+#nonResTemplate="QCD_Pt_" #high stat
+nonResTemplate="QCD_Pt-" #low stat --> use this for tests
+#nonResTemplate="Dijet" #to compare shapes
 
 minMJ=55.0
 maxMJ=215.0

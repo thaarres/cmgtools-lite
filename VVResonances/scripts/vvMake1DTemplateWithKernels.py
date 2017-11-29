@@ -24,6 +24,8 @@ parser.add_option("-x","--minx",dest="minx",type=float,help="bins",default=0)
 parser.add_option("-X","--maxx",dest="maxx",type=float,help="conditional bins split by comma",default=1)
 parser.add_option("-w","--weights",dest="weights",help="additional weights",default='')
 parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help="use gen mass for det resolution",default=False)
+parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
+parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
 
 (options,args) = parser.parse_args()     
 
@@ -183,7 +185,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histI2=plotter.drawTH1('jj_%s_softDrop_mass'%leg,options.cut,"1",options.binsx,options.minx,options.maxx)
 
    print " - Creating dataset - "   
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,options.firstEv,options.lastEv)     
 
    print " - Creating 1D gaussian template - "   
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)   
@@ -235,7 +237,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histI2=plotter.drawTH1('jj_%s_softDrop_mass'%leg,options.cut,"1",options.binsx,options.minx,options.maxx)
 
    print " - Creating dataset - "
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,options.firstEv,options.lastEv)     
 
    print " - Creating 1D gaussian template - "   
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
@@ -287,7 +289,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histI2=plotter.drawTH1('jj_%s_softDrop_mass'%leg,options.cut,"1",options.binsx,options.minx,options.maxx)
  
    print " - Creating dataset - "
-   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,maxEvents)     
+   dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_%s_gen_pt,%s'%(leg,options.var),options.cut,options.firstEv,options.lastEv)     
    
    print " - Creating 1D gaussian template - "
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
@@ -318,8 +320,8 @@ for hist in histograms:
  hist.Write(hist.GetName())
  finalHistograms[hist.GetName()]=hist
 
-histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
-histogram_altshapeDown.Write()
+#histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
+#histogram_altshapeDown.Write()
 
 f.Close()
 
