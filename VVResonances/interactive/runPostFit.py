@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     workspace.pdf("model_b").Print()
     model = workspace.pdf("model_b")
-    fitResult = model.fitTo(workspace.data("data_obs"),rt.RooFit.NumCPU(8),rt.RooFit.SumW2Error(True),rt.RooFit.Minos(0),rt.RooFit.Verbose(0),rt.RooFit.Save(1))
+    fitResult = model.fitTo(workspace.data("data_obs"),rt.RooFit.NumCPU(8),rt.RooFit.SumW2Error(True),rt.RooFit.Minos(1),rt.RooFit.Verbose(0),rt.RooFit.Save(1))
     fitResult.Print()
 
     #### generate a sample from the roofitresult (same statistics as original)

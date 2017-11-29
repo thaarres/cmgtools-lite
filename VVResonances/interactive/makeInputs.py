@@ -31,8 +31,10 @@ BRWW=1.*0.001
 BRZZ=1.*0.001
 
 dataTemplate="JetHT"
-# nonResTemplate="QCD_Pt_" #high stat
+#nonResTemplate="QCD_Pt_" #high stat
 nonResTemplate="QCD_Pt-" #low stat --> use this for tests
+#nonResTemplate="Dijet" #to compare shapes
+
 
 minMJ=55.0
 maxMJ=215.0
@@ -188,12 +190,12 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
     os.system(cmd)
 	
 
-# makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-# makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
-# makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 #do not use these
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
@@ -204,8 +206,8 @@ makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'])
 makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1")
 makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2")
 mergeBackgroundShapes("nonRes","JJ")
-#
-# makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"normNR")
-# # makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
-# from modules.submitJobs import makePseudodata
-# for p in purities: makePseudodata("JJ_nonRes_%s_nominal.root"%p,p) #remove this when running on data!!
+
+makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"normNR")
+# makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
+from modules.submitJobs import makePseudodata
+for p in purities: makePseudodata("JJ_nonRes_%s_nominal.root"%p,p) #remove this when running on data!!
