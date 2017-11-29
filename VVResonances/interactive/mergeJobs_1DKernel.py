@@ -25,7 +25,7 @@ def mirror(histo,histoNominal,name):
         nominal=histoNominal.GetBinContent(i)/intNominal
         newHisto.SetBinContent(i,histoNominal.GetBinContent(i)*nominal/up)
     return newHisto 
-    
+ 
 sampledir = 'samples'
 jobdir = 'tmp'
 outdir = 'res'
@@ -51,6 +51,11 @@ for s in samples:
     break
   if not found:
    print "SAMPLE ",s," JOBID ",jobid," NOT FOUND"
+   #os.chdir(jobdir+"/"+t)
+   #os.system('rm -rf LSFJOB_*')
+   #os.system('rm logs')
+   #os.system('bsub -q 8nh -o logs job_%s.sh'%(t))
+   #os.chdir('../../')
    exit_flag = True
  jobsPerSample[s] = filelist
 
@@ -132,6 +137,8 @@ for f in pythia_files:
 print cmd
 os.system(cmd)
 
+
+
 #now retrieve histos
 fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_MVV_HPHP_altshape2.root','READ')
 fhadd_herwig = ROOT.TFile.Open('JJ_nonRes_MVV_HPHP_altshapeUp.root','READ')
@@ -181,8 +188,10 @@ histogram_altshapeDown.SetName('histo_altshapeDown')
 histogram_altshapeDown.SetTitle('histo_altshapeDown')
 histogram_altshapeDown.Write('histo_altshapeDown')
 
-alpha=1.5/5000
-histogram_pt_down,histogram_pt_up=unequalScale(histo_nominal,"histo_nominal_PT",alpha)
+print "***********************************************"
+print "PT UP/DOWN shapes"
+alpha=1.5/5000.
+histogram_pt_down,histogram_pt_up=unequalScale(histo_nominal,"histo_nominal_PT",alpha,2)
 histogram_pt_down.SetName('histo_nominal_PTDown')
 histogram_pt_down.SetTitle('histo_nominal_PTDown')
 histogram_pt_down.Write('histo_nominal_PTDown')
@@ -190,11 +199,35 @@ histogram_pt_up.SetName('histo_nominal_PTUp')
 histogram_pt_up.SetTitle('histo_nominal_PTUp')
 histogram_pt_up.Write('histo_nominal_PTUp')
 
+print "***********************************************"
+print "OPT UP/DOWN shapes"
 alpha=1.5*1000
-histogram_opt_down,histogram_opt_up=unequalScale(histo_nominal,"histo_nominal_OPT",alpha,-1)
+histogram_opt_down,histogram_opt_up=unequalScale(histo_nominal,"histo_nominal_OPT",alpha,-2)
 histogram_opt_down.SetName('histo_nominal_OPTDown')
 histogram_opt_down.SetTitle('histo_nominal_OPTDown')
 histogram_opt_down.Write('histo_nominal_OPTDown')
 histogram_opt_up.SetName('histo_nominal_OPTUp')
 histogram_opt_up.SetTitle('histo_nominal_OPTUp')
 histogram_opt_up.Write('histo_nominal_OPTUp')  
+
+print "***********************************************"
+print "PT2 UP/DOWN shapes"
+alpha=5000.*5000.
+histogram_pt2_down,histogram_pt2_up=unequalScale(histo_nominal,"histo_nominal_PT2",alpha,2)
+histogram_pt2_down.SetName('histo_nominal_PT2Down')
+histogram_pt2_down.SetTitle('histo_nominal_PT2Down')
+histogram_pt2_down.Write('histo_nominal_PT2Down')
+histogram_pt2_up.SetName('histo_nominal_PT2Up')
+histogram_pt2_up.SetTitle('histo_nominal_PT2Up')
+histogram_pt2_up.Write('histo_nominal_PT2Up')
+
+print "***********************************************"
+print "OPT2 UP/DOWN shapes"
+alpha=1000.*1000.
+histogram_opt2_down,histogram_opt2_up=unequalScale(histo_nominal,"histo_nominal_OPT2",alpha,-2)
+histogram_opt2_down.SetName('histo_nominal_OPT2Down')
+histogram_opt2_down.SetTitle('histo_nominal_OPT2Down')
+histogram_opt2_down.Write('histo_nominal_OPT2Down')
+histogram_opt2_up.SetName('histo_nominal_OPT2Up')
+histogram_opt2_up.SetTitle('histo_nominal_OPT2Up')
+histogram_opt2_up.Write('histo_nominal_OPT2Up')  
