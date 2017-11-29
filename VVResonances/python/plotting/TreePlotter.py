@@ -271,6 +271,7 @@ class TreePlotter(PlotterBase):
             #N=N+1
             #if maxN >0 and N>maxN:
             #    return data
+        del self.cache
         return data    
 
 
