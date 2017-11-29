@@ -5,7 +5,7 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 purities=['HPHP','HPLP','LPLP']
-purities=['HPHP']
+purities=['HPLP']
 
 for p in purities:
 
