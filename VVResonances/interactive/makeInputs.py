@@ -35,7 +35,6 @@ dataTemplate="JetHT"
 nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 #nonResTemplate="Dijet" #to compare shapes
 
-
 minMJ=55.0
 maxMJ=215.0
 
@@ -99,7 +98,7 @@ def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP
 
 def makeDetectorResponse(name,filename,template,addCut="1"):
    cut='*'.join([cuts['common'],'(jj_l1_gen_softDrop_mass>10&&jj_l2_gen_softDrop_mass>10&&jj_gen_partialMass>0)',addCut])
-   resFile=filename+"_"+name+"_detectorResponse_tight.root"		 
+   resFile=filename+"_"+name+"_detectorResponse.root"		 
    cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
    os.system(cmd)
   
@@ -195,13 +194,13 @@ makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
 makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
 makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
-# makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 #do not use these
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 #makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 #makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 #makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
-
+#
 makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'])
 makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1")
 makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2")
