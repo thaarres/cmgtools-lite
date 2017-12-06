@@ -10,9 +10,12 @@ parser.add_option("-x","--xrange",dest="xrange",help="set range for x bins in pr
 parser.add_option("-y","--yrange",dest="yrange",help="set range for y bins in projection",default="0,-1")
 parser.add_option("-z","--zrange",dest="zrange",help="set range for z bins in projection",default="0,-1")
 parser.add_option("-p","--projection",dest="projection",help="choose which projection should be done",default="z")
+parser.add_option("-f","--postfit",dest="postfit",action="store_true",help="make also postfit plots",default=False)
 
 
 (options,args) = parser.parse_args()
+ROOT.gStyle.SetOptStat(0)
+colors = [ROOT.kBlack,ROOT.kRed-2,ROOT.kRed+1,ROOT.kRed-1,ROOT.kRed+2,ROOT.kGreen-1,ROOT.kGreen-2,ROOT.kGreen+1,ROOT.kGreen+2,ROOT.kBlue]
 
 def getListFromRange(xyzrange):
     r=[]
@@ -106,12 +109,16 @@ def reduceBinsToRange(Bins,r):
 
 
 
-def doZprojection(pdfs,zBins,proj):
+def doZprojection(pdfs,proj):
     # do some z projections
     h=[]
+    lv=[]
     for p in pdfs:
-        h.append( ROOT.TH1F("h_"+p.GetName(),"h_"+p.GetName(),len(zBins)-1,zBins[0],zBins[len(zBins)-1]))
-
+        h.append( ROOT.TH1F("h_"+p.GetName(),"h_"+p.GetName(),len(zBins)-2,zBinslowedge[1],zBinslowedge[len(zBins)-1]))
+        lv.append({})
+    for i in range(0,len(pdfs)):
+        for zk,zv in zBins_redux.iteritems():
+            lv[i][zv]=0    
     for xk, xv in xBins_redux.iteritems():
          MJ1.setVal(xv)
          for yk, yv in yBins_redux.iteritems():
@@ -120,32 +127,45 @@ def doZprojection(pdfs,zBins,proj):
                  MJJ.setVal(zv)
                  i=0
                  for p in pdfs:
-                    h[i].Fill(zv,p.getVal(argset))
-                    #print zv
+                    lv[i][zv] += p.getVal(argset)
                     i+=1
-     
+    for i in range(0,len(pdfs)):
+        for zk,zv in zBins_redux.iteritems():                
+            h[i].Fill(zv,lv[i][zv])
+    leg = ROOT.TLegend(0.88,0.65,0.7,0.88)
     c = ROOT.TCanvas("c","c",400,400)
     c.SetLogy()
-    h[0].SetLineColor(ROOT.kRed)
+    h[0].SetLineColor(colors[0])
+    h[0].SetTitle("Z-Proj. x : "+options.xrange+" y : "+options.yrange)
+    h[0].GetXaxis().SetTitle("m_{jj}")
+    h[0].GetYaxis().SetTitleOffset(1.3)
+    h[0].GetYaxis().SetTitle("events")
+    h[0].Scale(1/h[0].Integral())
     h[0].Draw("hist")
-    i=0
-    for hist in h:
-        hist.Scale(1/hist.Integral())
-        hist.SetLineColor(ROOT.kRed+i)
-        i+=1
-        hist.Draw("histsame")
+    leg.AddEntry(proj,"data","lp")
+    leg.AddEntry(h[0],"nominal","l")
+    for i in range(1,len(h)):
+        h[i].Scale(1/h[i].Integral())
+        h[i].SetLineColor(colors[i])
+        h[i].Draw("histsame")
+        name = h[i].GetName().split("_")
+        leg.AddEntry(h[i],name[2],"l")
     proj.Scale(1/proj.Integral())
     proj.SetMarkerStyle(1)
     proj.Draw("same")
-    c.SaveAs("Zproj.pdf")
+    leg.SetLineColor(0)
+    leg.Draw("same")
+    if pdf_shape_postfit in pdfs:
+        c.SaveAs("PostFit_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
+    else:    
+        c.SaveAs("Zproj_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
 
 
-def doXprojection(pdfs,xBins,hin):
-    # do some z projections
+def doXprojection(pdfs,hin):
     h=[]
     lv=[]
     for p in pdfs:
-        h.append( ROOT.TH1F("hx_"+p.GetName(),"hx_"+p.GetName(),len(xBins)-1,xBins[0],xBins[len(xBins)-1]))
+        h.append( ROOT.TH1F("hx_"+p.GetName(),"hx_"+p.GetName(),len(xBins)-2,xBinslowedge[1],xBinslowedge[len(xBins)-1]))
         lv.append({})
     for xk, xv in xBins_redux.iteritems():
          MJ1.setVal(xv)
@@ -157,33 +177,86 @@ def doXprojection(pdfs,xBins,hin):
                  MJJ.setVal(zv)
                  i=0
                  for p in pdfs:
-                    #print "xv "+str(xv)
-                    #print "yv "+str(yv)
-                    #print "zv "+str(zv)
-                    #print p.getVal(argset)
-                    #print lv[i][xv] 
                     lv[i][xv] += p.getVal(argset)
-                 #for p in pdfs:
-                 #   h[i].Fill(zv,p.getVal(argset))
-                 #   #print zv
                     i+=1
     for i in range(0,len(pdfs)):
         for key, value in lv[i].iteritems():
             h[i].Fill(key,value)
-    print lv[0]
-    c = ROOT.TCanvas("c","c",400,400)
-    #c.SetLogy()
-    h[0].SetLineColor(ROOT.kRed)
+    leg = ROOT.TLegend(0.88,0.65,0.77,0.89)
+    c = ROOT.TCanvas("c","c",800,400)
+    h[0].SetLineColor(colors[0])
+    h[0].SetTitle("X-Proj. y : "+options.yrange+" z : "+options.zrange)
+    h[0].GetXaxis().SetTitle("m_{jet1}")
+    h[0].GetYaxis().SetTitleOffset(1.3)
+    h[0].GetYaxis().SetTitle("events")
+    h[0].Scale(1/h[0].Integral())
     h[0].Draw("hist")
-    i=0
-    for hist in h:
-        hist.SetLineColor(ROOT.kRed+i)
-        hist.Scale(1/hist.Integral())
-        i+=1
-        hist.Draw("histsame")
+    leg.AddEntry(hin,"data","lp")
+    leg.AddEntry(h[0],"nominal","l")
+    for i in range(1,len(h)):
+        h[i].SetLineColor(colors[i])
+        h[i].Scale(1/h[i].Integral())
+        h[i].Draw("histsame")
+        name = h[i].GetName().split("_")
+        leg.AddEntry(h[i],name[2],"l")
     hin.Scale(1/hin.Integral())
+    hin.SetMarkerStyle(1)
     hin.Draw("same")
-    c.SaveAs("Xproj.pdf")    
+    leg.SetLineColor(0)
+    leg.Draw("same")
+    if pdf_shape_postfit in pdfs:
+        c.SaveAs("PostFit_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf") 
+    else:    
+        c.SaveAs("Xproj_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
+    
+
+def doYprojection(pdfs,hin):
+    h=[]
+    lv=[]
+    for p in pdfs:
+        h.append( ROOT.TH1F("hy_"+p.GetName(),"hy_"+p.GetName(),len(yBins)-2,yBinslowedge[1],yBinslowedge[len(yBins)-1]))
+        lv.append({})
+    for yk, yv in yBins_redux.iteritems():
+         MJ2.setVal(yv)
+         for i in range(0,len(pdfs)):
+            lv[i][yv]=0
+         for xk, xv in xBins_redux.iteritems():
+             MJ1.setVal(xv)
+             for zk,zv in zBins_redux.iteritems():
+                 MJJ.setVal(zv)
+                 i=0
+                 for p in pdfs:
+                    lv[i][yv] += p.getVal(argset)
+                    i+=1
+    for i in range(0,len(pdfs)):
+        for key, value in lv[i].iteritems():
+            h[i].Fill(key,value)
+    leg = ROOT.TLegend(0.88,0.65,0.77,0.89)
+    c = ROOT.TCanvas("c","c",800,400)
+    h[0].SetLineColor(colors[0])
+    h[0].SetTitle("Y-Proj. x : "+options.xrange+" z : "+options.zrange)
+    h[0].GetXaxis().SetTitle("m_{jet1}")
+    h[0].GetYaxis().SetTitleOffset(1.3)
+    h[0].GetYaxis().SetTitle("events")
+    h[0].Scale(1/h[0].Integral())
+    h[0].Draw("hist")
+    leg.AddEntry(hin,"data","lp")
+    leg.AddEntry(h[0],"nominal","l")
+    for i in range(1,len(h)):
+        h[i].SetLineColor(colors[i])
+        h[i].Scale(1/h[i].Integral())
+        h[i].Draw("histsame")
+        name = h[i].GetName().split("_")
+        leg.AddEntry(h[i],name[2],"l")
+    hin.Scale(1/hin.Integral())
+    hin.SetMarkerStyle(1)
+    hin.Draw("same")
+    leg.SetLineColor(0)
+    leg.Draw("same")
+    if pdf_shape_postfit in pdfs:
+        c.SaveAs("PostFit_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")
+    else:
+        c.SaveAs("Yproj_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
     
 
 if __name__=="__main__":
@@ -203,14 +276,12 @@ if __name__=="__main__":
      zBinslowedge = getListOfBinsLowEdge(hinMC,'z')
      zBinsWidth   = getListOfBinsWidth(hinMC,"z")
      
-     print xBinslowedge
-     print xBinsWidth
-     
-     print zBinslowedge
-     print zBinsWidth
-    
      f = ROOT.TFile(options.name,"READ")
      workspace = f.Get("w")
+     f.Close()
+     #workspace.Print()
+     norm = workspace.obj("CMS_VV_JJ_nonRes_norm_HPHP_Pdf")
+     print norm
      model = workspace.pdf("model_b")
      # try to get kernel Components 
      args  = model.getComponents()
@@ -220,56 +291,62 @@ if __name__=="__main__":
      pdf_PTZUp = args["nonRes_PTZUp_JJ_HPHP_13TeV"]
      pdf_OPTZDown  = args["nonRes_OPTZDown_JJ_HPHP_13TeV"]
      
-     pdf_shape   = args["shapeBkg_nonRes_JJ_HPHP_13TeV"]
+     pdf_shape_postfit   = args["shapeBkg_nonRes_JJ_HPHP_13TeV"]
+     pdf_shape_postfit.SetName("pdf_shape_postfit")
      pdf_PTXYUp   = args["nonRes_PTXYUp_JJ_HPHP_13TeV"]
      pdf_PTXYDown = args["nonRes_PTXYDown_JJ_HPHP_13TeV"]
-     #args.Print()
-     
-     pdfhist = workspace.obj("shapeBkg_nonRes_JJ_HPHP_13TeV")
-     
+     pdf_OPTXYUp   = args["nonRes_OPTXYUp_JJ_HPHP_13TeV"]
+     pdf_OPTXYDown = args["nonRes_OPTXYDown_JJ_HPHP_13TeV"]
+     #pdfhist = workspace.obj("shapeBkg_nonRes_JJ_HPHP_13TeV")
+     if options.postfit:
+        model.fitTo(workspace.data("data_obs"),ROOT.RooFit.NumCPU(8),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1))
      # get data from workspace 
      data = workspace.data("data_obs")
+     
      
      # get variables from workspace 
      MJ1= workspace.var("MJ1");
      MJ2= workspace.var("MJ2");
      MJJ= workspace.var("MJJ");
-    
+     del workspace
     
      argset = ROOT.RooArgSet();
      argset.add(MJJ);
      argset.add(MJ2);
-     argset.add(MJJ);
-     
+     argset.add(MJ1);
      
      x = getListFromRange(options.xrange)
      y = getListFromRange(options.yrange)
      z = getListFromRange(options.zrange)
      
-     print x
-     print y
-     print z
      
      xBins_redux = reduceBinsToRange(xBins,x)
      yBins_redux = reduceBinsToRange(yBins,y)
      zBins_redux = reduceBinsToRange(zBins,z)
-     print xBins_redux
-     print yBins_redux
-     print zBins_redux
+     #print xBins_redux
+     #print yBins_redux
+     #print zBins_redux
      
-     pdfs = [pdf,pdf_PTZDown,pdf_OPTZUp,pdf_OPTZDown,pdf_PTZUp]
      #make projections onto MJJ axis
      if options.projection =="z":
+         pdfs = [pdf,pdf_PTZDown,pdf_OPTZUp,pdf_OPTZDown,pdf_PTZUp]
          keys = xBins_redux.keys()
          keys.sort()
          zkeys = yBins_redux.keys()
          zkeys.sort()
-         
-         proj= hinMC.ProjectionZ("projx",keys[0],keys[-1],zkeys[0],zkeys[-1])
-         doZprojection(pdfs,zBins,proj)
+         if y[0]==0 and y[1]==-1 and x[0]==0 and x[1]==-1:
+             print "project all " 
+             proj= hinMC.ProjectionZ("projz",0,-1,0,-1)
+         else:    
+             proj= hinMC.ProjectionZ("projz",keys[0],keys[-1],zkeys[0],zkeys[-1])
+         doZprojection(pdfs,proj)
+         if options.postfit == True:
+             postfit = [pdf,pdf_shape_postfit]
+             doZprojection(postfit,proj)
          
      #make projections onto MJ1 axis
      if options.projection =="x":
+         pdfs = [pdf,pdf_PTXYDown,pdf_OPTXYDown,pdf_OPTXYUp,pdf_PTXYUp]
          if y[0]==0 and y[1]==-1 and z[0]==0 and z[1]==-1:
              print "project all " 
              proj= hinMC.ProjectionX("projx",0,-1,0,-1)
@@ -280,5 +357,31 @@ if __name__=="__main__":
             zkeys.sort()
          
             proj= hinMC.ProjectionX("projx",keys[0],keys[-1],zkeys[0],zkeys[-1])
-         doXprojection(pdfs,xBins,proj)    
+         doXprojection(pdfs,proj)
+         if options.postfit == True:
+             postfit = [pdf,pdf_shape_postfit]
+             doXprojection(postfit,proj)
+         
+         
+     #make projections onto MJ2 axis
+     if options.projection =="y":
+         pdfs = [pdf,pdf_PTXYDown,pdf_OPTXYDown,pdf_OPTXYUp,pdf_PTXYUp]
+         if x[0]==0 and x[1]==-1 and z[0]==0 and z[1]==-1:
+             print "project all " 
+             proj= hinMC.ProjectionY("projy",0,-1,0,-1)
+         else:
+            keys = xBins_redux.keys()
+            keys.sort()
+            zkeys = zBins_redux.keys()
+            zkeys.sort()
+         
+            proj= hinMC.ProjectionY("projy",keys[0],keys[-1],zkeys[0],zkeys[-1])
+         doYprojection(pdfs,proj)
+         
+         if options.postfit == True:
+             postfit = [pdf,pdf_shape_postfit]
+             doYprojection(postfit,proj)
+         
+         
      
+
