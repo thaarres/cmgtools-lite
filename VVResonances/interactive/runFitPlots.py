@@ -4,13 +4,14 @@ import os, sys, re, optparse,pickle,shutil,json
 import time
 
 parser = optparse.OptionParser()
-parser.add_option("-o","--output",dest="output",help="Output ROOT File",default='')
+parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
 parser.add_option("-n","--name",dest="name",help="Input ROOT File name",default='/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/workspace_pythia_nominal.root')
 parser.add_option("-x","--xrange",dest="xrange",help="set range for x bins in projection",default="0,-1")
 parser.add_option("-y","--yrange",dest="yrange",help="set range for y bins in projection",default="0,-1")
 parser.add_option("-z","--zrange",dest="zrange",help="set range for z bins in projection",default="0,-1")
 parser.add_option("-p","--projection",dest="projection",help="choose which projection should be done",default="z")
 parser.add_option("-f","--postfit",dest="postfit",action="store_true",help="make also postfit plots",default=False)
+parser.add_option("-l","--label",dest="label",help="add extra label such as pythia or herwig",default="")
 
 
 (options,args) = parser.parse_args()
@@ -136,7 +137,13 @@ def doZprojection(pdfs,data,proj=0):
         for zk,zv in zBins_redux.iteritems():                
             h[i].Fill(zv,lv[i][zv])
     leg = ROOT.TLegend(0.88,0.65,0.7,0.88)
-    c = ROOT.TCanvas("c","c",400,400)
+    c = ROOT.TCanvas("c","c",800,400)
+    if pdf_shape_postfit in pdfs:
+        pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1.0)
+        pad1.SetBottomMargin(0.01)
+        pad1.SetLogy()
+        pad1.Draw()
+        pad1.cd()    
     c.SetLogy()
     n = dh.Integral()
     h[0].SetLineColor(colors[0])
@@ -145,6 +152,12 @@ def doZprojection(pdfs,data,proj=0):
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
     h[0].Scale(n/h[0].Integral())
+    if pdf_shape_postfit in pdfs:
+        h[0].GetYaxis().SetTitleOffset(0.6)
+        h[0].GetYaxis().SetTitle("events")
+        h[0].GetYaxis().SetTitleSize(0.06)
+        h[0].GetYaxis().SetLabelSize(0.06)
+        h[0].GetYaxis().SetNdivisions(5)
     h[0].Draw("hist")
     
     dh.SetMarkerStyle(1)
@@ -166,9 +179,19 @@ def doZprojection(pdfs,data,proj=0):
     leg.SetLineColor(0)
     leg.Draw("same")
     if pdf_shape_postfit in pdfs:
-        c.SaveAs("PostFit_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
+        c.cd()
+        pad2 = ROOT.TPad("pad2", "pad2", 0, 0.05, 1, 0.3)
+        pad2.SetTopMargin(0.1)
+        pad2.SetBottomMargin(0.3)
+        pad2.SetGridy()
+        pad2.Draw()
+        pad2.cd()
+        graphs = addPullPlot(dh,h[0],h[1])
+        graphs[0].Draw("AP")
+        graphs[1].Draw("P")
+        c.SaveAs(options.output+"PostFit"+options.label+"_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
     else:    
-        c.SaveAs("Zproj_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
+        c.SaveAs(options.output+"Zproj"+options.label+"_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
 
 
 def doXprojection(pdfs,data,hin=0):
@@ -196,12 +219,23 @@ def doXprojection(pdfs,data,hin=0):
             h[i].Fill(key,value)
     leg = ROOT.TLegend(0.88,0.65,0.77,0.89)
     c = ROOT.TCanvas("c","c",800,400)
+    if pdf_shape_postfit in pdfs:
+        pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1.0)
+        pad1.SetBottomMargin(0.01)
+        pad1.Draw()
+        pad1.cd()     
     n = proj.Integral()
     h[0].SetLineColor(colors[0])
     h[0].SetTitle("X-Proj. y : "+options.yrange+" z : "+options.zrange)
     h[0].GetXaxis().SetTitle("m_{jet1}")
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
+    if pdf_shape_postfit in pdfs:
+        h[0].GetYaxis().SetTitleOffset(0.6)
+        h[0].GetYaxis().SetTitle("events")
+        h[0].GetYaxis().SetTitleSize(0.06)
+        h[0].GetYaxis().SetLabelSize(0.06)
+        h[0].GetYaxis().SetNdivisions(5)
     h[0].Scale(n/h[0].Integral())
     h[0].Draw("hist")
     leg.AddEntry(proj,"data","lp")
@@ -221,9 +255,19 @@ def doXprojection(pdfs,data,hin=0):
     leg.SetLineColor(0)
     leg.Draw("same")
     if pdf_shape_postfit in pdfs:
-        c.SaveAs("PostFit_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf") 
+        c.cd()
+        pad2 = ROOT.TPad("pad2", "pad2", 0, 0.05, 1, 0.3)
+        pad2.SetTopMargin(0.1)
+        pad2.SetBottomMargin(0.3)
+        pad2.SetGridy()
+        pad2.Draw()
+        pad2.cd()
+        graphs = addPullPlot(proj,h[0],h[1])
+        graphs[0].Draw("AP")
+        graphs[1].Draw("P")
+        c.SaveAs(options.output+"PostFit"+options.label+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf") 
     else:    
-        c.SaveAs("Xproj_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
+        c.SaveAs(options.output+"Xproj"+options.label+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
     
 
 def doYprojection(pdfs,data):
@@ -251,12 +295,23 @@ def doYprojection(pdfs,data):
             h[i].Fill(key,value)
     leg = ROOT.TLegend(0.88,0.65,0.77,0.89)
     c = ROOT.TCanvas("c","c",800,400)
+    if pdf_shape_postfit in pdfs:
+        pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1.0)
+        pad1.SetBottomMargin(0.01)
+        pad1.Draw()
+        pad1.cd()               
     n = proj.Integral()
     h[0].SetLineColor(colors[0])
     h[0].SetTitle("Y-Proj. x : "+options.xrange+" z : "+options.zrange)
-    h[0].GetXaxis().SetTitle("m_{jet1}")
+    h[0].GetXaxis().SetTitle("m_{jet2}")
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
+    if pdf_shape_postfit in pdfs:
+        h[0].GetYaxis().SetTitleOffset(0.6)
+        h[0].GetYaxis().SetTitle("events")
+        h[0].GetYaxis().SetTitleSize(0.06)
+        h[0].GetYaxis().SetLabelSize(0.06)
+        h[0].GetYaxis().SetNdivisions(5)
     h[0].Scale(n/h[0].Integral())
     h[0].Draw("hist")
     leg.AddEntry(proj,"data","lp")
@@ -273,10 +328,58 @@ def doYprojection(pdfs,data):
     proj.Scale(n/proj.Integral())
     proj.Draw("same")
     if pdf_shape_postfit in pdfs:
-        c.SaveAs("PostFit_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")
+        c.cd()
+        pad2 = ROOT.TPad("pad2", "pad2", 0, 0.05, 1, 0.3)
+        pad2.SetTopMargin(0.1)
+        pad2.SetBottomMargin(0.3)
+        pad2.SetGridy()
+        pad2.Draw()
+        pad2.cd()
+        graphs = addPullPlot(proj,h[0],h[1])
+        graphs[0].Draw("AP")
+        graphs[1].Draw("P")
+        c.SaveAs(options.output+"PostFit"+options.label+"_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")
     else:
-        c.SaveAs("Yproj_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
-    
+        c.SaveAs(options.output+"Yproj"+options.label+"_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
+ 
+
+def addPullPlot(hdata,hprefit,hpostfit):
+    print "make pull plots: (data-fit)/sigma_data"
+    N = hdata.GetNbinsX()
+    gpost = ROOT.TGraph(0)
+    gpre  = ROOT.TGraph(0)
+    for i in range(1,N):
+        m = hdata.GetXaxis().GetBinCenter(i)
+        if hdata.GetBinContent(i) == 0:
+            continue
+        ypostfit = (hdata.GetBinContent(i) - hpostfit.GetBinContent(i))/hdata.GetBinError(i)
+        yprefit  = (hdata.GetBinContent(i) - hprefit.GetBinContent(i))/hdata.GetBinError(i)
+        gpost.SetPoint(i-1,m,ypostfit)
+        gpre.SetPoint(i-1,m,yprefit)
+    gpost.SetLineColor(colors[1])
+    gpre.SetLineColor(colors[0])
+    gpost.SetMarkerColor(colors[1])
+    gpre.SetMarkerColor(colors[0])
+    gpost.SetMarkerSize(1)
+    gpre.SetMarkerSize(1)
+    gpre.SetTitle("")
+    gpre.SetMarkerStyle(4)
+    gpost.SetMarkerStyle(3)
+    gpre.GetXaxis().SetTitle(hprefit.GetXaxis().GetTitle())
+    gpre.GetYaxis().SetTitle("#frac{data-fit}{#sigma}")
+    gpre.GetYaxis().SetTitleSize(0.15)
+    gpre.GetYaxis().SetTitleOffset(0.2)
+    gpre.GetXaxis().SetTitleSize(0.15)
+    gpre.GetXaxis().SetTitleOffset(0.7)
+    gpre.GetXaxis().SetLabelSize(0.15)
+    gpre.GetYaxis().SetLabelSize(0.15)
+    gpre.GetXaxis().SetNdivisions(6)
+    gpre.GetYaxis().SetNdivisions(4)
+    gpre.SetMaximum(2.5)
+    gpre.SetMinimum(-4.5)
+    gpre.GetXaxis().SetRangeUser(hdata.GetXaxis().GetBinLowEdge(1),hdata.GetXaxis().GetBinLowEdge(N))
+    return [gpre,gpost] 
+ 
 
 if __name__=="__main__":
      finMC = ROOT.TFile("JJ_pythia_HPHP.root","READ");
