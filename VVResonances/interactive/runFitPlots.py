@@ -417,7 +417,7 @@ if __name__=="__main__":
      pdf_PTZUp = args["nonRes_PTZUp_JJ_HPHP_13TeV"]
      pdf_OPTZDown  = args["nonRes_OPTZDown_JJ_HPHP_13TeV"]
      
-     pdf_shape_postfit   = args["pdf_binJJ_HPHP_13TeV_bonly_nuis"]#args["shapeBkg_nonRes_JJ_HPHP_13TeV"]
+     pdf_shape_postfit   = args["shapeBkg_nonRes_JJ_HPHP_13TeV"]
      pdf_shape_postfit.SetName("pdf_postfit_shape")
      pdf_PTXYUp   = args["nonRes_PTXYUp_JJ_HPHP_13TeV"]
      pdf_PTXYDown = args["nonRes_PTXYDown_JJ_HPHP_13TeV"]
@@ -428,23 +428,23 @@ if __name__=="__main__":
      data = workspace.data("data_obs")
      norm = data.sumEntries()
      print norm
-     #if options.postfit:
-        #fitresult = model.fitTo(data,ROOT.RooFit.NumCPU(8),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1))
-        #if options.log!="":
-            #params = fitresult.floatParsFinal()
-            #paramsinit = fitresult.floatParsInit()
-            #paramsfinal = ROOT.RooArgSet(params)
-            #paramsfinal.writeToFile(options.output+options.log)
-            #logfile = open(options.output+options.log,"a::ios::ate")
-            #logfile.write("#################################################\n")
-            #for k in range(0,len(params)):
-                #pf = params.at(k)
-                #if not("nonRes" in pf.GetName()):
-                    #continue
-                #pi = paramsinit.at(k)
-                #r  = pi.getMax()-1
-                #logfile.write(pf.GetName()+" & "+str((pf.getVal()-pi.getVal())/r)+"\\\\ \n")
-            #logfile.close()
+     if options.postfit:
+        fitresult = model.fitTo(data,ROOT.RooFit.NumCPU(8),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1))
+        if options.log!="":
+            params = fitresult.floatParsFinal()
+            paramsinit = fitresult.floatParsInit()
+            paramsfinal = ROOT.RooArgSet(params)
+            paramsfinal.writeToFile(options.output+options.log)
+            logfile = open(options.output+options.log,"a::ios::ate")
+            logfile.write("#################################################\n")
+            for k in range(0,len(params)):
+                pf = params.at(k)
+                if not("nonRes" in pf.GetName()):
+                    continue
+                pi = paramsinit.at(k)
+                r  = pi.getMax()-1
+                logfile.write(pf.GetName()+" & "+str((pf.getVal()-pi.getVal())/r)+"\\\\ \n")
+            logfile.close()
      # get data from workspace 
      
      data.Print()
