@@ -5,11 +5,26 @@ from array import array
 import os, sys, re, optparse,pickle,shutil,json
 
 
+def getBinning(histo):
+    b = []
+    for i in range(0,histo.GetNbinsX()+2):
+        b.append(histo.GetBinLowEdge(i))
+    return array('d',b)
+
 def makeHisto(name,fx,nhistox,fy,nhistoy,fz,nhistoz,fout):
     histox=fx.Get(nhistox)
     histoy=fy.Get(nhistoy)
     histoz=fz.Get(nhistoz)
-    h=ROOT.TH3F(name,name,histox.GetNbinsX(),histox.GetXaxis().GetXmin(),histox.GetXaxis().GetXmax(),histox.GetNbinsX(),histox.GetXaxis().GetXmin(),histox.GetXaxis().GetXmax(),histox.GetNbinsY(),histox.GetYaxis().GetXmin(),histox.GetYaxis().GetXmax())
+    #print  getBinning(histoz)
+    hxx = histox.ProjectionX("projX")
+    hxy = histox.ProjectionY("projY")
+    binningx= getBinning(hxx)
+    binningz= getBinning(hxy)
+    
+    print binningx
+    print binningz
+   
+    h=ROOT.TH3F(name,name,histox.GetNbinsX(),binningx,histox.GetNbinsX(),binningx,histox.GetNbinsY(),binningz)
     for k in range(1,histoz.GetNbinsX()+1):
      #print k,histoz.GetBinCenter(k),histoz.GetBinContent(k)
      for j in range(1,histoy.GetNbinsX()+1):
@@ -78,18 +93,18 @@ print "   - Opt (x,y) up/down"
 makeHisto("histo_OPTXYUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
 makeHisto("histo_OPTXYDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",inputz,"histo_nominal",output)
 
-print "  - herwig x"
-makeHisto("histo_altshapeXUp",inputx,"histo_altshapeUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
-makeHisto("histo_altshapeXDown",inputx,"histo_altshapeDown",inputy,"histo_nominal",inputz,"histo_nominal",output)
-print "  - herwig y"
-makeHisto("histo_altshapeYUp",inputx,"histo_nominal",inputy,"histo_altshapeUp",inputz,"histo_nominal",output)
-makeHisto("histo_altshapeYDown",inputx,"histo_nominal",inputy,"histo_altshapeDown",inputz,"histo_nominal",output)
-print "  - herwig z"
-makeHisto("histo_altshapeZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_altshapeUp",output)
-makeHisto("histo_altshapeZDown",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_altshapeDown",output)
-print "  - herwig (x,y)"
-makeHisto("histo_altshapeXYUp",inputx,"histo_altshapeUp",inputy,"histo_altshapeUp",inputz,"histo_nominal",output)
-makeHisto("histo_altshapeXYDown",inputx,"histo_altshapeDown",inputy,"histo_altshapeDown",inputz,"histo_nominal",output)
+#print "  - herwig x"
+#makeHisto("histo_altshapeXUp",inputx,"histo_altshapeUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
+#makeHisto("histo_altshapeXDown",inputx,"histo_altshapeDown",inputy,"histo_nominal",inputz,"histo_nominal",output)
+#print "  - herwig y"
+#makeHisto("histo_altshapeYUp",inputx,"histo_nominal",inputy,"histo_altshapeUp",inputz,"histo_nominal",output)
+#makeHisto("histo_altshapeYDown",inputx,"histo_nominal",inputy,"histo_altshapeDown",inputz,"histo_nominal",output)
+#print "  - herwig z"
+#makeHisto("histo_altshapeZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_altshapeUp",output)
+#makeHisto("histo_altshapeZDown",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_altshapeDown",output)
+#print "  - herwig (x,y)"
+#makeHisto("histo_altshapeXYUp",inputx,"histo_altshapeUp",inputy,"histo_altshapeUp",inputz,"histo_nominal",output)
+#makeHisto("histo_altshapeXYDown",inputx,"histo_altshapeDown",inputy,"histo_altshapeDown",inputz,"histo_nominal",output)
 
 #print "Merge herwig"
 #makeHisto("histo_altshapeUp",inputx,"histo_altshapeUp",inputy,"histo_altshapeUp",inputz,"histo_altshapeUp",output)

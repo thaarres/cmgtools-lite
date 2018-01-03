@@ -50,6 +50,28 @@ class TreePlotter(PlotterBase):
 
         return h
 
+    def drawTH1(self,var,cuts,lumi,bins,binning,titlex = "",units = "",drawStyle = "HIST"):
+        h = ROOT.TH1D("tmpTH1","",bins,binning)
+        h.Sumw2()
+        h.SetLineStyle(self.linestyle)
+        h.SetLineColor(self.linecolor)
+        h.SetLineWidth(self.linewidth)
+        h.SetFillStyle(self.fillstyle)
+        h.SetFillColor(self.fillcolor)
+        h.SetMarkerStyle(self.markerstyle)
+        if units=="":
+            h.GetXaxis().SetTitle(titlex)
+        else:
+            h.GetXaxis().SetTitle(titlex+ " ["+units+"]")
+
+        #Apply correction factors
+        corrString='1'
+        for corr in self.corrFactors:
+                corrString = corrString+"*("+str(corr['value'])+")" 
+        self.tree.Draw(var+">>tmpTH1","("+cuts+")*"+lumi+"*"+self.weight+"*("+corrString+")","goff")
+
+        return h
+
 
     def randomEvent(self):
         i=int(self.random.Rndm()*self.N)
@@ -71,7 +93,6 @@ class TreePlotter(PlotterBase):
         self.tree.Draw(var+">>tmpTH2","("+cuts+")*"+lumi+"*"+self.weight+"*("+corrString+")","goff")
 
         return h
-
 
 
 
@@ -264,7 +285,7 @@ class TreePlotter(PlotterBase):
 
             for v in variables:
                 #argset2.find(v).setVal(getattr(event,v))
-                argset2.find(v).setVal(getattr(event,v))
+                argset2.find(v).setVal(getattr(event,v)[0])
             data.add(argset2,weight)
             #N=N+1
             #if maxN >0 and N>maxN:

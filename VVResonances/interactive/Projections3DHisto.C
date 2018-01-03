@@ -3,12 +3,13 @@ void Projections3DHisto(){
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 
-TFile* fin = new TFile("JJ_nonRes_2D_HPHP.root","READ");
+TFile* fin = new TFile("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_tails3D_nonRes_2D_HPHP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 
-TFile* finMC = new TFile("JJ_HPHP.root","READ");
+TFile* finMC = new TFile("JJ_madgraph_HPHP.root","READ");
 TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
 
+const char* sample = "pythianominal_madgraphdata";
 
 int binsx = hin->GetNbinsX();
 float xmin = hin->GetXaxis()->GetXmin();
@@ -32,10 +33,10 @@ std::vector<TH1F*> hxMC;
 std::vector<TH1F*> hyMC;
 std::vector<TH1F*> hzMC;
 
-int zbinMin[4] = {1,1,hin->GetZaxis()->FindBin(1600),hin->GetZaxis()->FindBin(5000)};
-int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1600),hin->GetZaxis()->FindBin(5000),binsz};
+int zbinMin[4] = {1,1,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(2000)};
+int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(2000),binsz};
 int colors[5] = {1,99,9,8,94};
-float scale[4] = {1.,0.7,5,10000};
+float scale[4] ={1.,0.8,2.,30.};
 
 for(int i=0; i<4; ++i){
 
@@ -73,6 +74,10 @@ for(int i=0; i<4; ++i){
  hyMC[i]->SetMarkerSize(0.5);
 
 }
+hx[0]->SetMinimum(0);
+hx[0]->SetMaximum(0.1);
+hy[0]->SetMinimum(0);
+hy[0]->SetMaximum(0.1);
 
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
 leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");
@@ -86,6 +91,7 @@ cx->cd();
 for(int i=0; i<4; ++i){ hx[i]->Draw("HISTsame"); hxMC[i]->Draw("PEsame");}
 hx[0]->GetXaxis()->SetTitle("m_{jet1} (proj. x) [GeV]");
 leg->Draw();
+cx->SaveAs(Form("ProjectionsX_%s.pdf",sample));
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
@@ -122,7 +128,7 @@ for(int i=0; i<5; ++i){
  hzMC[i]->SetMarkerSize(0.5);
     
 }
-
+cy->SaveAs(Form("ProjectionsY_%s.pdf",sample));
 TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
 leg2->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg2->AddEntry(hz[0],"Template","L");
@@ -159,6 +165,8 @@ leg3->AddEntry(hz[0],"Template (Pythia8)","L");
 leg3->AddEntry(hz_PTZUp,"p_{T} syst. up/down","L");
 leg3->AddEntry(hz_OPTZUp,"1/p_{T} syst. up/down","L");
 
+cz->SaveAs(Form("ProjectionsZ_%s.pdf",sample));
+
 TCanvas* czSyst = new TCanvas("czSyst","czSyst");
 czSyst->cd();
 czSyst->SetLogy();
@@ -171,7 +179,8 @@ hz_OPTZDown->Draw("HISTsame");
 hzMC[0]->Draw("same");
 leg3->Draw();
 
-
+czSyst->SaveAs(Form("ZSyst_%s.pdf",sample));
+/*
 TH3F* hin_PTXUp = (TH3F*)fin->Get("histo_PTXYUp");
 TH3F* hin_PTXDown = (TH3F*)fin->Get("histo_PTXYDown");
 TH3F* hin_OPTXUp = (TH3F*)fin->Get("histo_OPTXYUp");
@@ -217,12 +226,13 @@ hy_PTYUp->Draw("HISTsame");
 hy_PTYDown->Draw("HISTsame"); 
 hy_OPTYUp->Draw("HISTsame");
 hy_OPTYDown->Draw("HISTsame");
-hyMC[0]->Draw("same");
+hyMC[0]->Draw("same");*/
 
 TCanvas* cxz = new TCanvas("cxz","cxz");
 cxz->cd();
 TH2F* hxz = (TH2F*)hin->Project3D("zx");
 hxz->Draw("COLZ");
+
 
 TCanvas* cyz = new TCanvas("cyz","cyz");
 cyz->cd();

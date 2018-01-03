@@ -29,9 +29,10 @@ BRWW=1.
 BRZZ=1.
 
 #dataTemplate="JetHT"
-dataTemplate="QCD_herwigpp_randomOrder"
-#nonResTemplate="QCD_Pt_" #high stat
-nonResTemplate="QCD_herwigpp_randomOrder" #low stat --> use this for tests
+#dataTemplate="QCD_herwigpp_randomOrder"
+dataTemplate="QCD_HT"
+nonResTemplate="QCD_Pt_" #high stat
+#nonResTemplate="QCD_herwigpp_randomOrder" #low stat --> use this for tests
 
 minMJ=55.0
 maxMJ=215.0
@@ -40,7 +41,10 @@ minMVV=1000.0
 maxMVV=5000.0
 
 binsMJ=80
-binsMVV=100
+binsMVV=36
+#binsMVV=1000
+
+HCALbinsMVV=[ 1000, 1058,1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337,4509, 4686, 4869, 5058]
 
 cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMVV=minMVV,maxMVV=maxMVV,minMJ=minMJ,maxMJ=maxMJ)
 cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>0&&jj_l2_gen_softDrop_mass>0&&jj_gen_partialMass>0)'
@@ -126,7 +130,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1"):
   print "=========== PURITY: ", p
   cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],cuts['acceptanceMJ']])    
   rootFile=filename+"_"+name+"_MVV_"+p+".root"
-  cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV)
+  cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058 samples'.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV)
   os.system(cmd)
 
 def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut=""):
@@ -137,7 +141,8 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut=""):
   print "=========== PURITY: ", p
   cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN']])
   rootFile=filename+"_"+name+"_COND2D_"+p+"_"+leg+".root"		 
-  cmd='vvMake2DTemplateWithKernels.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass"  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
+  cmd='vvMake2DTemplateWithKernels.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass"  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058 samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
+  #cmd='vvMake2DTemplateWithKernels.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass"  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
   os.system(cmd)
 
 def mergeBackgroundShapes(name,filename):
@@ -155,25 +160,25 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1):
   for p in purities:
    rootFile=filename+"_"+p+".root"
    cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptance']])
-   cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l2_softDrop_mass,jj_l1_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}"  samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
+   cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l2_softDrop_mass,jj_l1_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}" --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058 samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
    os.system(cmd)
                	  
 
 #makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
 #makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
 #makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-#makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+#makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW*0.0001,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
-#makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+#makeDetectorResponse("nonRes","JJ_pythia",nonResTemplate,cuts['nonres'])
 ##makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 ##makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 ##makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
 ##makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
-#makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'])
-#makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
-#makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
-#mergeBackgroundShapes("nonRes","JJ")
+#makeBackgroundShapesMVVKernel("nonRes","JJ_pythia",nonResTemplate,cuts['nonres'])
+#makeBackgroundShapesMVVConditional("nonRes","JJ_pythia",nonResTemplate,'l1',cuts['nonres'])
+#makeBackgroundShapesMVVConditional("nonRes","JJ_pythia",nonResTemplate,'l2',cuts['nonres'])
+#mergeBackgroundShapes("nonRes","JJ_pythia")
 
-#makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0)
-makeNormalizations("data","test",dataTemplate,0,"1",35867.)
+#makeNormalizations("nonRes","JJ_pythia",nonResTemplate,0,cuts['nonres'],1.0)
+makeNormalizations("data","pythia",dataTemplate,0,"1",35867.)
 #makeNormalizations("data","JJ",dataTemplate,1)
