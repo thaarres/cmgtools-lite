@@ -195,10 +195,15 @@ binsx=[]
 for i in range(0,options.binsx+1):
     binsx.append(options.minx+i*(options.maxx-options.minx)/options.binsx)
 
+<<<<<<< HEAD
 #binsy=[1000+i*100 for i in range(41)]
 binsy = getBinning(options.binsMVV,options.miny,options.maxy,options.binsy)
 print binsy
 
+=======
+binsy=[1000+i*100 for i in range(41)]
+    
+>>>>>>> FETCH_HEAD
 scaleUp = ROOT.TH1F(scale_x)
 scaleUp.SetName("scaleUp")
 scaleDown = ROOT.TH1F(scale_x)
@@ -404,7 +409,7 @@ finalHistograms={}
 f.cd()
 for hist in histograms:
  print "Working on histogram " ,hist.GetName()
- hist.Write(hist.GetName()+"_coarse")
+ #hist.Write(hist.GetName()+"_coarse")
  #smooth
  #print "Smoothing tail for " ,hist.GetName()
  #smoothTail(hist)
@@ -426,7 +431,7 @@ mjet_mvv_nominal_3D.Write()
 #conditional(histogram_altshapeDown)
 #histogram_altshapeDown.Write()
 
-alpha=1.5/610.
+alpha=1.5/215.
 histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha)
 conditional(histogram_pt_down)
 histogram_pt_down.Write()

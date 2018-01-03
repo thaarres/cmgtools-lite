@@ -1,9 +1,10 @@
 import ROOT
-import sys
+import sys,commands
 from array import array
 import pickle
 from PlotterBase import PlotterBase
 from array import array
+import random
 
 class TreePlotter(PlotterBase):
 
@@ -256,7 +257,8 @@ class TreePlotter(PlotterBase):
 
     def makeDataSet(self,var,cut,firstEv=0,lastEv=-1):
         variables=var.split(',')
-        self.cache=ROOT.TFile("cache.root","RECREATE")
+	
+        self.cache=ROOT.TFile("/tmp/%s/cache%i.root"%(commands.getoutput("whoami"),random.randint(0, 1e+6)),"RECREATE")
         w=ROOT.RooWorkspace("w","w")
         argset=ROOT.RooArgSet()
         argset2=ROOT.RooArgSet()
@@ -290,6 +292,7 @@ class TreePlotter(PlotterBase):
             #N=N+1
             #if maxN >0 and N>maxN:
             #    return data
+        del self.cache
         return data    
 
 

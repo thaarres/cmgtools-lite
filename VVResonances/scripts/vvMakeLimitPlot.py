@@ -41,7 +41,6 @@ setTDRStyle()
 f=ROOT.TFile(args[0])
 limit=f.Get("limit")
 data={}
-corrfactor = 0.0001
 
 for event in limit:
     if float(event.mh)<options.minX or float(event.mh)>options.maxX:
@@ -50,19 +49,20 @@ for event in limit:
     if not (event.mh in data.keys()):
         data[event.mh]={}
 
-
+    lim = event.limit*0.001
     if event.quantileExpected<0:            
-        data[event.mh]['obs']=event.limit*corrfactor
+        data[event.mh]['obs']=lim
     if event.quantileExpected>0.02 and event.quantileExpected<0.03:            
-        data[event.mh]['-2sigma']=event.limit*corrfactor
+        data[event.mh]['-2sigma']=lim
     if event.quantileExpected>0.15 and event.quantileExpected<0.17:            
-        data[event.mh]['-1sigma']=event.limit*corrfactor
+        data[event.mh]['-1sigma']=lim
     if event.quantileExpected>0.49 and event.quantileExpected<0.51:            
-        data[event.mh]['exp']=event.limit*corrfactor
+        data[event.mh]['exp']=lim
     if event.quantileExpected>0.83 and event.quantileExpected<0.85:            
-        data[event.mh]['+1sigma']=event.limit*corrfactor
+        data[event.mh]['+1sigma']=lim
     if event.quantileExpected>0.974 and event.quantileExpected<0.976:            
-        data[event.mh]['+2sigma']=event.limit*corrfactor
+        data[event.mh]['+2sigma']=lim
+
 
 
 band68=ROOT.TGraphAsymmErrors()

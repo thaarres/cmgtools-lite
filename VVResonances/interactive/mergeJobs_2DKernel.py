@@ -80,6 +80,11 @@ for s in samples:
     break
   if not found:
    print "SAMPLE ",s," JOBID ",jobid," NOT FOUND"
+   #os.chdir(jobdir+"/"+t)
+   #os.system('rm -rf LSFJOB_*')
+   #os.system('rm logs')
+   #os.system('bsub -q 8nh -o logs job_%s.sh'%(t))
+   #os.chdir('../../')
    exit_flag = True
  jobsPerSample[s] = filelist
 
@@ -131,7 +136,6 @@ for s in jobsPerSample.keys():
 
 
 
-
   
 # read out files
 filelist = os.listdir('./'+outdir+'_out/')
@@ -167,6 +171,7 @@ for f in pythia_files:
  cmd += ' '
 print cmd
 os.system(cmd)
+
 
 #now retrieve histos
 fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l1_altshape2.root','READ')

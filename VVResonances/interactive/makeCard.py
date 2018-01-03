@@ -16,7 +16,7 @@ for p in purities:
  #SIGNAL
  card.addMVVSignalParametricShape2("BulkGWW_MVV","MJJ","JJ_BulkGWW_MVV.json",{'CMS_scale_j':1},{'CMS_res_j':1.0})
 
- if p=='LP':
+ if p=='HPLP':
      card.addMJJSignalParametricShape("Wqq","MJ","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
      card.addParametricYieldWithUncertainty("XqW",0,"JJ_BulkGWW_MJl1_"+p+".json",1,'CMS_tau21_PtDependence','((0.054/0.041)*(-log(MH/600)))',0.041)
  else:
@@ -29,12 +29,13 @@ for p in purities:
    
  #QCD
  rootFile="JJ_nonRes_2D_"+p+".root"
+
  rootFile="JJ_pythia_nonRes_2D_"+p+".root"
  rootFile="/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_nonRes_2D_HPHP.root"
  #rootFile="JJ_pythia_tails3D_nonRes_2D_HPHP.root"
  print rootFile
+
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
- #card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['altshapeXY:CMS_VV_JJ_nonRes_altshapeXY','altshapeZ:CMS_VV_JJ_nonRes_altshapeZ'],False,0)    
  card.addFixedYieldFromFile("nonRes",1,"JJ_"+p+".root","nonRes")
 
  #DATA
@@ -55,7 +56,7 @@ for p in purities:
  #tau21 
  if p=='HPHP':
      card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1+0.14})
- if p=='LP':
+ if p=='HPLP':
      card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1-0.33})
                
  #pruned mass scale    
@@ -67,11 +68,10 @@ for p in purities:
  #alternative shapes
  card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
  card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.333])
+ #card.addSystematic("CMS_VV_JJ_nonRes_PT2","param",[0.0,0.333])
  card.addSystematic("CMS_VV_JJ_nonRes_OPTXY","param",[0.0,0.333])
  card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,0.333])
- #card.addSystematic("CMS_VV_JJ_nonRes_altshapeXY","param",[0.0,0.333])
- #card.addSystematic("CMS_VV_JJ_nonRes_altshapeZ","param",[0.0,0.333])
-    
+ #card.addSystematic("CMS_VV_JJ_nonRes_OPT2","param",[0.0,0.333])
  card.makeCard()
 
 #make combined cards
