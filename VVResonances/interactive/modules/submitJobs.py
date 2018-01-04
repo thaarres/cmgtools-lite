@@ -6,15 +6,34 @@ import sys
 import ROOT
 from ROOT import *
 import subprocess, thread
+sys.path.append('/home/dschaefer/jdl_creator/')
 
 timeCheck = "30"
 userName=os.environ['USER']
+useCondorBatch =True
+
+def writeJDL(arguments,mem,time,name):
+    #jobs = JDLCreator('condocker')  #run jobs on condocker cloude site
+    jobs = JDLCreator('condocker')
+    jobs.wall_time = time
+    jobs.memory = mem 
+    jobs.requirements = "(TARGET.ProvidesCPU) && (TARGET.ProvidesEkpResources)"
+    jobs.accounting_group = "cms.top"
+    jobs.SetExecutable(name)  # set job script
+    #jobs.SetFolder('/usr/users/dschaefer/job_submission/local/sframe')  # set subfolder !!! you have to copy your job file into the folder
+    jobs.SetArguments(arguments)              # write an JDL file and create folder f            # set arguments
+    jobs.WriteJDL() # write an JDL file and create folder for log files
+
+
 
 def waitForBatchJobs( jobname, remainingjobs, listOfJobs, userName, timeCheck="30"):
 	if listOfJobs-remainingjobs < listOfJobs:
 	    time.sleep(float(timeCheck))
 	    # nprocess = "bjobs -u %s | awk {'print $9'} | grep %s | wc -l" %(userName,jobname)
-	    nprocess = "bjobs -u %s | grep %s | wc -l" %(userName,jobname)
+	    if not useCondorBatch:
+                nprocess = "bjobs -u %s | grep %s | wc -l" %(userName,jobname)
+            else:
+                nprocess = "condor_q %s | grep %s | wc -l" %(userName,jobname)
 	    result = subprocess.Popen(nprocess, stdout=subprocess.PIPE, shell=True)
 	    runningJobs =  int(result.stdout.read())
 	    print "waiting for %d job(s) in the queue (out of total %d)" %(runningJobs,listOfJobs)
@@ -37,6 +56,10 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 
 	  for j in range(len(v)):
 	   os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
+	   if useCondorBatch:
+                os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/out")
+                os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/error")
+                os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/log")
 	   os.chdir("tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
 	  
 	   with open('job_%s_%i.sh'%(k.replace(".root",""),j+1), 'w') as fout:
@@ -45,7 +68,10 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("echo\n")
 	      fout.write("echo 'START---------------'\n")
 	      fout.write("echo 'WORKDIR ' ${PWD}\n")
-	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
+	      if not useCondorBatch:
+                fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
+              else:
+                  fout.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
 	      fout.write("cd "+str(path)+"\n")
 	      fout.write("cmsenv\n")
 	      fout.write(cmd+" -o res"+jobname+"/"+OutputFileNames+"_"+str(j+1)+"_"+k+" -s "+k+" -e "+str(minEv[k][j])+" -E "+str(maxEv[k][j])+"\n")
@@ -53,7 +79,12 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("echo\n")
 	      fout.write("echo\n")
 	   os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
-	   os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
+	   if not useCondorBatch:
+            os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
+           else:
+            os.system("mv  job_*.sh "+jobname+".sh") 
+            makeJDL("",12*1000,3*60*60,jobname+".sh")
+            os.system("condor_submit "+jobname+".jdl")
 	   print "job nr " + str(j+1) + " file " + k + " being submitted"
 	   joblist.append("%s_%i"%(k.replace(".root",""),j+1))
 	   os.chdir("../..")
@@ -128,7 +159,10 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	
 	print
 	print "your jobs:"
-	os.system("bjobs")
+	if not useCondorBatch:
+            os.system("bjobs")
+        else:
+            os.system("condor_q")
 	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
@@ -182,7 +216,10 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	
 	print
 	print "your jobs:"
-	os.system("bjobs")
+	if not useCondorBatch:
+            os.system("bjobs")
+        else:
+            os.system("condor_q")
 	userName=os.environ['USER']
 	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
@@ -293,8 +330,12 @@ def reSubmit(jobdir,resubmit,jobname):
 		 if o.find(jobs) != -1: 
 			 jobfolder = jobdir+"/"+jobs+"/"
 			 os.chdir(jobfolder)
-			 script = "job_"+jobs+".sh"
-			 cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
+			 if not useCondorBatch:
+                            script = "job_"+jobs+".sh"
+                            cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
+                         else:
+                             script = jobname+".sh"
+                             cmd = "condor_submit "+jobname+".jdl"
 			 print cmd
 			 jobs += cmd
 			 os.system("chmod 755 %s"%script)
@@ -814,7 +855,10 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
    
 	print
 	print "your jobs:"
-	os.system("bjobs")
+	if not useCondorBatch:
+            os.system("bjobs")
+        else:
+            os.system("condor_q")
 	userName=os.environ['USER']
 	waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
@@ -895,4 +939,4 @@ def makePseudodata(infile,purity):
 	hmcout.Write()
 	
 	fin.Close()
-	fout.Close()
+fout.Close()
