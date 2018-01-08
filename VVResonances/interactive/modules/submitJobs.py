@@ -7,10 +7,14 @@ import ROOT
 from ROOT import *
 import subprocess, thread
 sys.path.append('/home/dschaefer/jdl_creator/')
+#sys.path.append('/home/dschaefer/jdl_creator/classes/')
+from classes.JDLCreator import JDLCreator
 
 timeCheck = "30"
 userName=os.environ['USER']
 useCondorBatch =True
+mypath = "/portal/ekpbms2/home/dschaefer/tmp/"
+startpath="/usr/users/dschaefer/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive"
 
 def writeJDL(arguments,mem,time,name):
     #jobs = JDLCreator('condocker')  #run jobs on condocker cloude site
@@ -55,12 +59,15 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	for k,v in minEv.iteritems():
 
 	  for j in range(len(v)):
-	   os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
 	   if useCondorBatch:
-                os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/out")
-                os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/error")
-                os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/log")
-	   os.chdir("tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
+                os.system("echo "+path)
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/out")
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/error")
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/log")
+           else:
+               os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)) 
+	   os.chdir(path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
 	  
 	   with open('job_%s_%i.sh'%(k.replace(".root",""),j+1), 'w') as fout:
 	      fout.write("#!/bin/sh\n")
@@ -83,7 +90,7 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
             os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
            else:
             os.system("mv  job_*.sh "+jobname+".sh") 
-            makeJDL("",12*1000,3*60*60,jobname+".sh")
+            writeJDL("",1*1000,20*60,jobname+".sh")
             os.system("condor_submit "+jobname+".jdl")
 	   print "job nr " + str(j+1) + " file " + k + " being submitted"
 	   joblist.append("%s_%i"%(k.replace(".root",""),j+1))
@@ -137,7 +144,8 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	print "samples  = %s" %samples   
 	print "jobName  = %s" %jobName 
 	print
-
+	if mypath!="":
+            os.chdir(startpath)
 	minEv, maxEv, NumberOfJobs, files = getEvents(template,samples) 
 	print "Submitting %i number of jobs "  ,NumberOfJobs
 	print
@@ -146,12 +154,12 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
-	path = os.getcwd()
-	try: os.system("rm -r tmp"+jobName)
-	except: print "No tmp/ directory"
-	os.system("mkdir tmp"+jobName)
-	try: os.stat("res"+jobName) 
-	except: os.mkdir("res"+jobName)
+	path = mypath# os.getcwd()
+	try: os.system("rm -r "+path+"tmp"+jobName)
+	except: print "No "+path+"tmp/ directory"
+	os.system("mkdir "+path+"tmp"+jobName)
+	try: os.stat(path+"res"+jobName) 
+	except: os.mkdir(path+"res"+jobName)
 	print
 
 	#### Creating and sending jobs #####
@@ -194,7 +202,8 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	print "samples   = %s" %samples   
 	print "jobName   = %s" %jobName   
 	print
-
+        if mypath!="":
+            os.chdir(startpath)
 	minEv, maxEv, NumberOfJobs, files = getEvents(template,samples) 
 	print "Submitting %i number of jobs "  ,NumberOfJobs
 	print
@@ -203,12 +212,12 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
-	path = os.getcwd()
-	try: os.system("rm -r tmp"+jobName)
-	except: print "No tmp/ directory"
-	os.system("mkdir tmp"+jobName)
-	try: os.stat("res"+jobName) 
-	except: os.mkdir("res"+jobName)
+	path = mypath #os.getcwd()
+	try: os.system("rm -r "+path+"tmp"+jobName)
+	except: print "No "+path+"tmp/ directory"
+	os.system("mkdir "+path+"tmp"+jobName)
+	try: os.stat(path+"res"+jobName) 
+	except: os.mkdir(path+"res"+jobName)
 	print
 
 	#### Creating and sending jobs #####
@@ -299,7 +308,7 @@ def conditional(hist):
         for j in range(1,hist.GetNbinsX()+1):
             hist.SetBinContent(j,i,hist.GetBinContent(j,i)/integral)
 
-def getJobs(files,jobList,outdir):
+def getJobs(files,jobList,outdir,purity):
 	resubmit = []
 	jobsPerSample = {}
 	exit_flag = False
@@ -312,7 +321,7 @@ def getJobs(files,jobList,outdir):
 	  jobid = t.split("_")[-1]
 	  found = False
 	  for o in os.listdir(outdir):
-	   if o.find(s) != -1 and o.find('_'+jobid+'_') != -1:
+	   if o.find(s) != -1 and o.find('_'+jobid+'_') != -1 and o.find(purity)!=-1:
 	    found = True
 	    filelist.append(outdir+"/"+o)
 	    break
@@ -344,7 +353,7 @@ def reSubmit(jobdir,resubmit,jobname):
  return jobs
  	
 def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):
-	
+	print jobList
 	print "Merging 1D templates"
 	print
 	print "Jobs to merge :   " ,jobList
@@ -353,7 +362,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 	outdir = 'res'+jobname
 	jobdir = 'tmp'+jobname
 	
-	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir,purity)
 	
 	if exit_flag:
 	 submit = raw_input("The following files are missing: %s. Do you  want to resubmit the jobs to the batch system before merging? [y/n] "%resubmit)
@@ -361,7 +370,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		 print "Resubmitting jobs:"
 		 jobs = reSubmit(jobdir,resubmit,jobname)
 		 waitForBatchJobs(jobname,len(resubmit),len(resubmit), userName, timeCheck)
-		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir,purity)
 		 if exit_flag: 
 			 print "Job crashed again! Please resubmit manually before attempting to merge again"
 			 for j in jobs: print j 
@@ -377,7 +386,6 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 	except: os.mkdir(outdir+'_out')
 
 	for s in jobsPerSample.keys():
-
 	 factor = 1./float(len(jobsPerSample[s]))
 	 print "sample: ", s,"number of files:",len(jobsPerSample[s]),"adding histo with scale factor:",factor
  
@@ -523,9 +531,10 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 	if doMadGraph:
 		mvv_altshape2.Write('mvv_altshape2')
 		histo_altshape2.Write('histo_altshape2')
-		
+	
+	#os.system('mv JJ_nonRes_MVV_'+purity+'.root '+startpath)
 	os.system('rm -rf '+outdir+'_out/')
-	# os.system('rm -rf '+outdir+'/')
+	#os.system('rm -rf '+outdir+'/')
 
 def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):  
 	
@@ -537,7 +546,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	outdir = 'res'+jobname
 	jobdir = 'tmp'+jobname
 	
-	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir,purity)
 	
 	if exit_flag:
 	 submit = raw_input("The following files are missing: %s. Do you  want to resubmit the jobs to the batch system before merging? [y/n] "%resubmit)
@@ -545,7 +554,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		 print "Resubmitting jobs:"
 		 jobs = reSubmit(jobdir,resubmit,jobname)
 		 waitForBatchJobs(jobname,len(resubmit),len(resubmit), userName, timeCheck)
-		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir,purity)
 		 if exit_flag: 
 			 print "Job crashed again! Please resubmit manually before attempting to merge again"
 			 for j in jobs: print j 
@@ -569,19 +578,22 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	 outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_COND2D_%s_%s_%s.root'%(s,leg,purity),'RECREATE')
   
 	 finalHistos = {}
-	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,40,minMVV,maxMVV)
+	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal_3D'] = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",binsMJ,minMJ,maxMJ,binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
     
 	 for f in jobsPerSample[s]:
 
 	  inf = ROOT.TFile.Open(f,'READ')
+	  #print "open file "+f
     
 	  for h in inf.GetListOfKeys():
   
 	   for k in finalHistos.keys():
+        
 	    if h.GetName() == k:
-
+             #print "add histos with key "
+             #print k
 	     histo = ROOT.TH1F()
 	     histo = inf.Get(h.GetName())
 
@@ -682,6 +694,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		mjet_mvv_nominal = fhadd_pythia.Get('mjet_mvv_nominal')
 		mjet_mvv_nominal.SetName('mjet_mvv_nominal')
 		mjet_mvv_nominal.SetTitle('mjet_mvv_nominal')
+		fhadd_pythia.Print()
 		histo_nominal = fhadd_pythia.Get('histo_nominal_coarse')
 		histo_nominal.SetName('histo_nominal_coarse')
 		histo_nominal.SetTitle('histo_nominal_coarse')
@@ -700,8 +713,9 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		mjet_mvv_nominal_3D.Write('mjet_mvv_nominal_3D')
 
 		histo_nominal.Write('histo_nominal_coarse')
+		print "make conditional histogram"
 		conditional(histo_nominal)
-		
+		print "expand histogram"
 		expanded=expandHisto(histo_nominal,"",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		conditional(expanded)
 		expanded.SetName('histo_nominal')
@@ -782,7 +796,8 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		expanded.SetName('histo_altshape2')
 		expanded.SetTitle('histo_altshape2')
 		expanded.Write('histo_altshape2')
-		
+	
+	#os.system('mv JJ_nonRes_COND2D_'+purity+'_'+leg+'.root '+startpath)
 	os.system('rm -r '+outdir+'_out')
 	# os.system('rm -r '+outdir)
 	
@@ -804,7 +819,9 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	print "jobname  = ",jobname
 	print "samples  = ",samples
 	print 
-
+	if mypath!="":
+            os.chdir(startpath)
+        #minEv, maxEv, NumberOfJobs, files = getEvents(template,samples)
 	files = []
 	sampleTypes = template.split(',')
 	for f in os.listdir(samples):
@@ -817,21 +834,29 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	queue = "1nd" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 
-	path = os.getcwd()
-	try: os.system("rm -r tmp"+jobname)
-	except: print "No tmp/ directory"
-	os.system("mkdir tmp"+jobname)
-	try: os.stat("res"+jobname) 
-	except: os.mkdir("res"+jobname)
+	path = mypath# os.getcwd()
+	try: os.system("rm -r "+path+"tmp"+jobname)
+	except: print "No "+path+"tmp/ directory"
+	os.system("mkdir "+path+"tmp"+jobname)
+	try: os.stat(path+"res"+jobname) 
+	except: os.mkdir(path+"res"+jobname)
 	print
-
-	#### Creating and sending jobs #####
+        
+        #joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path)
+	##### Creating and sending jobs #####
 	joblist = []
-	##### loop for creating and sending jobs #####
+	###### loop for creating and sending jobs #####
 	for x in range(1, int(NumberOfJobs)+1):
-	 
-	   os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
-	   os.chdir("tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   if useCondorBatch:
+                os.system("echo "+path)
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root","")+"/out")
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root","")+"/error")
+                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root","")+"/log")
+           else:
+               os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   #os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir(path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	 
 	   with open('job_%s.sh'%files[x-1].replace(".root",""), 'w') as fout:
 	      fout.write("#!/bin/sh\n")
@@ -839,7 +864,10 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("echo\n")
 	      fout.write("echo 'START---------------'\n")
 	      fout.write("echo 'WORKDIR ' ${PWD}\n")
-	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
+	      if not useCondorBatch:
+                fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
+              else:
+                  fout.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
 	      fout.write("cd "+str(path)+"\n")
 	      fout.write("cmsenv\n")
 	      fout.write(cmd+" -o "+path+"/res"+jobname+"/"+OutputFileNames+"_"+files[x-1]+" -s "+files[x-1]+"\n")
@@ -847,8 +875,13 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("echo\n")
 	      fout.write("echo\n")
 	   os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
+	   if not useCondorBatch:
+            os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
+           else:
+            os.system("mv  job_*.sh "+jobname+".sh") 
+            writeJDL("",500,10*60,jobname+".sh")
+            os.system("condor_submit "+jobname+".jdl")
    
-	   os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
 	   print "job nr " + str(x) + " submitted"
 	   joblist.append("%s"%(files[x-1].replace(".root","")))
 	   os.chdir("../..")
@@ -878,6 +911,8 @@ def mergeData(jobname,purity):
 
 	for f in filelist:
 	 #if f.find('COND2D') == -1: continue
+	 if f.find(purity)==-1:
+             continue
 	 if f.find('QCD_HT')    != -1: mg_files.append('./res'+jobname+'/'+f)
 	 elif f.find('QCD_Pt_') != -1: pythia_files.append('./res'+jobname+'/'+f)
 	 elif f.find('JetHT')   != -1: data_files.append('./res'+jobname+'/'+f)
@@ -939,4 +974,4 @@ def makePseudodata(infile,purity):
 	hmcout.Write()
 	
 	fin.Close()
-fout.Close()
+        fout.Close()
