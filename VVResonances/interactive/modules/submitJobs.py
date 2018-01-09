@@ -91,6 +91,81 @@ def getEvents(template,samples):
 
 	return minEv, maxEv, NumberOfJobs, files
 	
+def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO! Buggy, fix
+   
+	print 
+	print 'START: Make2DDetectorParam with parameters:'
+	print
+	print "rootFile = %s" %rootFile  
+	print "template = %s" %template  
+	print "cut      = %s" %cut       
+	print "samples  = %s" %samples   
+	print "jobName  = %s" %jobName 
+	
+
+	cmd='vvMake2DDetectorParam.py  -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,infolder=samples)
+	
+	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
+	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
+	
+	files = []
+	sampleTypes = template.split(',')
+	for f in os.listdir(samples):
+		for t in sampleTypes:
+			if f.find('.root') != -1 and f.find(t) != -1: files.append(f)
+ 
+	NumberOfJobs= len(files) 
+	print
+	print "Submitting %i number of jobs "  ,NumberOfJobs
+	print
+	
+	path = os.getcwd()
+	try: os.system("rm -r tmp"+jobName)
+	except: print "No tmp/ directory"
+	os.system("mkdir tmp"+jobName)
+	try: os.stat("res"+jobName) 
+	except: os.mkdir("res"+jobName)
+	print
+
+	#### Creating and sending jobs #####
+	joblist = []
+	##### loop for creating and sending jobs #####
+	for x in range(1, int(NumberOfJobs)+1):
+	 
+	   os.system("mkdir tmp"+jobName+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir("tmp"+jobName+"/"+str(files[x-1]).replace(".root",""))
+	 
+	   with open('job_%s.sh'%files[x-1].replace(".root",""), 'w') as fout:
+	      fout.write("#!/bin/sh\n")
+	      fout.write("echo\n")
+	      fout.write("echo\n")
+	      fout.write("echo 'START---------------'\n")
+	      fout.write("echo 'WORKDIR ' ${PWD}\n")
+	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
+	      fout.write("cd "+str(path)+"\n")
+	      fout.write("cmsenv\n")
+	      fout.write(cmd+" -o "+path+"/res"+jobName+"/"+OutputFileNames+"_"+files[x-1]+" -s "+files[x-1]+"\n")
+	      fout.write("echo 'STOP---------------'\n")
+	      fout.write("echo\n")
+	      fout.write("echo\n")
+	   os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
+   
+	   os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobName))
+	   print "job nr " + str(x) + " submitted"
+	   joblist.append("%s"%(files[x-1].replace(".root","")))
+	   os.chdir("../..")
+   
+	print
+	print "your jobs:"
+	os.system("bjobs")
+	userName=os.environ['USER']
+	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	
+	print
+	print 'END: Make2DDetectorParam'
+	print
+	return joblist, files	
+	
 def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV"):
 	
 	print 
@@ -125,16 +200,16 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
-	
+	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
+		outfile.write("jobList: %s\n" % joblist)
+		outfile.write("files: %s\n" % files)
+	outfile.close()
 	print
 	print "your jobs:"
 	os.system("bjobs")
 	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
-	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
-		outfile.write("jobList: %s\n" % joblist)
-		outfile.write("files: %s\n" % files)
-	outfile.close()
+	
 	
 	print
 	print 'END: Make1DMVVTemplateWithKernels'
@@ -179,17 +254,17 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
-	
+	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
+		outfile.write("jobList: %s\n" % joblist)
+		outfile.write("files: %s\n" % files)
+	outfile.close()
 	print
 	print "your jobs:"
 	os.system("bjobs")
 	userName=os.environ['USER']
 	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
-	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
-		outfile.write("jobList: %s\n" % joblist)
-		outfile.write("files: %s\n" % files)
-	outfile.close()
+	
 	  
 	print
 	print 'END: Make2DTemplateWithKernels'
@@ -301,7 +376,62 @@ def reSubmit(jobdir,resubmit,jobname):
 			 os.system(cmd)
 			 os.chdir("../..")
  return jobs
- 	
+
+def merge2DDetectorParam(jobList,files,jobname): # TODO! Buggy, fix
+	
+	print "Merging 2D detector parametrization"
+	print
+	print "Jobs to merge :   " ,jobList
+	print "Files ran over:   " ,files
+	
+	outdir = 'res'+jobname
+	jobdir = 'tmp'+jobname
+	
+	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+	
+	if exit_flag:
+	 submit = raw_input("The following files are missing: %s. Do you  want to resubmit the jobs to the batch system before merging? [y/n] "%resubmit)
+	 if submit == 'y' or submit=='Y':
+		 print "Resubmitting jobs:"
+		 jobs = reSubmit(jobdir,resubmit,jobname)
+		 waitForBatchJobs(jobname,len(resubmit),len(resubmit), userName, timeCheck)
+		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+		 if exit_flag: 
+			 print "Job crashed again! Please resubmit manually before attempting to merge again"
+			 for j in jobs: print j 
+			 sys.exit()
+	else:
+		 submit = raw_input("Some files are missing. [y] == Exit without merging, [n] == continue ? ")
+		 if submit == 'y' or submit=='Y':
+			 print "Exit without merging!"
+			 sys.exit()
+		 else:
+			 print "Continuing merge!"
+ 
+	try: 
+		os.stat(outdir+'_out') 
+		os.system('rm -r '+outdir+'_out')
+		os.mkdir(outdir+'_out')
+	except: os.mkdir(outdir+'_out')
+
+	filelist = os.listdir('./res'+jobname+'/')
+
+	pythia_files = []
+
+	for f in filelist:
+	 if f.find('QCD_Pt_') != -1: pythia_files.append('./res'+jobname+'/'+f)
+	
+
+	#now hadd them
+
+	if len(pythia_files) > 0:
+		cmd = 'hadd -f JJ_nonRes_detectorResponse.root'
+		for f in pythia_files:
+		 cmd += f
+		 cmd += ' '
+		print cmd
+		os.system(cmd)
+		 	
 def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):
 	
 	print "Merging 1D templates"
@@ -326,8 +456,12 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 			 for j in jobs: print j 
 			 sys.exit()
 	 else:
-		 print "Some files are missing. Exit without merging!"
-	 sys.exit()
+		 submit = raw_input("Some files are missing. [y] == Exit without merging, [n] == continue ? ")
+		 if submit == 'y' or submit=='Y':
+			 print "Exit without merging!"
+			 sys.exit()
+		 else:
+			 print "Continuing merge!"
  
 	try: 
 		os.stat(outdir+'_out') 
@@ -468,6 +602,31 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_opt_up.SetTitle('histo_nominal_OPTUp')
 		histogram_opt_up.Write('histo_nominal_OPTUp')
 		
+		alpha=5000.*5000.
+		histogram_pt2_down,histogram_pt2_up=unequalScale(histo_nominal,"histo_nominal_PT2",alpha,2)
+		histogram_pt2_down.SetName('histo_nominal_PT2Down')
+		histogram_pt2_down.SetTitle('histo_nominal_PT2Down')
+		histogram_pt2_down.Write('histo_nominal_PT2Down')
+		histogram_pt2_down.Write()
+		
+		histogram_pt2_up.SetName('histo_nominal_PT2Up')
+		histogram_pt2_up.SetTitle('histo_nominal_PT2Up')
+		histogram_pt2_up.Write('histo_nominal_PT2Up')
+		histogram_pt2_up.Write()
+		
+		alpha=1000.*1000.
+		histogram_opt2_down,histogram_opt2_up=unequalScale(histo_nominal,"histo_nominal_OPT2",alpha,-2)
+		
+		histogram_opt2_up.SetName('histo_nominal_OPT2Up')
+		histogram_opt2_up.SetTitle('histo_nominal_OPT2Up')
+		histogram_opt2_up.Write()
+		
+		histogram_opt2_down.SetName('histo_nominal_OPT2Up')
+		histogram_opt2_down.SetTitle('histo_nominal_OPT2Up')
+		histogram_opt2_down.Write()
+		
+		
+		
 	if doHerwig:
 		mvv_altshapeUp.Write('mvv_altshapeUp')
 		histo_altshapeUp.Write('histo_altshapeUp')
@@ -510,8 +669,12 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 			 for j in jobs: print j 
 			 sys.exit()
 	 else:
-		 print "Some files are missing. Exit without merging!"
-		 sys.exit()
+		 submit = raw_input("Some files are missing. [y] == Exit without merging, [n] == continue ? ")
+		 if submit == 'y' or submit=='Y':
+			 print "Exit without merging!"
+			 sys.exit()
+		 else:
+			 print "Continuing merge!"
 	
  
 	try: 
@@ -528,7 +691,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	 outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_COND2D_%s_%s_%s.root'%(s,leg,purity),'RECREATE')
   
 	 finalHistos = {}
-	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,40,minMVV,maxMVV)
+	 finalHistos['histo_nominal'] = ROOT.TH2F("histo_nominal_out","histo_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal_3D'] = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",binsMJ,minMJ,maxMJ,binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
     
@@ -575,56 +738,56 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	doHerwig   = False
 	doPythia   = False
 	
-	#now hadd them
-	if len(mg_files) > 0:
-		cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_altshape2.root '%(purity,leg)
-		for f in mg_files:
-		 cmd += f
-		 cmd += ' '
-		print cmd
-		os.system(cmd)
-		
-		
-		fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_COND2D_%s_%s_altshape2.root'%(purity,leg),'READ')
-		#mjet_mvv_nominal = fhadd_madgraph.Get('mjet_mvv_nominal')
-		#histo_nominal = fhadd_madgraph.Get('histo_nominal_coarse')
-		#histo_nominal_ScaleUp = fhadd_madgraph.Get('histo_nominal_ScaleUp_coarse')
-		#histo_nominal_ScaleDown = fhadd_madgraph.Get('histo_nominal_ScaleDown_coarse')
-		mjet_mvv_altshape2_3D = fhadd_madgraph.Get('mjet_mvv_nominal_3D') 
-		mjet_mvv_altshape2_3D.SetName('mjet_mvv_altshape2_3D')
-		mjet_mvv_altshape2_3D.SetTitle('mjet_mvv_altshape2_3D')
-		mjet_mvv_altshape2 = fhadd_madgraph.Get('mjet_mvv_nominal')
-		mjet_mvv_altshape2.SetName('mjet_mvv_altshape2')
-		mjet_mvv_altshape2.SetTitle('mjet_mvv_altshape2')
-		histo_altshape2 = fhadd_madgraph.Get('histo_nominal_coarse')
-		histo_altshape2.SetName('histo_altshape2_coarse')
-		histo_altshape2.SetTitle('histo_altshape2_coarse')
-		
-		doMadGraph = True
-		
-
-	if len(herwig_files) > 0:
-		cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_altshapeUp.root '%(purity,leg)
-		for f in herwig_files:
-		 cmd += f
-		 cmd += ' '
-		print cmd
-		os.system(cmd)
-		
-		fhadd_herwig = ROOT.TFile.Open('JJ_nonRes_COND2D_%s_%s_altshapeUp.root'%(purity,leg),'READ')
-		mjet_mvv_altshapeUp_3D = fhadd_herwig.Get('mjet_mvv_nominal_3D') 
-		mjet_mvv_altshapeUp_3D.SetName('mjet_mvv_altshapeUp_3D')
-		mjet_mvv_altshapeUp_3D.SetTitle('mjet_mvv_altshapeUp_3D')
-		mjet_mvv_altshapeUp = fhadd_herwig.Get('mjet_mvv_nominal')
-		mjet_mvv_altshapeUp.SetName('mjet_mvv_altshapeUp')
-		mjet_mvv_altshapeUp.SetTitle('mjet_mvv_altshapeUp')
-		histo_altshapeUp = fhadd_herwig.Get('histo_nominal_coarse')
-		histo_altshapeUp.SetName('histo_altshapeUp_coarse')
-		histo_altshapeUp.SetTitle('histo_altshapeUp_coarse')
-		#histo_altshape_ScaleUp = fhadd_herwig.Get('histo_nominal_ScaleUp_coarse')
-		#histo_altshape_ScaleDown = fhadd_herwig.Get('histo_nominal_ScaleDown_coarse')
-		
-		doHerwig = True
+	# #now hadd them
+	# if len(mg_files) > 0:
+	# 	cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_altshape2.root '%(purity,leg)
+	# 	for f in mg_files:
+	# 	 cmd += f
+	# 	 cmd += ' '
+	# 	print cmd
+	# 	os.system(cmd)
+	#
+	#
+	# 	fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_COND2D_%s_%s_altshape2.root'%(purity,leg),'READ')
+	# 	#mjet_mvv_nominal = fhadd_madgraph.Get('mjet_mvv_nominal')
+	# 	#histo_nominal = fhadd_madgraph.Get('histo_nominal')
+	# 	#histo_nominal_ScaleUp = fhadd_madgraph.Get('histo_nominal_ScaleUp')
+	# 	#histo_nominal_ScaleDown = fhadd_madgraph.Get('histo_nominal_ScaleDown')
+	# 	mjet_mvv_altshape2_3D = fhadd_madgraph.Get('mjet_mvv_nominal_3D')
+	# 	mjet_mvv_altshape2_3D.SetName('mjet_mvv_altshape2_3D')
+	# 	mjet_mvv_altshape2_3D.SetTitle('mjet_mvv_altshape2_3D')
+	# 	mjet_mvv_altshape2 = fhadd_madgraph.Get('mjet_mvv_nominal')
+	# 	mjet_mvv_altshape2.SetName('mjet_mvv_altshape2')
+	# 	mjet_mvv_altshape2.SetTitle('mjet_mvv_altshape2')
+	# 	histo_altshape2 = fhadd_madgraph.Get('histo_nominal')
+	# 	histo_altshape2.SetName('histo_altshape2')
+	# 	histo_altshape2.SetTitle('histo_altshape2')
+	#
+	# 	doMadGraph = True
+	#
+	#
+	# if len(herwig_files) > 0:
+	# 	cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_altshapeUp.root '%(purity,leg)
+	# 	for f in herwig_files:
+	# 	 cmd += f
+	# 	 cmd += ' '
+	# 	print cmd
+	# 	os.system(cmd)
+	#
+	# 	fhadd_herwig = ROOT.TFile.Open('JJ_nonRes_COND2D_%s_%s_altshapeUp.root'%(purity,leg),'READ')
+	# 	mjet_mvv_altshapeUp_3D = fhadd_herwig.Get('mjet_mvv_nominal_3D')
+	# 	mjet_mvv_altshapeUp_3D.SetName('mjet_mvv_altshapeUp_3D')
+	# 	mjet_mvv_altshapeUp_3D.SetTitle('mjet_mvv_altshapeUp_3D')
+	# 	mjet_mvv_altshapeUp = fhadd_herwig.Get('mjet_mvv_nominal')
+	# 	mjet_mvv_altshapeUp.SetName('mjet_mvv_altshapeUp')
+	# 	mjet_mvv_altshapeUp.SetTitle('mjet_mvv_altshapeUp')
+	# 	histo_altshapeUp = fhadd_herwig.Get('histo_nominal')
+	# 	histo_altshapeUp.SetName('histo_altshapeUp')
+	# 	histo_altshapeUp.SetTitle('histo_altshapeUp')
+	# 	#histo_altshape_ScaleUp = fhadd_herwig.Get('histo_nominal_ScaleUp')
+	# 	#histo_altshape_ScaleDown = fhadd_herwig.Get('histo_nominal_ScaleDown')
+	#
+	# 	doHerwig = True
  	
 	if len(pythia_files) > 0:
 		cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_nominal.root '%(purity,leg)
@@ -641,13 +804,13 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		mjet_mvv_nominal = fhadd_pythia.Get('mjet_mvv_nominal')
 		mjet_mvv_nominal.SetName('mjet_mvv_nominal')
 		mjet_mvv_nominal.SetTitle('mjet_mvv_nominal')
-		histo_nominal = fhadd_pythia.Get('histo_nominal_coarse')
-		histo_nominal.SetName('histo_nominal_coarse')
-		histo_nominal.SetTitle('histo_nominal_coarse')
-		#histo_nominal_ScaleUp = fhadd_pythia.Get('histo_nominal_ScaleUp_coarse')
-		#histo_nominal_ScaleDown = fhadd_pythia.Get('histo_nominal_ScaleDown_coarse')
+		histo_nominal = fhadd_pythia.Get('histo_nominal')
+		histo_nominal.SetName('histo_nominal')
+		histo_nominal.SetTitle('histo_nominal')
+		#histo_nominal_ScaleUp = fhadd_pythia.Get('histo_nominal_ScaleUp')
+		#histo_nominal_ScaleDown = fhadd_pythia.Get('histo_nominal_ScaleDown')
 		#mjet_mvv_altshape2 = fhadd_pythia.Get('mjet_mvv_nominal')
-		#histo_altshape2 = fhadd_pythia.Get('histo_nominal_coarse')
+		#histo_altshape2 = fhadd_pythia.Get('histo_nominal')
 		
 		doPythia = True
 
@@ -658,23 +821,23 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		mjet_mvv_nominal.Write('mjet_mvv_nominal')
 		mjet_mvv_nominal_3D.Write('mjet_mvv_nominal_3D')
 
-		histo_nominal.Write('histo_nominal_coarse')
-		conditional(histo_nominal)
+		histo_nominal.Write('histo_nominal')
+		# conditional(histo_nominal)
+		#
+		# expanded=expandHisto(histo_nominal,"",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+		# conditional(expanded)
+		# expanded.SetName('histo_nominal')
+		# expanded.SetTitle('histo_nominal')
+		# expanded.Write('histo_nominal')
+		finalHistograms['histo_nominal'] = histo_nominal
 		
-		expanded=expandHisto(histo_nominal,"",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-		conditional(expanded)
-		expanded.SetName('histo_nominal')
-		expanded.SetTitle('histo_nominal')
-		expanded.Write('histo_nominal')
-		finalHistograms['histo_nominal'] = expanded
-		
-		#histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp_coarse')
+		#histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp')
 		#conditional(histo_nominal_ScaleUp)
 		#expanded=expandHisto(histo_nominal_ScaleUp,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		#conditional(expanded)
 		#expanded.Write('histo_nominal_ScaleUp')
 
-		#histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown_coarse')
+		#histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown')
 		#conditional(histo_nominal_ScaleDown)
 		#expanded=expandHisto(histo_nominal_ScaleDown,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		#conditional(expanded)
@@ -702,45 +865,67 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		h2.SetTitle('histo_nominal_OPTUp')
 		h2.Write('histo_nominal_OPTUp')
 		
+		alpha=5000.*5000.
+		histogram_pt2_down,histogram_pt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT2",alpha,2)
+		histogram_pt2_down.SetName('histo_nominal_PT2Down')
+		histogram_pt2_down.SetTitle('histo_nominal_PT2Down')
+		histogram_pt2_down.Write('histo_nominal_PT2Down')
+		histogram_pt2_down.Write()
 		
-	if doHerwig:
-		histo_altshapeUp.Write('histo_altshapeUp_coarse')
-		conditional(histo_altshapeUp)
-		expanded=expandHisto(histo_altshapeUp,"herwig",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-		conditional(expanded)
-		expanded.SetName('histo_altshapeUp')
-		expanded.SetTitle('histo_altshapeUp')
-		print "NEW NAME = ", expanded.GetName()
-		expanded.Write('histo_altshapeUp')
-		finalHistograms['histo_altshapeUp'] = expanded
-		if doPythia:
-			histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown",2)
-			conditional(histogram_altshapeDown)
-			histogram_altshapeDown.SetName('histo_altshapeDown')
-			histogram_altshapeDown.SetTitle('histo_altshapeDown')
-			histogram_altshapeDown.Write()
+		histogram_pt2_up.SetName('histo_nominal_PT2Up')
+		histogram_pt2_up.SetTitle('histo_nominal_PT2Up')
+		histogram_pt2_up.Write('histo_nominal_PT2Up')
+		histogram_pt2_up.Write()
+		
+		alpha=1000.*1000.
+		histogram_opt2_down,histogram_opt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT2",alpha,-2)
+		
+		histogram_opt2_up.SetName('histo_nominal_OPT2Up')
+		histogram_opt2_up.SetTitle('histo_nominal_OPT2Up')
+		histogram_opt2_up.Write()
+		
+		histogram_opt2_down.SetName('histo_nominal_OPT2Up')
+		histogram_opt2_down.SetTitle('histo_nominal_OPT2Up')
+		histogram_opt2_down.Write()
+		
+# 	if doHerwig:
+# 		histo_altshapeUp.Write('histo_altshapeUp')
+# 		# conditional(histo_altshapeUp)
+# # 		expanded=expandHisto(histo_altshapeUp,"herwig",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+# # 		conditional(expanded)
+# # 		expanded.SetName('histo_altshapeUp')
+# # 		expanded.SetTitle('histo_altshapeUp')
+# # 		print "NEW NAME = ", expanded.GetName()
+# # 		expanded.Write('histo_altshapeUp')
+# 		finalHistograms['histo_altshapeUp'] = histo_altshapeUp
+# 		if doPythia:
+# 			histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown",2)
+# 			conditional(histogram_altshapeDown)
+# 			histogram_altshapeDown.SetName('histo_altshapeDown')
+# 			histogram_altshapeDown.SetTitle('histo_altshapeDown')
+# 			histogram_altshapeDown.Write()
 
-		#histo_altshape_ScaleUp.Write('histo_altshape_ScaleUp_coarse')
+		#histo_altshape_ScaleUp.Write('histo_altshape_ScaleUp')
 		#conditional(histo_altshape_ScaleUp)
 		#expanded=expandHisto(histo_altshape_ScaleUp,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		#conditional(expanded)
 		#expanded.Write('histo_altshape_ScaleUp')
 
-		#histo_altshape_ScaleDown.Write('histo_altshape_ScaleDown_coarse')
+		#histo_altshape_ScaleDown.Write('histo_altshape_ScaleDown')
 		#conditional(histo_altshape_ScaleDown)
 		#expanded=expandHisto(histo_altshape_ScaleDown,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		#conditional(expanded)
 		#expanded.Write('histo_altshape_ScaleDown')
 
 		
-	if doMadGraph:
-		histo_altshape2.Write('histo_altshape2_coarse')
-		conditional(histo_altshape2)
-		expanded=expandHisto(histo_altshape2,"madgraph",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-		conditional(expanded)
-		expanded.SetName('histo_altshape2')
-		expanded.SetTitle('histo_altshape2')
-		expanded.Write('histo_altshape2')
+# 	if doMadGraph:
+# 		histo_altshape2.Write('histo_altshape2')
+# 		# conditional(histo_altshape2)
+# # 		expanded=expandHisto(histo_altshape2,"madgraph",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+# # 		conditional(expanded)
+# # 		expanded.SetName('histo_altshape2')
+# # 		expanded.SetTitle('histo_altshape2')
+# # 		expanded.Write('histo_altshape2')
 		
 	os.system('rm -r '+outdir+'_out')
 	# os.system('rm -r '+outdir)
@@ -857,7 +1042,7 @@ def mergeData(jobname,purity):
 		os.system(cmd)
 
 	if len(pythia_files) > 0:
-		cmd = 'hadd -f JJ_nonRes_%s_nominal.root '%purity
+		cmd = 'hadd -f JJ_nonRes_%s.root '%purity
 		for f in pythia_files:
 		 cmd += f
 		 cmd += ' '

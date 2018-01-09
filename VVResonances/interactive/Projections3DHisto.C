@@ -3,11 +3,12 @@ void Projections3DHisto(){
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 
-TFile* fin = new TFile("JJ_nonRes_2D_HPHP.root","READ");
+TFile* fin = new TFile("JJ_nonRes_2D_HPLP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 hin->Scale(1./hin->Integral());
 
-TFile* finMC = new TFile("JJ_HPHP_herwigMC_herwigData.root","READ");
+
+TFile* finMC = new TFile("JJ_HPLP.root","READ");
 TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
 hinMC->Scale(1./hinMC->Integral());
 
@@ -36,6 +37,7 @@ std::vector<TH1F*> hzMC;
 int zbinMin[4] = {1,1,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(2000)};
 int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(2000),binsz};
 int colors[5] = {1,99,9,8,94};
+
 float scale[4] = {1.,0.8,2.,30.};
 
 for(int i=0; i<4; ++i){
