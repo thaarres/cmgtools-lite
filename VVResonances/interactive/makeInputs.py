@@ -30,7 +30,7 @@ cuts['NP'] = '(('+cat['LP1']+'&&'+cat['NP2']+')||('+cat['NP1']+'&&'+cat['LP2']+'
 cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
-purities=['HPHP']
+purities=['HPHP','HPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
