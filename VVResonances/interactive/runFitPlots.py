@@ -56,7 +56,7 @@ def getListOfBins(hist,dim):
     mmin = axis.GetXmin()
     mmax = axis.GetXmax()
     r ={}
-    for i in range(0,N+2):
+    for i in range(1,N+1):
         #v = mmin + i * (mmax-mmin)/float(N)
         r[i] = axis.GetBinCenter(i) 
     return r   
@@ -173,7 +173,7 @@ def doZprojection(pdfs,data,norm,proj=0):
     h[0].SetLineColor(colors[0])
     h[0].SetTitle("Z-Proj. x : "+options.xrange+" y : "+options.yrange)
     h[0].GetXaxis().SetTitle("m_{jj}")
-    h[0].GetXaxis().SetRangeUser(1000,5000)
+    #h[0].GetXaxis().SetRangeUser(1000,5000)
     #h[0].SetMaximum(1e6)
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
@@ -278,7 +278,7 @@ def doXprojection(pdfs,data,norm,hin=0):
     h[0].SetLineColor(colors[0])
     h[0].SetTitle("X-Proj. y : "+options.yrange+" z : "+options.zrange)
     h[0].GetXaxis().SetTitle("m_{jet1}")
-    h[0].GetXaxis().SetRangeUser(55,215)
+    #h[0].GetXaxis().SetRangeUser(55,215)
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
     if postfit:
@@ -373,6 +373,7 @@ def doYprojection(pdfs,data,norm):
     h[0].GetXaxis().SetTitle("m_{jet2}")
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
+    #h[0].GetXaxis().SetRangeUser(55,215)
     if postfit:
         h[0].GetYaxis().SetTitleOffset(0.6)
         h[0].GetYaxis().SetTitle("events")
@@ -453,7 +454,7 @@ def builtFittedPdf(pdfs,coefficients):
     return result
 
 if __name__=="__main__":
-     finMC = ROOT.TFile("JJ_testBinning_HPHP.root","READ")#ROOT.TFile("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_HPHP.root","READ");
+     finMC = ROOT.TFile("JJ_HPHP.root","READ")#ROOT.TFile("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_HPHP.root","READ");
      hinMC = finMC.Get("nonRes");
      xBins= getListOfBins(hinMC,"x")
      yBins= getListOfBins(hinMC,"y")
@@ -522,8 +523,8 @@ if __name__=="__main__":
      # get data from workspace 
      norm = (args["pdf_binJJ_"+purity+"_13TeV_bonly"].getComponents())["n_exp_binJJ_"+purity+"_13TeV_proc_nonRes"].getVal()
      # check normalization with from pdf generated data:
-     pdfdata_shape_postfit = (pdf_shape_postfit.generateBinned(ROOT.RooArgSet(workspace.var('MJ1'), workspace.var('MJ2'), workspace.var('MJJ')), norm,True,True))#.binnedClone("datafrompdf","datafrompdf")
-     pdfdata_shape_postfit.SetName("pdfdata_shape_postfit")
+     #pdfdata_shape_postfit = (pdf_shape_postfit.generateBinned(ROOT.RooArgSet(workspace.var('MJ1'), workspace.var('MJ2'), workspace.var('MJJ')), norm,True,True))#.binnedClone("datafrompdf","datafrompdf")
+     #pdfdata_shape_postfit.SetName("pdfdata_shape_postfit")
      #pdf_shape_postfit.syncTotal()
      #################################################
      print "norm after fit "+str(norm)
@@ -567,7 +568,7 @@ if __name__=="__main__":
              #proj= hinMC.ProjectionZ("projz",keys[0],keys[-1],zkeys[0],zkeys[-1])
          doZprojection(pdfs,data,norm)
          if options.postfit == True:
-             postfit = [pdf,pdfdata_shape_postfit,pdf_shape_postfit,model]
+             postfit = [pdf,pdf_shape_postfit,pdf_shape_postfit,model]
              doZprojection(postfit,data,norm)
          
      #make projections onto MJ1 axis
@@ -585,7 +586,7 @@ if __name__=="__main__":
             #proj= hinMC.ProjectionX("projx",keys[0],keys[-1],zkeys[0],zkeys[-1])
          doXprojection(pdfs,data,norm)
          if options.postfit == True:
-             postfit = [pdf,pdfdata_shape_postfit,pdf_shape_postfit,model]
+             postfit = [pdf,pdf_shape_postfit,pdf_shape_postfit,model]
              doXprojection(postfit,data,norm)
          
          
@@ -604,7 +605,7 @@ if __name__=="__main__":
          doYprojection(pdfs,data,norm)
          
          if options.postfit == True:
-             postfit = [pdf,pdfdata_shape_postfit,pdf_shape_postfit,model]
+             postfit = [pdf,pdf_shape_postfit,pdf_shape_postfit,model]
              doYprojection(postfit,data,norm)
          
      if options.projection =="xyz":
@@ -613,7 +614,7 @@ if __name__=="__main__":
         doYprojection(pdfs,data,norm)
         doZprojection(pdfs,data,norm)
         if options.postfit == True:
-             postfit = [pdf,pdfdata_shape_postfit]
+             postfit = [pdf,pdf_shape_postfit]
              doXprojection(postfit,data,norm)
              doYprojection(postfit,data,norm)
              doZprojection(postfit,data,norm)
