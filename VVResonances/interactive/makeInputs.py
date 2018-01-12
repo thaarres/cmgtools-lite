@@ -31,6 +31,7 @@ cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP','HPLP']
+purities=['HPHP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -39,7 +40,7 @@ BRZZ=1.*0.001
 
 dataTemplate="JetHT"
 nonResTemplate="QCD_Pt_" #high stat
-# nonResTemplate="QCD_Pt-" #low stat --> use this for tests
+#nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 #nonResTemplate="Dijet" #to compare shapes
 
 minMJ=55.0
@@ -55,7 +56,7 @@ binsMJ=80
 binsMVV=100
 
 cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMVV=minMVV,maxMVV=maxMVV,minMJ=minMJ,maxMJ=maxMJ)
-cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>20&&jj_l2_gen_softDrop_mass>20&&jj_gen_partialMass>800)'
+cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>0&&jj_l2_gen_softDrop_mass>0&&jj_gen_partialMass>0)'
 
 cuts['acceptanceMJ']= "(jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMJ=minMJ,maxMJ=maxMJ) 
 cuts['acceptanceMVV'] = "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV})".format(minMVV=minMVV,maxMVV=maxMVV)
@@ -104,13 +105,16 @@ def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP
 def makeDetectorResponse(name,filename,template,addCut="1",jobName="DetPar"):
 		pwd = os.getcwd()
 		samples = pwd +"/samples"
-		cut='*'.join([cuts['common'],addCut,cuts['acceptanceGEN']])
+		cut='*'.join([cuts['common'],addCut,'(jj_l1_gen_softDrop_mass>10&&jj_l2_gen_softDrop_mass>10&&jj_gen_partialMass>0)'])
 		resFile=filename+"_"+name+"_detectorResponse.root"		 
 		print "Saving detector resolution to file: " ,resFile
 		if submitToBatch:
+		        template += ",QCD_Pt-,QCD_HT"
 			from modules.submitJobs import Make2DDetectorParam,merge2DDetectorParam
 			jobList, files = Make2DDetectorParam(resFile,template,cut,samples,jobName)
-			merge2DDetectorParam(jobList,files,jobName)
+			jobList = []
+			files = []
+			merge2DDetectorParam(jobList,files,"200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000",jobName)
 		else:
 			cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
 			os.system(cmd)
@@ -151,7 +155,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1D"
   samples = pwd +"/samples"
 
   if submitToBatch:
-    # template += ",QCD_Pt-,QCD_HT"
+    template += ",QCD_Pt-,QCD_HT"
     from modules.submitJobs import Make1DMVVTemplateWithKernels,merge1DMVVTemplate
     jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobname)
     merge1DMVVTemplate(jobList,files,jobname,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
@@ -173,7 +177,7 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobN
   samples = pwd +"/samples" 
   
   if submitToBatch:
-    # template += ",QCD_Pt-,QCD_HT"
+    template += ",QCD_Pt-,QCD_HT"
     from modules.submitJobs import Make2DTemplateWithKernels,merge2DTemplate
     jobList, files = Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobname)
     merge2DTemplate(jobList,files,jobname,p,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)

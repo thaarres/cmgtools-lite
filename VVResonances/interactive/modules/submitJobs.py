@@ -6,6 +6,7 @@ import sys
 import ROOT
 from ROOT import *
 import subprocess, thread
+from array import array
 
 timeCheck = "30"
 userName=os.environ['USER']
@@ -377,7 +378,7 @@ def reSubmit(jobdir,resubmit,jobname):
 			 os.chdir("../..")
  return jobs
 
-def merge2DDetectorParam(jobList,files,jobname): # TODO! Buggy, fix
+def merge2DDetectorParam(jobList,files,binsxStr,jobname): # TODO! Buggy, fix
 	
 	print "Merging 2D detector parametrization"
 	print
@@ -387,6 +388,7 @@ def merge2DDetectorParam(jobList,files,jobname): # TODO! Buggy, fix
 	outdir = 'res'+jobname
 	jobdir = 'tmp'+jobname
 	
+	'''
 	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
 	
 	if exit_flag:
@@ -413,25 +415,110 @@ def merge2DDetectorParam(jobList,files,jobname): # TODO! Buggy, fix
 		os.system('rm -r '+outdir+'_out')
 		os.mkdir(outdir+'_out')
 	except: os.mkdir(outdir+'_out')
-
+        '''
+	
 	filelist = os.listdir('./res'+jobname+'/')
 
 	pythia_files = []
+	herwig_files = []
+	mg_files = []
 
 	for f in filelist:
 	 if f.find('QCD_Pt_') != -1: pythia_files.append('./res'+jobname+'/'+f)
+	 elif f.find('QCD_HT') != -1: mg_files.append('./res'+jobname+'/'+f)
+	 else: herwig_files.append('./res'+jobname+'/'+f)
 	
 
 	#now hadd them
-
+	tmp_files = []
 	if len(pythia_files) > 0:
-		cmd = 'hadd -f JJ_nonRes_detectorResponse.root'
+		cmd = 'hadd -f tmp_nominal.root '
 		for f in pythia_files:
 		 cmd += f
 		 cmd += ' '
 		print cmd
 		os.system(cmd)
-		 	
+		tmp_files.append('tmp_nominal.root')
+		
+	if len(mg_files) > 0:
+		cmd = 'hadd -f tmp_altshape2.root '
+		for f in mg_files:
+		 cmd += f
+		 cmd += ' '
+		print cmd
+		os.system(cmd)	
+		tmp_files.append('tmp_altshape2.root')	
+
+	if len(herwig_files) > 0:
+		cmd = 'hadd -f tmp_altshapeUp.root '
+		for f in herwig_files:
+		 cmd += f
+		 cmd += ' '
+		print cmd
+		os.system(cmd)	
+		tmp_files.append('tmp_altshapeUp.root')
+		
+	#produce final det resolution files (one per sample, but at the end we use the pythia one in the following steps for all the samples)
+	for f in tmp_files:
+	
+	 fin = ROOT.TFile.Open(f,'READ')
+	 
+         superHX = fin.Get("dataX")
+	 superHY = fin.Get("dataY")
+	 superHNsubj = fin.Get("dataNsubj")
+
+	 binsx=[]
+	 for b in binsxStr.split(','):
+	     binsx.append(float(b))
+	  
+	 fout = ROOT.TFile("JJ_nonRes_detectorResponse_"+f.split('_')[1],"RECREATE")
+
+	 scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+	 resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
+	 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+	 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
+	 scaleNsubjHisto=ROOT.TH1F("scaleNsubjHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+	 resNsubjHisto=ROOT.TH1F("resNsubjHisto","resHisto",len(binsx)-1,array('d',binsx))
+
+	 for bin in range(1,superHX.GetNbinsX()+1):
+
+	     tmp=superHX.ProjectionY("q",bin,bin)
+	     scalexHisto.SetBinContent(bin,tmp.GetMean())
+	     scalexHisto.SetBinError(bin,tmp.GetMeanError())
+	     resxHisto.SetBinContent(bin,tmp.GetRMS())
+	     resxHisto.SetBinError(bin,tmp.GetRMSError())
+
+	     tmp=superHY.ProjectionY("q",bin,bin)
+	     scaleyHisto.SetBinContent(bin,tmp.GetMean())
+	     scaleyHisto.SetBinError(bin,tmp.GetMeanError())
+	     resyHisto.SetBinContent(bin,tmp.GetRMS())
+	     resyHisto.SetBinError(bin,tmp.GetRMSError())
+
+	     tmp=superHNsubj.ProjectionY("q",bin,bin)
+	     scaleNsubjHisto.SetBinContent(bin,tmp.GetMean())
+	     scaleNsubjHisto.SetBinError(bin,tmp.GetMeanError())
+	     resNsubjHisto.SetBinContent(bin,tmp.GetRMS())
+	     resNsubjHisto.SetBinError(bin,tmp.GetRMSError())
+	     
+	 scalexHisto.Write()
+	 scaleyHisto.Write()
+	 scaleNsubjHisto.Write()
+	 resxHisto.Write()
+	 resyHisto.Write()
+	 resNsubjHisto.Write()
+	 superHX.Write("dataX")
+	 superHY.Write("dataY")
+	 superHNsubj.Write("dataNsubj")
+
+	 fout.Close()
+	 fin.Close()
+	 
+	 os.system('rm '+f)
+	
+	#use the pythia det resolution for all the sample in the following steps
+	os.system('cp JJ_nonRes_detectorResponse_nominal.root JJ_nonRes_detectorResponse.root')
+
+				 	
 def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):
 	
 	print "Merging 1D templates"
