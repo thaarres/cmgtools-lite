@@ -107,13 +107,13 @@ def makeDetectorResponse(name,filename,template,addCut="1",jobName="DetPar"):
 		cut='*'.join([cuts['common'],addCut,cuts['acceptanceGEN']])
 		resFile=filename+"_"+name+"_detectorResponse.root"		 
 		print "Saving detector resolution to file: " ,resFile
-		if submitToBatch:
-			from modules.submitJobs import Make2DDetectorParam,merge2DDetectorParam
-			jobList, files = Make2DDetectorParam(resFile,template,cut,samples,jobName)
-			merge2DDetectorParam(jobList,files,jobName)
-		else:
-			cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
-			os.system(cmd)
+		# if submitToBatch:
+# 			from modules.submitJobs import Make2DDetectorParam,merge2DDetectorParam
+# 			jobList, files = Make2DDetectorParam(resFile,template,cut,samples,jobName)
+# 			merge2DDetectorParam(jobList,files,jobName)
+# 		else:
+		cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
+		os.system(cmd)
 		
 		print "Done with ",resFile
   
