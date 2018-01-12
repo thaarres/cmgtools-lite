@@ -17,10 +17,6 @@ parser.add_option("-c","--cut",dest="cut",help="Cut to apply for yield in gen sa
 parser.add_option("-v","--vars",dest="vars",help="variable for gen",default='')
 parser.add_option("-b","--binsx",dest="binsx",help="bins",default='')
 parser.add_option("-g","--genVars",dest="genVars",help="variable for gen",default='')
-parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
-parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
-
-
 
 (options,args) = parser.parse_args()
 
@@ -60,9 +56,13 @@ varDijet = 'jj_gen_partialMass'
 
 scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
+
 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
 
+#scaleNsubjHisto=ROOT.TH1F("scaleNsubjHisto","scaleHisto",len(binsx)-1,array('d',binsx))		
+#resNsubjHisto=ROOT.TH1F("resNsubjHisto","resHisto",len(binsx)-1,array('d',binsx))
+ 
 variables=options.vars.split(',')
 genVariables=options.genVars.split(',')
 
@@ -73,10 +73,13 @@ gaussian=ROOT.TF1("gaussian","gaus",0.5,1.5)
 f=ROOT.TFile(options.output,"RECREATE")
 f.cd()
 
-superHX=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[2],options.cut,"1",binsx,binsz) #dijet
+superHX=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[2],options.cut,"1",binsx,binsz) #mvv
 superHY=data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+genVariables[2],options.cut,"1",binsx,binsz) #mjet
-# superHX=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+varDijet,options.cut,"1",binsDijet,binsz) #dijet
-# superHY=data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+varDijet,options.cut,"1",binsDijet,binsz) #mjet
+#superHNsubj=data.drawTH2Binned('(jj_l1_tau2/jj_l1_tau1)/(jj_l1_gen_tau2/jj_l1_gen_tau1)'+':'+genVariables[2],options.cut,"1",binsx,binsz) #for smearing tau21
+
+# superHX=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+varDijet,options.cut,"1",binsDijet,binsz) #mvv, if using dijetbinning
+# superHY=data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+varDijet,options.cut,"1",binsDijet,binsz) #mjet, if using dijetbinning
+
 
 for bin in range(1,superHX.GetNbinsX()+1):
 
