@@ -30,7 +30,9 @@ def diffTrees(t,T,tname,Tname,debug):
     print "l2 reco softdrop mass %.2f"%(t.jj_l2_softDrop_mass[0])
     print "l2 gen pt %.2f"%(t.jj_l2_gen_pt[0])
     print "l2 reco pt %.2f"%(t.jj_l2_pt[0])
-  
+    print "l1 reco tau21 %.2f"%(t.jj_l1_tau2/t.jj_l1_tau1)
+    print "l2 reco tau21 %.2f"%(t.jj_l2_tau2/t.jj_l2_tau1)
+      
   else: common+=1
   
  return [nEv,common] 
@@ -87,8 +89,11 @@ h_l1_reco_pt_1 = ROOT.TH1F("h_l1_reco_pt_1","l1 reco pt",200,0,5000)
 h_l1_reco_pt_2 = ROOT.TH1F("h_l1_reco_pt_2","l1 reco pt",200,0,5000)
 h_l2_reco_pt_1 = ROOT.TH1F("h_l2_reco_pt_1","l2 reco pt",200,0,5000)
 h_l2_reco_pt_2 = ROOT.TH1F("h_l2_reco_pt_2","l2 reco pt",200,0,5000)
+h_l1_reco_tau21_1 = ROOT.TH1F("h_l1_reco_tau21_1","l1 reco tau21",100,0,1)
+h_l1_reco_tau21_2 = ROOT.TH1F("h_l1_reco_tau21_2","l1 reco tau21",100,0,1)
+h_l2_reco_tau21_1 = ROOT.TH1F("h_l2_reco_tau21_1","l2 reco tau21",100,0,1)
+h_l2_reco_tau21_2 = ROOT.TH1F("h_l2_reco_tau21_2","l2 reco tau21",100,0,1)
 
-n=0
 for e in range(n1):
 
  t1.GetEntry(e)
@@ -107,34 +112,39 @@ for e in range(n1):
    print "l2 reco softdrop mass %.2f/%.2f"%(t2.jj_l2_softDrop_mass,t1.jj_l2_softDrop_mass[0])
    print "l2 gen pt %.2f/%.2f"%(t2.jj_l2_gen_pt,t1.jj_l2_gen_pt[0])
    print "l2 reco pt %.2f/%.2f"%(t2.jj_l2_pt,t1.jj_l2_pt[0])
-      
-  h_gen_jj_mass_1.Fill(t1.jj_gen_partialMass[0])
-  h_gen_jj_mass_2.Fill(t2.jj_gen_partialMass)
+   print "l1 reco tau21 %.2f/%.2f"%(t2.jj_l1_tau2/t2.jj_l1_tau1,t1.jj_l1_tau2[0]/t1.jj_l1_tau1[0])
+   print "l2 reco tau21 %.2f/%.2f"%(t2.jj_l2_tau2/t2.jj_l2_tau1,t1.jj_l2_tau2[0]/t1.jj_l2_tau1[0])
+         
+  h_gen_jj_mass_1.Fill(t1.jj_gen_partialMass)
+  h_gen_jj_mass_2.Fill(t2.jj_gen_partialMass[0])
   
-  h_l1_gen_mass_1.Fill(t1.jj_l1_gen_softDrop_mass[0])
-  h_l1_gen_mass_2.Fill(t2.jj_l1_gen_softDrop_mass)    
-  h_l2_gen_mass_1.Fill(t1.jj_l2_gen_softDrop_mass[0])
-  h_l2_gen_mass_2.Fill(t2.jj_l2_gen_softDrop_mass)
+  h_l1_gen_mass_1.Fill(t1.jj_l1_gen_softDrop_mass)
+  h_l1_gen_mass_2.Fill(t2.jj_l1_gen_softDrop_mass[0])    
+  h_l2_gen_mass_1.Fill(t1.jj_l2_gen_softDrop_mass)
+  h_l2_gen_mass_2.Fill(t2.jj_l2_gen_softDrop_mass[0])
 
-  h_l1_gen_pt_1.Fill(t1.jj_l1_gen_pt[0])
-  h_l1_gen_pt_2.Fill(t2.jj_l1_gen_pt)    
-  h_l2_gen_pt_1.Fill(t1.jj_l2_gen_pt[0])
-  h_l2_gen_pt_2.Fill(t2.jj_l2_gen_pt)
+  h_l1_gen_pt_1.Fill(t1.jj_l1_gen_pt)
+  h_l1_gen_pt_2.Fill(t2.jj_l1_gen_pt[0])    
+  h_l2_gen_pt_1.Fill(t1.jj_l2_gen_pt)
+  h_l2_gen_pt_2.Fill(t2.jj_l2_gen_pt[0])
 
-  h_reco_jj_mass_1.Fill(t1.jj_LV_mass[0])
-  h_reco_jj_mass_2.Fill(t2.jj_LV_mass)
+  h_reco_jj_mass_1.Fill(t1.jj_LV_mass)
+  h_reco_jj_mass_2.Fill(t2.jj_LV_mass[0])
   
-  h_l1_reco_mass_1.Fill(t1.jj_l1_softDrop_mass[0])
-  h_l1_reco_mass_2.Fill(t2.jj_l1_softDrop_mass)    
-  h_l2_reco_mass_1.Fill(t1.jj_l2_softDrop_mass[0])
-  h_l2_reco_mass_2.Fill(t2.jj_l2_softDrop_mass)
+  h_l1_reco_mass_1.Fill(t1.jj_l1_softDrop_mass)
+  h_l1_reco_mass_2.Fill(t2.jj_l1_softDrop_mass[0])    
+  h_l2_reco_mass_1.Fill(t1.jj_l2_softDrop_mass)
+  h_l2_reco_mass_2.Fill(t2.jj_l2_softDrop_mass[0])
 
-  h_l1_reco_pt_1.Fill(t1.jj_l1_pt[0])
-  h_l1_reco_pt_2.Fill(t2.jj_l1_pt)    
-  h_l2_reco_pt_1.Fill(t1.jj_l2_pt[0])
-  h_l2_reco_pt_2.Fill(t2.jj_l2_pt)
+  h_l1_reco_pt_1.Fill(t1.jj_l1_pt)
+  h_l1_reco_pt_2.Fill(t2.jj_l1_pt[0])    
+  h_l2_reco_pt_1.Fill(t1.jj_l2_pt)
+  h_l2_reco_pt_2.Fill(t2.jj_l2_pt[0])
   
-  n+=1
+  h_l1_reco_tau21_1.Fill(t1.jj_l1_tau2/t1.jj_l1_tau1)
+  h_l1_reco_tau21_2.Fill(t2.jj_l1_tau2[0]/t2.jj_l1_tau1[0])
+  h_l2_reco_tau21_1.Fill(t1.jj_l2_tau2/t1.jj_l2_tau1)
+  h_l2_reco_tau21_2.Fill(t2.jj_l2_tau2[0]/t2.jj_l2_tau1[0])
 
 histos_1 = []
 histos_2 = []
@@ -164,6 +174,11 @@ histos_1.append(h_l1_reco_pt_1)
 histos_2.append(h_l1_reco_pt_2)
 histos_1.append(h_l2_reco_pt_1)
 histos_2.append(h_l2_reco_pt_2)
+
+histos_1.append(h_l1_reco_tau21_1)
+histos_2.append(h_l1_reco_tau21_2)
+histos_1.append(h_l2_reco_tau21_1)
+histos_2.append(h_l2_reco_tau21_2)
 
 for h in range(len(histos_1)):
 
