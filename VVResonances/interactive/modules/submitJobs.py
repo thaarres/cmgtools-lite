@@ -91,7 +91,7 @@ def getEvents(template,samples):
 
 	return minEv, maxEv, NumberOfJobs, files
 	
-def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO! Buggy, fix
+def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar",wait=True): # TODO! Buggy, fix
    
 	print 
 	print 'START: Make2DDetectorParam with parameters:'
@@ -159,14 +159,14 @@ def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO!
 	print "your jobs:"
 	os.system("bjobs")
 	userName=os.environ['USER']
-	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	print
 	print 'END: Make2DDetectorParam'
 	print
 	return joblist, files	
 	
-def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV"):
+def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV",wait=True):
 	
 	print 
 	print 'START: Make1DMVVTemplateWithKernels with parameters:'
@@ -201,13 +201,13 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
 	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
-		outfile.write("jobList: %s\n" % joblist)
-		outfile.write("files: %s\n" % files)
+		outfile.write("jobList = %s\n" % joblist)
+		outfile.write("files = %s\n" % files)
 	outfile.close()
 	print
 	print "your jobs:"
 	os.system("bjobs")
-	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	
 	
@@ -216,7 +216,7 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	print
 	return joblist, files 
 
-def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobName="2DMVV"):
+def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobName="2DMVV",wait=True):
 	
 	print 
 	print 'START: Make2DTemplateWithKernels'
@@ -255,14 +255,14 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
 	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
-		outfile.write("jobList: %s\n" % joblist)
-		outfile.write("files: %s\n" % files)
+		outfile.write("jobList = %s\n" % joblist)
+		outfile.write("files = %s\n" % files)
 	outfile.close()
 	print
 	print "your jobs:"
 	os.system("bjobs")
 	userName=os.environ['USER']
-	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	
 	  
@@ -896,7 +896,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	os.system('rm -r '+outdir+'_out')
 	# os.system('rm -r '+outdir)
 	
-def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,factor,name,data,jobname,samples):
+def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,factor,name,data,jobname,samples,wait=True):
 	print 
 	print 'START: makeData'
 	print "template = ",template
@@ -967,7 +967,7 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	print "your jobs:"
 	os.system("bjobs")
 	userName=os.environ['USER']
-	waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	if wait: waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	print
 	print 'END: makeData'
