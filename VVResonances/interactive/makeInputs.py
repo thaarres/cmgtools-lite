@@ -2,8 +2,10 @@ import ROOT
 import os,sys
 
 submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
-
+runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
+ 	
 cat={}
+# For standard tau 21, use this
 # cat['HP1'] = 'jj_l1_tau2/jj_l1_tau1<0.35'
 # cat['HP2'] = 'jj_l2_tau2/jj_l2_tau1<0.35'
 # cat['LP1'] = 'jj_l1_tau2/jj_l1_tau1>0.35&&jj_l1_tau2/jj_l1_tau1<0.75'
@@ -11,12 +13,22 @@ cat={}
 # cat['NP1'] = 'jj_l1_tau2/jj_l1_tau1>0.75'
 # cat['NP2'] = 'jj_l2_tau2/jj_l2_tau1>0.75'
 
-cat['HP1'] = 'jj_l1_tau21_DDT<0.47'
-cat['HP2'] = 'jj_l2_tau21_DDT<0.47'
-cat['LP1'] = 'jj_l1_tau21_DDT>0.47&&jj_l1_tau21_DDT<0.88'
-cat['LP2'] = 'jj_l2_tau21_DDT>0.47&&jj_l2_tau21_DDT<0.88'
-cat['NP1'] = 'jj_l1_tau21_DDT>0.88'
-cat['NP2'] = 'jj_l2_tau21_DDT>0.88'
+# For standard DDT tau 21, use this
+# cat['HP1'] = 'jj_l1_tau21_DDT<0.47'
+# cat['HP2'] = 'jj_l2_tau21_DDT<0.47'
+# cat['LP1'] = 'jj_l1_tau21_DDT>0.47&&jj_l1_tau21_DDT<0.88'
+# cat['LP2'] = 'jj_l2_tau21_DDT>0.47&&jj_l2_tau21_DDT<0.88'
+# cat['NP1'] = 'jj_l1_tau21_DDT>0.88'
+# cat['NP2'] = 'jj_l2_tau21_DDT>0.88'
+
+# For retuned DDT tau 21, use this
+cat['HP1'] = '(jj_l1_tau2/jj_l1_tau1+(0.082*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))<0.47'
+cat['HP2'] = '(jj_l2_tau2/jj_l2_tau1+(0.082*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))<0.47'
+cat['LP1'] = '(jj_l1_tau2/jj_l1_tau1+(0.082*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))>0.47&&(jj_l1_tau2/jj_l1_tau1+(0.082*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))<0.88'
+cat['LP2'] = '(jj_l2_tau2/jj_l2_tau1+(0.082*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))>0.47&&(jj_l2_tau2/jj_l2_tau1+(0.082*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))<0.88'
+cat['NP1'] = '(jj_l1_tau2/jj_l1_tau1+(0.082*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))>0.88'
+cat['NP2'] = '(jj_l2_tau2/jj_l2_tau1+(0.082*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))>0.88'
+
 
 cuts={}
 
@@ -142,7 +154,7 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
   cmd='vvMake1DTemplateSpline.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_softDrop_mass"  -b {binsMJ}  -x {minMJ} -X {maxMJ} -f 6 samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
   os.system(cmd)
 
-def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1D"):
+def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1D",wait=True):
  pwd = os.getcwd()
  for p in purities:
   jobname = jobName+"_"+p
@@ -157,13 +169,13 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1D"
   if submitToBatch:
     template += ",QCD_Pt-,QCD_HT"
     from modules.submitJobs import Make1DMVVTemplateWithKernels,merge1DMVVTemplate
-    jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobname)
-    merge1DMVVTemplate(jobList,files,jobname,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+    jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobname,wait)
+    if wait: merge1DMVVTemplate(jobList,files,jobname,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
   else:
     cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV)
     os.system(cmd)	  
 
-def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobName="2DMVV"):
+def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobName="2DMVV",wait=True):
  pwd = os.getcwd()	
  for p in purities:
   jobname = jobName+"_"+p
@@ -179,12 +191,42 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobN
   if submitToBatch:
     template += ",QCD_Pt-,QCD_HT"
     from modules.submitJobs import Make2DTemplateWithKernels,merge2DTemplate
-    jobList, files = Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobname)
-    merge2DTemplate(jobList,files,jobname,p,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+    jobList, files = Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobname,wait)
+    if wait: merge2DTemplate(jobList,files,jobname,p,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
   else:
     cmd='vvMake2DTemplateWithKernels.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass"  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
     os.system(cmd)
 
+def mergeKernelJobs():
+	for p in purities:
+		jobList = []
+		files   = []
+		with open("tmp1D_%s_joblist.txt"%p,'r') as infile:
+			for line in infile:
+				if line.startswith("job"):
+					for job in line.split("[")[1].split("]")[0].split(","):
+						jobList.append(job.replace("'","").replace(" ",""))
+			if line.startswith("file"):
+				for job in line.split("[")[1].split("]")[0].split(","):
+					files.append(job.replace("'","").replace(" ",""))	
+		from modules.submitJobs import merge1DMVVTemplate
+		merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)		
+		
+		jobList = []
+		files   = []
+		with open("tmp2Dl1_%s_joblist.txt"%p,'r') as infile:
+			for line in infile:
+				if line.startswith("job"):
+					for job in line.split("[")[1].split("]")[0].split(","):
+						jobList.append(job.replace("'","").replace(" ",""))
+			if line.startswith("file"):
+				for job in line.split("[")[1].split("]")[0].split(","):
+					files.append(job.replace("'","").replace(" ",""))	
+		
+		from modules.submitJobs import merge2DTemplate
+		merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+		merge2DTemplate(jobList,files,"2Dl2"+"_"+p,p,"l2",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+			
 def mergeBackgroundShapes(name,filename):
 
  for p in purities:
@@ -223,15 +265,27 @@ makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
 makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
 makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
-# do not use these
-# makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
-# makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
-# makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
-# makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 
-makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'])
-makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1")
-makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2")
+## ------ do not use these ------
+## makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
+## makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
+## makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
+## makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
+## ------------------------------
+
+if runParallel:
+	wait = False
+	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+	print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
+	sys.exit()
+	mergeKernelJobs()
+else:
+	wait = True
+	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"nR")

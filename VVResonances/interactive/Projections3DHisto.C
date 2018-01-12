@@ -3,12 +3,12 @@ void Projections3DHisto(){
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 
-TFile* fin = new TFile("JJ_nonRes_2D_HPLP.root","READ");
+TFile* fin = new TFile("JJ_nonRes_2D_HPHP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 hin->Scale(1./hin->Integral());
 
 
-TFile* finMC = new TFile("JJ_HPLP.root","READ");
+TFile* finMC = new TFile("JJ_nonRes_HPHP.root","READ");
 TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
 hinMC->Scale(1./hinMC->Integral());
 
