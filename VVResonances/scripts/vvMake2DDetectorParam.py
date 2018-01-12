@@ -43,6 +43,7 @@ data=MergedPlotter(dataPlotters)
 
 
 
+
 binsxStr=options.binsx.split(',')
 binsx=[]
 for b in binsxStr:
@@ -59,6 +60,9 @@ resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
 
+scaleNsubjHisto=ROOT.TH1F("scaleNsubjHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+resNsubjHisto=ROOT.TH1F("resNsubjHisto","resHisto",len(binsx)-1,array('d',binsx))
+
 variables=options.vars.split(',')
 genVariables=options.genVars.split(',')
 
@@ -71,6 +75,7 @@ f.cd()
 
 superHX=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[2],options.cut,"1",binsx,binsz)
 superHY=data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+genVariables[2],options.cut,"1",binsx,binsz)
+superHNsubj=data.drawTH2Binned('(jj_l1_tau2/jj_l1_tau1)/(jj_l1_gen_tau2/jj_l1_gen_tau1)'+':'+genVariables[2],options.cut,"1",binsx,binsz)
 
 for bin in range(1,superHX.GetNbinsX()+1):
 
@@ -86,11 +91,19 @@ for bin in range(1,superHX.GetNbinsX()+1):
     resyHisto.SetBinContent(bin,tmp.GetRMS())
     resyHisto.SetBinError(bin,tmp.GetRMSError())
 
+    tmp=superHNsubj.ProjectionY("q",bin,bin)
+    scaleNsubjHisto.SetBinContent(bin,tmp.GetMean())
+    scaleNsubjHisto.SetBinError(bin,tmp.GetMeanError())
+    resNsubjHisto.SetBinContent(bin,tmp.GetRMS())
+    resNsubjHisto.SetBinError(bin,tmp.GetRMSError())
         
 scalexHisto.Write()
 scaleyHisto.Write()
+scaleNsubjHisto.Write()
 resxHisto.Write()
 resyHisto.Write()
+resNsubjHisto.Write()
 superHX.Write("dataX")
 superHY.Write("dataY")
+superHNsubj.Write("dataNsubj")
 f.Close()    
