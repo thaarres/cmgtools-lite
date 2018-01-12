@@ -9,12 +9,28 @@ import subprocess, thread
 
 timeCheck = "30"
 userName=os.environ['USER']
+useCondorBatch = True
 
+def makeSubmitFileCondor(exe,jobname,jobflavour):
+    print "make options file for condor job submission "
+    submitfile = open("submit.sub","w")
+    submitfile.write("executable  = "+exe+"\n")
+    submitfile.write("arguments             = $(ClusterID) $(ProcId)\n")
+    submitfile.write("output                = "+jobname+".$(ClusterId).$(ProcId).out\n")
+    submitfile.write("error                 = "+jobname+".$(ClusterId).$(ProcId).err\n")
+    submitfile.write("log                   = "+jobname+".$(ClusterId).log\n")
+    submitfile.write("+JobFlavour           = "+jobflavour+"\n")
+    submitfile.write("queue")
+    submitfile.close()
+	
 def waitForBatchJobs( jobname, remainingjobs, listOfJobs, userName, timeCheck="30"):
 	if listOfJobs-remainingjobs < listOfJobs:
 	    time.sleep(float(timeCheck))
 	    # nprocess = "bjobs -u %s | awk {'print $9'} | grep %s | wc -l" %(userName,jobname)
-	    nprocess = "bjobs -u %s | grep %s | wc -l" %(userName,jobname)
+	    if useCondorBatch:
+                nprocess = "condor_q %s | grep %s | wc -l"%(userName,jobname)
+            else:
+                nprocess = "bjobs -u %s | grep %s | wc -l" %(userName,jobname)
 	    result = subprocess.Popen(nprocess, stdout=subprocess.PIPE, shell=True)
 	    runningJobs =  int(result.stdout.read())
 	    print "waiting for %d job(s) in the queue (out of total %d)" %(runningJobs,listOfJobs)
@@ -52,8 +68,13 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("echo 'STOP---------------'\n")
 	      fout.write("echo\n")
 	      fout.write("echo\n")
-	   os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
-	   os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
+	   if useCondorBatch:
+               os.system("mv  job_*.sh "+jobname+".sh")
+               makeSubmitFileCondor(jobname+".sh",jobname,"microcentury")
+               os.system("condor_submit submit.sub")
+           else:
+               os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
+               os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
 	   print "job nr " + str(j+1) + " file " + k + " being submitted"
 	   joblist.append("%s_%i"%(k.replace(".root",""),j+1))
 	   os.chdir("../..")
@@ -91,7 +112,7 @@ def getEvents(template,samples):
 
 	return minEv, maxEv, NumberOfJobs, files
 	
-def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar",wait=True): # TODO! Buggy, fix
+def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO! Buggy, fix
    
 	print 
 	print 'START: Make2DDetectorParam with parameters:'
@@ -148,18 +169,25 @@ def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar",wait=True
 	      fout.write("echo 'STOP---------------'\n")
 	      fout.write("echo\n")
 	      fout.write("echo\n")
-	   os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
-   
-	   os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobName))
+           if useCondorBatch:
+               os.system("mv  job_*.sh "+jobName+".sh")
+               makeSubmitFileCondor(jobName+".sh",jobName,"microcentury")
+               os.system("condor_submit submit.sub")
+           else:
+               os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
+               os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobName))
 	   print "job nr " + str(x) + " submitted"
 	   joblist.append("%s"%(files[x-1].replace(".root","")))
 	   os.chdir("../..")
    
 	print
 	print "your jobs:"
-	os.system("bjobs")
+	if useCondorBatch:
+            os.system("condor_q")
+        else:
+            os.system("bjobs")
 	userName=os.environ['USER']
-	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	print
 	print 'END: Make2DDetectorParam'
@@ -206,7 +234,10 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	outfile.close()
 	print
 	print "your jobs:"
-	os.system("bjobs")
+        if useCondorBatch:
+            os.system("condor_q")
+        else:
+            os.system("bjobs")
 	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	
@@ -260,7 +291,10 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	outfile.close()
 	print
 	print "your jobs:"
-	os.system("bjobs")
+        if useCondorBatch:
+            os.system("condor_q")
+        else:
+            os.system("bjobs")
 	userName=os.environ['USER']
 	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	

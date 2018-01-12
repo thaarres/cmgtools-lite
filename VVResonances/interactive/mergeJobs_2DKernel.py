@@ -92,7 +92,7 @@ for s in samples:
 if exit_flag:
  print "Mergin not done: some files are missing. Exiting!"
  sys.exit()
- 
+
 
 os.system('rm -r '+outdir+'_out')
 os.system('mkdir '+outdir+'_out')
@@ -187,13 +187,6 @@ mjet_mvv_nominal.SetTitle('mjet_mvv_nominal')
 histo_nominal = fhadd_pythia.Get('histo_nominal_coarse')
 histo_nominal.SetName('histo_nominal_coarse')
 histo_nominal.SetTitle('histo_nominal_coarse')
-#histo_nominal_ScaleUp = fhadd_pythia.Get('histo_nominal_ScaleUp_coarse')
-#histo_nominal_ScaleDown = fhadd_pythia.Get('histo_nominal_ScaleDown_coarse')
-
-#mjet_mvv_nominal = fhadd_madgraph.Get('mjet_mvv_nominal')
-#histo_nominal = fhadd_madgraph.Get('histo_nominal_coarse')
-#histo_nominal_ScaleUp = fhadd_madgraph.Get('histo_nominal_ScaleUp_coarse')
-#histo_nominal_ScaleDown = fhadd_madgraph.Get('histo_nominal_ScaleDown_coarse')
 
 mjet_mvv_altshapeUp_3D = fhadd_herwig.Get('mjet_mvv_nominal_3D') 
 mjet_mvv_altshapeUp_3D.SetName('mjet_mvv_altshapeUp_3D')
@@ -204,8 +197,6 @@ mjet_mvv_altshapeUp.SetTitle('mjet_mvv_altshapeUp')
 histo_altshapeUp = fhadd_herwig.Get('histo_nominal_coarse')
 histo_altshapeUp.SetName('histo_altshapeUp_coarse')
 histo_altshapeUp.SetTitle('histo_altshapeUp_coarse')
-#histo_altshape_ScaleUp = fhadd_herwig.Get('histo_nominal_ScaleUp_coarse')
-#histo_altshape_ScaleDown = fhadd_herwig.Get('histo_nominal_ScaleDown_coarse')
 
 mjet_mvv_altshape2_3D = fhadd_madgraph.Get('mjet_mvv_nominal_3D') 
 mjet_mvv_altshape2_3D.SetName('mjet_mvv_altshape2_3D')
@@ -216,8 +207,6 @@ mjet_mvv_altshape2.SetTitle('mjet_mvv_altshape2')
 histo_altshape2 = fhadd_madgraph.Get('histo_nominal_coarse')
 histo_altshape2.SetName('histo_altshape2_coarse')
 histo_altshape2.SetTitle('histo_altshape2_coarse')
-#mjet_mvv_altshape2 = fhadd_pythia.Get('mjet_mvv_nominal')
-#histo_altshape2 = fhadd_pythia.Get('histo_nominal_coarse')
 
 #save everything in the final out file after renaming and do usual operations on histos
 outf = ROOT.TFile.Open('JJ_nonRes_COND2D_HPHP_l1.root','RECREATE') 
@@ -240,18 +229,6 @@ expanded.SetTitle('histo_nominal')
 expanded.Write('histo_nominal')
 finalHistograms['histo_nominal'] = expanded
 
-#histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp_coarse')
-#conditional(histo_nominal_ScaleUp)
-#expanded=expandHisto(histo_nominal_ScaleUp)
-#conditional(expanded)
-#expanded.Write('histo_nominal_ScaleUp')
-
-#histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown_coarse')
-#conditional(histo_nominal_ScaleDown)
-#expanded=expandHisto(histo_nominal_ScaleDown)
-#conditional(expanded)
-#expanded.Write('histo_nominal_ScaleDown')
-
 histo_altshapeUp.Write('histo_altshapeUp_coarse')
 conditional(histo_altshapeUp)
 expanded=expandHisto(histo_altshapeUp,"herwig")
@@ -260,18 +237,6 @@ expanded.SetName('histo_altshapeUp')
 expanded.SetTitle('histo_altshapeUp')
 expanded.Write('histo_altshapeUp')
 finalHistograms['histo_altshapeUp'] = expanded
-
-#histo_altshape_ScaleUp.Write('histo_altshape_ScaleUp_coarse')
-#conditional(histo_altshape_ScaleUp)
-#expanded=expandHisto(histo_altshape_ScaleUp)
-#conditional(expanded)
-#expanded.Write('histo_altshape_ScaleUp')
-
-#histo_altshape_ScaleDown.Write('histo_altshape_ScaleDown_coarse')
-#conditional(histo_altshape_ScaleDown)
-#expanded=expandHisto(histo_altshape_ScaleDown)
-#conditional(expanded)
-#expanded.Write('histo_altshape_ScaleDown')
 
 histo_altshape2.Write('histo_altshape2_coarse')
 conditional(histo_altshape2)

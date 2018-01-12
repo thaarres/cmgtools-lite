@@ -61,7 +61,7 @@ for(int i=0; i<4; ++i){
  hy[i]->Scale(scale[i]);
  hxMC[i]->Scale(scale[i]);
  hyMC[i]->Scale(scale[i]);
-   
+    
  hx[i]->SetLineColor(colors[i]);
  hx[i]->SetMarkerColor(colors[i]);
  hy[i]->SetLineColor(colors[i]);
@@ -86,12 +86,14 @@ leg->AddEntry(hx[3],"2 < m_{jj} < 5 TeV");
  
 TCanvas* cx = new TCanvas("cx","cx");
 cx->cd();
+hx[0]->SetMinimum(0);
 for(int i=0; i<4; ++i){ hx[i]->Draw("HISTsame"); hxMC[i]->Draw("PEsame");}
 hx[0]->GetXaxis()->SetTitle("m_{jet1} (proj. x) [GeV]");
 leg->Draw();
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
+hy[0]->SetMinimum(0);
 for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
@@ -116,7 +118,7 @@ for(int i=0; i<5; ++i){
  
  hz[i]->Scale(scalez[i]);
  hzMC[i]->Scale(scalez[i]);
-  
+   
  hz[i]->SetLineColor(colors[i]);
  hz[i]->SetMarkerColor(colors[i]);
  hzMC[i]->SetLineColor(colors[i]);
@@ -137,6 +139,8 @@ leg2->AddEntry(hz[4],"150 < m_{jet} < 215 GeV");
 TCanvas* cz = new TCanvas("cz","cz");
 cz->SetLogy();
 cz->cd();
+hz[0]->SetMinimum(1E-09);
+hz[0]->SetMaximum(0.5);
 for(int i=0; i<5; ++i){ hz[i]->Draw("HISTsame"); hzMC[i]->Draw("PEsame");}
 hz[0]->GetXaxis()->SetTitle("m_{jj} (proj. z) [GeV]");
 leg2->Draw();

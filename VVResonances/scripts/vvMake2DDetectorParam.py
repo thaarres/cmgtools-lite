@@ -24,7 +24,7 @@ parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",defau
 
 (options,args) = parser.parse_args()
 
-
+print 
 sampleTypes=options.samples.split(',')
 dataPlotters=[]
 
@@ -45,6 +45,7 @@ data=MergedPlotter(dataPlotters)
 
 
 
+
 binsxStr=options.binsx.split(',')
 binsx=[]
 for b in binsxStr:
@@ -61,11 +62,6 @@ scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
-
-# scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsDijet)-1,array('d',binsDijet))
-# resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsDijet)-1,array('d',binsDijet))
-# scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsDijet)-1,array('d',binsDijet))
-# resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsDijet)-1,array('d',binsDijet))
 
 variables=options.vars.split(',')
 genVariables=options.genVars.split(',')
@@ -96,11 +92,19 @@ for bin in range(1,superHX.GetNbinsX()+1):
     resyHisto.SetBinContent(bin,tmp.GetRMS())
     resyHisto.SetBinError(bin,tmp.GetRMSError())
 
+    #tmp=superHNsubj.ProjectionY("q",bin,bin)
+    #scaleNsubjHisto.SetBinContent(bin,tmp.GetMean())
+    #scaleNsubjHisto.SetBinError(bin,tmp.GetMeanError())
+    #resNsubjHisto.SetBinContent(bin,tmp.GetRMS())
+    #resNsubjHisto.SetBinError(bin,tmp.GetRMSError())
         
 scalexHisto.Write()
 scaleyHisto.Write()
+#scaleNsubjHisto.Write()
 resxHisto.Write()
 resyHisto.Write()
+#resNsubjHisto.Write()
 superHX.Write("dataX")
 superHY.Write("dataY")
+#superHNsubj.Write("dataNsubj")
 f.Close()    
