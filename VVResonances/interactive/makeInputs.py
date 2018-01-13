@@ -209,6 +209,7 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
    cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptance']])
    
    if submitToBatch:
+           template += ",QCD_Pt-,QCD_HT"
 	   from modules.submitJobs import makeData,mergeData
 	   jobList, files = makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,factor,name,data,jobname,samples)
 	   mergeData(jobname,p,rootFile)

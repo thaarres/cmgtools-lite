@@ -1,15 +1,19 @@
-void Projections3DHisto(){
+void Projections3DHisto(std::string dataFile, std::string hdataName, std::string fitFile, std::string hfitName, std::string outDirName){
+
+std::stringstream ss; ss.str(""); ss << "mkdir " << outDirName << std::endl;
+system(ss.str().c_str());
 
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
+gROOT->SetBatch(true);
 
-TFile* fin = new TFile("JJ_nonRes_2D_HPLP.root","READ");
-TH3F* hin = (TH3F*)fin->Get("histo");
+TFile* fin = new TFile(fitFile.c_str(),"READ"); //fitFile: JJ_nonRes_2D_HPHP.root
+TH3F* hin = (TH3F*)fin->Get(hfitName.c_str()); //hfitName: histo
 hin->Scale(1./hin->Integral());
 
 
-TFile* finMC = new TFile("JJ_HPLP.root","READ");
-TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
+TFile* finMC = new TFile(dataFile.c_str(),"READ"); //dataFile: JJ_nonRes_HPHP_nominal.root
+TH3F* hinMC = (TH3F*)finMC->Get(hdataName.c_str()); //hdataName: nonRes
 hinMC->Scale(1./hinMC->Integral());
 
 int binsx = hin->GetNbinsX();
@@ -34,17 +38,20 @@ std::vector<TH1F*> hxMC;
 std::vector<TH1F*> hyMC;
 std::vector<TH1F*> hzMC;
 
+std::vector<TH1F*> pullsx;
+std::vector<TH1F*> pullsy;
+std::vector<TH1F*> pullsz;
+
 int zbinMin[4] = {1,1,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(2000)};
 int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(2000),binsz};
 int colors[5] = {1,99,9,8,94};
 
-float scale[4] = {1.,0.8,2.,30.};
+float scale[4] = {1.,0.8,2.,20.};
 
 for(int i=0; i<4; ++i){
 
  std::cout << "Plotting mJJ projections " << zbinMin[i] << " " << zbinMax[i] << std::endl;
- std::stringstream ss; ss.str("");
- ss << "px_" << i << std::endl;
+ ss.str(""); ss << "px_" << i << std::endl;
  hx.push_back((TH1F*)hin->ProjectionX(ss.str().c_str(),1,binsy,zbinMin[i],zbinMax[i]));
  ss.str(""); ss << "py_" << i << std::endl;
  hy.push_back((TH1F*)hin->ProjectionY(ss.str().c_str(),1,binsx,zbinMin[i],zbinMax[i]));
@@ -52,7 +59,21 @@ for(int i=0; i<4; ++i){
  hxMC.push_back((TH1F*)hinMC->ProjectionX(ss.str().c_str(),1,binsy,zbinMin[i],zbinMax[i]));
  ss.str(""); ss << "pyMC_" << i << std::endl;
  hyMC.push_back((TH1F*)hinMC->ProjectionY(ss.str().c_str(),1,binsx,zbinMin[i],zbinMax[i])); 
-   
+
+ ss.str(""); ss << "pullsx_" << i << std::endl;
+ pullsx.push_back( new TH1F(ss.str().c_str(),ss.str().c_str(),40,-10,10) );
+ ss.str(""); ss << "pullsy_" << i << std::endl;
+ pullsy.push_back( new TH1F(ss.str().c_str(),ss.str().c_str(),40,-10,10) );
+        
+}
+
+for(int i=0; i<4; ++i){
+
+ for(int b=1; b<=binsx; ++b){
+  if(hxMC[i]->GetBinContent(b) != 0){ pullsx[i]->Fill( (hxMC[i]->GetBinContent(b)-hx[i]->GetBinContent(b))/hxMC[i]->GetBinError(b) ); }
+  if(hyMC[i]->GetBinContent(b) != 0){ pullsy[i]->Fill( (hyMC[i]->GetBinContent(b)-hy[i]->GetBinContent(b))/hyMC[i]->GetBinError(b) ); }
+ }
+
 }
 
 for(int i=0; i<4; ++i){
@@ -74,7 +95,14 @@ for(int i=0; i<4; ++i){
  hyMC[i]->SetMarkerColor(colors[i]); 
  hyMC[i]->SetMarkerStyle(20);
  hyMC[i]->SetMarkerSize(0.5);
-
+ 
+ pullsx[i]->SetLineColor(colors[i]);
+ pullsx[i]->SetLineWidth(2);
+ pullsx[i]->SetMarkerSize(0);
+ pullsy[i]->SetLineColor(colors[i]);
+ pullsy[i]->SetLineWidth(2);
+ pullsy[i]->SetMarkerSize(0);
+  
 }
 
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
@@ -90,6 +118,7 @@ hx[0]->SetMinimum(0);
 for(int i=0; i<4; ++i){ hx[i]->Draw("HISTsame"); hxMC[i]->Draw("PEsame");}
 hx[0]->GetXaxis()->SetTitle("m_{jet1} (proj. x) [GeV]");
 leg->Draw();
+cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.png"),"png");
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
@@ -97,6 +126,114 @@ hy[0]->SetMinimum(0);
 for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
+cy->SaveAs(TString(outDirName)+TString("/")+TString("cy.png"),"png");
+
+std::string labelsXY[4] = {"All m_{jj} bins","1 < m_{jj} < 1.3 TeV","1.3 < m_{jj} < 2 TeV","2 < m_{jj} < 5 TeV"};
+for(int i=0; i<4; ++i){
+
+ TPaveText* pt = new TPaveText(0.1436782,0.7690678,0.4224138,0.8644068,"brNDC");
+ pt->SetTextFont(42);
+ pt->SetTextSize(0.042);
+ pt->SetTextAlign(22);
+ pt->SetFillColor(0);
+ pt->SetBorderSize(1);
+ pt->SetFillStyle(0);
+ pt->SetLineWidth(2);
+ pt->AddText(labelsXY[i].c_str());
+ 
+
+ 
+ ss.str(""); ss << "cpullsx_" << i;
+ TCanvas* cpullsx = new TCanvas(ss.str().c_str(),ss.str().c_str());
+ cpullsx->cd(); 
+ pullsx[i]->Draw("PE");
+
+ TF1* f = new TF1("func","gaus(0)",-10,10);
+ f->SetParameter(0,10);
+ f->SetParError(0,5);
+ f->SetParameter(1,0);
+ f->SetParError(1,0.5);
+ f->SetParameter(2,4);
+ f->SetParError(2,2);
+ pullsx[i]->Fit("func");
+ 
+ pt->Draw();
+
+ TPaveText* ptstat = new TPaveText(0.6091954,0.5635593,0.9597701,0.9088983,"brNDC");
+ ptstat->SetTextFont(42);
+ ptstat->SetTextSize(0.042);
+ ptstat->SetTextAlign(12);
+ ptstat->SetFillColor(0);
+ ptstat->SetBorderSize(0);
+ ptstat->SetFillStyle(0);
+ 
+ ss.str(""); ss << "Constant = " << f->GetParameter(0) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "Mean = " << f->GetParameter(1) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "Sigma = " << f->GetParameter(2) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "#chi^2/ndf = " << f->GetChisquare() << "/" << f->GetNDF() << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ 
+ ptstat->Draw();
+
+ cpullsx->SaveAs(TString(outDirName)+TString("/")+TString(cpullsx->GetName())+TString(".png"),"png");
+  
+}
+
+for(int i=0; i<4; ++i){
+
+ TPaveText* pt = new TPaveText(0.1436782,0.7690678,0.4224138,0.8644068,"brNDC");
+ pt->SetTextFont(42);
+ pt->SetTextSize(0.042);
+ pt->SetTextAlign(22);
+ pt->SetFillColor(0);
+ pt->SetBorderSize(1);
+ pt->SetFillStyle(0);
+ pt->SetLineWidth(2);
+ pt->AddText(labelsXY[i].c_str());
+ 
+
+ 
+ ss.str(""); ss << "cpullsy_" << i;
+ TCanvas* cpullsy = new TCanvas(ss.str().c_str(),ss.str().c_str());
+ cpullsy->cd(); 
+ pullsy[i]->Draw("PE");
+
+ TF1* f = new TF1("func","gaus(0)",-10,10);
+ f->SetParameter(0,10);
+ f->SetParError(0,5);
+ f->SetParameter(1,0);
+ f->SetParError(1,0.5);
+ f->SetParameter(2,4);
+ f->SetParError(2,2);
+ pullsy[i]->Fit("func");
+ 
+ pt->Draw();
+
+ TPaveText* ptstat = new TPaveText(0.6091954,0.5635593,0.9597701,0.9088983,"brNDC");
+ ptstat->SetTextFont(42);
+ ptstat->SetTextSize(0.042);
+ ptstat->SetTextAlign(12);
+ ptstat->SetFillColor(0);
+ ptstat->SetBorderSize(0);
+ ptstat->SetFillStyle(0);
+ 
+ ss.str(""); ss << "Constant = " << f->GetParameter(0) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "Mean = " << f->GetParameter(1) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "Sigma = " << f->GetParameter(2) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "#chi^2/ndf = " << f->GetChisquare() << "/" << f->GetNDF() << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ 
+ ptstat->Draw();
+
+ cpullsy->SaveAs(TString(outDirName)+TString("/")+TString(cpullsy->GetName())+TString(".png"),"png");
+  
+}
 
 int xbinMin[5] = {1,hin->GetXaxis()->FindBin(55),hin->GetXaxis()->FindBin(70),hin->GetXaxis()->FindBin(100),hin->GetXaxis()->FindBin(150)};
 int xbinMax[5] = {binsx,hin->GetXaxis()->FindBin(70),hin->GetXaxis()->FindBin(100),hin->GetXaxis()->FindBin(150),binsx};
@@ -106,12 +243,22 @@ float scalez[5] = {1.,1.,0.1,0.01,0.001};
 for(int i=0; i<5; ++i){
 
  std::cout << "Plotting mJ projections " << xbinMin[i] << " " << xbinMax[i] << std::endl;
- std::stringstream ss; ss.str("");
- ss << "pz_" << i << std::endl;
+ ss.str(""); ss << "pz_" << i << std::endl;
  hz.push_back((TH1F*)hin->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
  ss.str(""); ss << "pzMC_" << i << std::endl;
  hzMC.push_back((TH1F*)hinMC->ProjectionZ(ss.str().c_str(),xbinMin[i],xbinMax[i],xbinMin[i],xbinMax[i]));
-   
+
+ ss.str(""); ss << "pullsz_" << i << std::endl;
+ pullsz.push_back( new TH1F(ss.str().c_str(),ss.str().c_str(),40,-10,10) );
+    
+}
+
+for(int i=0; i<5; ++i){
+
+ for(int b=1; b<=binsx; ++b){
+  if(hzMC[i]->GetBinContent(b) != 0){ pullsz[i]->Fill( (hzMC[i]->GetBinContent(b)-hz[i]->GetBinContent(b))/hzMC[i]->GetBinError(b) ); }
+ }
+
 }
 
 for(int i=0; i<5; ++i){
@@ -125,7 +272,11 @@ for(int i=0; i<5; ++i){
  hzMC[i]->SetMarkerColor(colors[i]);
  hzMC[i]->SetMarkerStyle(20);
  hzMC[i]->SetMarkerSize(0.5);
-    
+
+ pullsz[i]->SetLineColor(colors[i]);
+ pullsz[i]->SetLineWidth(2);
+ pullsz[i]->SetMarkerSize(0);
+     
 }
 
 TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
@@ -144,6 +295,61 @@ hz[0]->SetMaximum(0.5);
 for(int i=0; i<5; ++i){ hz[i]->Draw("HISTsame"); hzMC[i]->Draw("PEsame");}
 hz[0]->GetXaxis()->SetTitle("m_{jj} (proj. z) [GeV]");
 leg2->Draw();
+cz->SaveAs(TString(outDirName)+TString("/")+TString("cz.png"),"png");
+
+std::string labelsZ[5] = {"All m_{jet} bins","55 < m_{jet} < 70 GeV","70 < m_{jet} < 100 GeV","100 < m_{jet} < 150 GeV","150 < m_{jet} < 215 GeV"};
+for(int i=0; i<5; ++i){
+
+ TPaveText* pt = new TPaveText(0.1436782,0.7690678,0.4224138,0.8644068,"brNDC");
+ pt->SetTextFont(42);
+ pt->SetTextSize(0.042);
+ pt->SetTextAlign(22);
+ pt->SetFillColor(0);
+ pt->SetBorderSize(1);
+ pt->SetFillStyle(0);
+ pt->SetLineWidth(2);
+ pt->AddText(labelsZ[i].c_str());
+ 
+
+ 
+ ss.str(""); ss << "cpullsz_" << i;
+ TCanvas* cpullsz = new TCanvas(ss.str().c_str(),ss.str().c_str());
+ cpullsz->cd(); 
+ pullsz[i]->Draw("PE");
+
+ TF1* f = new TF1("func","gaus(0)",-10,10);
+ f->SetParameter(0,10);
+ f->SetParError(0,5);
+ f->SetParameter(1,0);
+ f->SetParError(1,0.5);
+ f->SetParameter(2,4);
+ f->SetParError(2,2);
+ pullsz[i]->Fit("func");
+ 
+ pt->Draw();
+
+ TPaveText* ptstat = new TPaveText(0.6091954,0.5635593,0.9597701,0.9088983,"brNDC");
+ ptstat->SetTextFont(42);
+ ptstat->SetTextSize(0.042);
+ ptstat->SetTextAlign(12);
+ ptstat->SetFillColor(0);
+ ptstat->SetBorderSize(0);
+ ptstat->SetFillStyle(0);
+ 
+ ss.str(""); ss << "Constant = " << f->GetParameter(0) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "Mean = " << f->GetParameter(1) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "Sigma = " << f->GetParameter(2) << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ ss.str(""); ss << "#chi^2/ndf = " << f->GetChisquare() << "/" << f->GetNDF() << std::endl;
+ ptstat->AddText(ss.str().c_str());
+ 
+ ptstat->Draw();
+
+ cpullsz->SaveAs(TString(outDirName)+TString("/")+TString(cpullsz->GetName())+TString(".png"),"png");
+  
+}
 
 TH3F* hin_PTZUp = (TH3F*)fin->Get("histo_PTZUp"); hin_PTZUp->Scale(1./hin_PTZUp->Integral());
 TH3F* hin_PTZDown = (TH3F*)fin->Get("histo_PTZDown"); hin_PTZDown->Scale(1./hin_PTZDown->Integral());
@@ -177,6 +383,7 @@ hz_OPTZDown->Draw("HISTsame");
 hzMC[0]->Draw("same");
 leg3->Draw();
 
+czSyst->SaveAs(TString(outDirName)+TString("/")+TString("czSyst.png"),"png");
 
 TH3F* hin_PTXUp = (TH3F*)fin->Get("histo_PTXYUp"); hin_PTXUp->Scale(1./hin_PTXUp->Integral());
 TH3F* hin_PTXDown = (TH3F*)fin->Get("histo_PTXYDown"); hin_PTXDown->Scale(1./hin_PTXDown->Integral());
@@ -202,6 +409,8 @@ hx_OPTXDown->Draw("HISTsame");
 hxMC[0]->Draw("same");
 leg3->Draw();
 
+cxSyst->SaveAs(TString(outDirName)+TString("/")+TString("cxSyst.png"),"png");
+
 TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTYUp"); hin_PTYUp->Scale(1./hin_PTYUp->Integral());
 TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTYDown"); hin_PTYDown->Scale(1./hin_PTYDown->Integral());
 TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTYUp"); hin_OPTYUp->Scale(1./hin_OPTYUp->Integral());
@@ -224,15 +433,22 @@ hy_PTYDown->Draw("HISTsame");
 hy_OPTYUp->Draw("HISTsame");
 hy_OPTYDown->Draw("HISTsame");
 hyMC[0]->Draw("same");
+leg3->Draw();
+
+cySyst->SaveAs(TString(outDirName)+TString("/")+TString("cySyst.png"),"png");
 
 TCanvas* cxz = new TCanvas("cxz","cxz");
 cxz->cd();
 TH2F* hxz = (TH2F*)hin->Project3D("zx");
 hxz->Draw("COLZ");
 
+cxz->SaveAs(TString(outDirName)+TString("/")+TString("cxz.png"),"png");
+
 TCanvas* cyz = new TCanvas("cyz","cyz");
 cyz->cd();
 TH2F* hyz = (TH2F*)hin->Project3D("zy");
 hyz->Draw("COLZ");
+
+cyz->SaveAs(TString(outDirName)+TString("/")+TString("cyz.png"),"png");
 
 }
