@@ -11,7 +11,6 @@ TFile* fin = new TFile(fitFile.c_str(),"READ"); //fitFile: JJ_nonRes_2D_HPHP.roo
 TH3F* hin = (TH3F*)fin->Get(hfitName.c_str()); //hfitName: histo
 hin->Scale(1./hin->Integral());
 
-
 TFile* finMC = new TFile(dataFile.c_str(),"READ"); //dataFile: JJ_nonRes_HPHP_nominal.root
 TH3F* hinMC = (TH3F*)finMC->Get(hdataName.c_str()); //hdataName: nonRes
 hinMC->Scale(1./hinMC->Integral());
