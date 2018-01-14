@@ -992,15 +992,22 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("echo\n")
 	      fout.write("echo\n")
 	   os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
-   
-	   os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
+           if useCondorBatch:
+               os.system("mv  job_*.sh "+jobname+".sh")
+               makeSubmitFileCondor(jobname+".sh",jobname,"workday")
+               os.system("condor_submit submit.sub")
+           else:
+               os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
 	   print "job nr " + str(x) + " submitted"
 	   joblist.append("%s"%(files[x-1].replace(".root","")))
 	   os.chdir("../..")
    
 	print
 	print "your jobs:"
-	os.system("bjobs")
+        if useCondorBatch:
+            os.system("condor_q")
+        else:
+            os.system("bjobs")
 	userName=os.environ['USER']
 	if wait: waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
