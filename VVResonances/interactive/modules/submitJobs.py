@@ -404,7 +404,7 @@ def reSubmit(jobdir,resubmit,jobname):
 			 os.chdir(jobfolder)
 			 if useCondorBatch:
 			    cmd = "condor_submit submit.sub"
-			    script = "2Dl2_HPHP.sh"
+			    script = jobname+".sh"
                          else:
                             script = "job_"+jobs+".sh"
                             cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
