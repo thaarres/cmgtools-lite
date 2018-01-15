@@ -44,7 +44,12 @@ Make the 3D templates
 python makeInputs.py
 ```
 
-Run closure test of 3D templates versus simulation with Projections3DHisto.C script
+Run closure test of 3D templates versus simulation with Projections3DHisto.C script:
+
+```
+root -l
+.x  Projections3DHisto.C("JJ_nonRes_HPHP_nominal.root","nonRes","JJ_nonRes_2D_HPHP.root","histo","control-plots")
+```
 
 Create datacard and workspace and run post fit
 
