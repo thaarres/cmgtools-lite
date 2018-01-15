@@ -19,7 +19,7 @@ def makeSubmitFileCondor(exe,jobname,jobflavour):
     submitfile.write("output                = "+jobname+".$(ClusterId).$(ProcId).out\n")
     submitfile.write("error                 = "+jobname+".$(ClusterId).$(ProcId).err\n")
     submitfile.write("log                   = "+jobname+".$(ClusterId).log\n")
-    submitfile.write("+JobFlavour           = "+jobflavour+"\n")
+    submitfile.write('+JobFlavour           = "'+jobflavour+'"\n')
     submitfile.write("queue")
     submitfile.close()
 	
@@ -70,7 +70,7 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("echo\n")
 	   if useCondorBatch:
                os.system("mv  job_*.sh "+jobname+".sh")
-               makeSubmitFileCondor(jobname+".sh",jobname,"microcentury")
+               makeSubmitFileCondor(jobname+".sh",jobname,"workday")
                os.system("condor_submit submit.sub")
            else:
                os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
@@ -171,7 +171,7 @@ def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO!
 	      fout.write("echo\n")
            if useCondorBatch:
                os.system("mv  job_*.sh "+jobName+".sh")
-               makeSubmitFileCondor(jobName+".sh",jobName,"microcentury")
+               makeSubmitFileCondor(jobName+".sh",jobName,"workday")
                os.system("condor_submit submit.sub")
            else:
                os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
@@ -402,8 +402,12 @@ def reSubmit(jobdir,resubmit,jobname):
 		 if o.find(jobs) != -1: 
 			 jobfolder = jobdir+"/"+jobs+"/"
 			 os.chdir(jobfolder)
-			 script = "job_"+jobs+".sh"
-			 cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
+			 if useCondorBatch:
+			    cmd = "condor_submit submit.sub"
+			    script = jobname+".sh"
+                         else:
+                            script = "job_"+jobs+".sh"
+                            cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
 			 print cmd
 			 jobs += cmd
 			 os.system("chmod 755 %s"%script)
@@ -907,11 +911,8 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		expanded.SetTitle('histo_altshapeUp')
 		expanded.Write('histo_altshapeUp')
 		finalHistograms['histo_altshapeUp'] = expanded
-		#histo_altshapeUp.Write('histo_altshapeUp')
-		#finalHistograms['histo_altshapeUp'] = histo_altshapeUp
-		finalHistograms['histo_altshapeUp'] = histo_altshapeUp
 		if doPythia:
-			histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
+			histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown",2)
 			conditional(histogram_altshapeDown)
 			histogram_altshapeDown.SetName('histo_altshapeDown')
 			histogram_altshapeDown.SetTitle('histo_altshapeDown')
@@ -920,7 +921,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	if doMadGraph:
 		histo_altshape2.Write('histo_altshape2_coarse')
 		conditional(histo_altshape2)
-		expanded=expandHisto(histo_altshape2,"madgraph")
+		expanded=expandHisto(histo_altshape2,"madgraph",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		conditional(expanded)
 		expanded.SetName('histo_altshape2')
 		expanded.SetTitle('histo_altshape2')
@@ -991,15 +992,22 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("echo\n")
 	      fout.write("echo\n")
 	   os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
-   
-	   os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
+           if useCondorBatch:
+               os.system("mv  job_*.sh "+jobname+".sh")
+               makeSubmitFileCondor(jobname+".sh",jobname,"workday")
+               os.system("condor_submit submit.sub")
+           else:
+               os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
 	   print "job nr " + str(x) + " submitted"
 	   joblist.append("%s"%(files[x-1].replace(".root","")))
 	   os.chdir("../..")
    
 	print
 	print "your jobs:"
-	os.system("bjobs")
+        if useCondorBatch:
+            os.system("condor_q")
+        else:
+            os.system("bjobs")
 	userName=os.environ['USER']
 	if wait: waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
