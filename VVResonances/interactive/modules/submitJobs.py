@@ -6,6 +6,7 @@ import sys
 import ROOT
 from ROOT import *
 import subprocess, thread
+from array import array
 
 timeCheck = "30"
 userName=os.environ['USER']
