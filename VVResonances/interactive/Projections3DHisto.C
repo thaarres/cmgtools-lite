@@ -67,20 +67,14 @@ for(int i=0; i<4; ++i){
 }
 
 for(int i=0; i<4; ++i){
-
- for(int b=1; b<=binsx; ++b){
-  if(hxMC[i]->GetBinContent(b) != 0){ pullsx[i]->Fill( (hxMC[i]->GetBinContent(b)-hx[i]->GetBinContent(b))/hxMC[i]->GetBinError(b) ); }
-  if(hyMC[i]->GetBinContent(b) != 0){ pullsy[i]->Fill( (hyMC[i]->GetBinContent(b)-hy[i]->GetBinContent(b))/hyMC[i]->GetBinError(b) ); }
- }
-
-}
-
-for(int i=0; i<4; ++i){
   
- hx[i]->Scale(scale[i]);
- hy[i]->Scale(scale[i]);
+ std::cout << "histo " << i << " int_x " << hx[i]->Integral() << " int_MCx " << hxMC[i]->Integral();
+ std::cout << " int_y " << hy[i]->Integral() << " int_MCy " << hyMC[i]->Integral() << std::endl;
+
  hxMC[i]->Scale(scale[i]);
  hyMC[i]->Scale(scale[i]);
+ hx[i]->Scale(hxMC[i]->Integral()/hx[i]->Integral());
+ hy[i]->Scale(hyMC[i]->Integral()/hy[i]->Integral());
     
  hx[i]->SetLineColor(colors[i]);
  hx[i]->SetMarkerColor(colors[i]);
@@ -104,6 +98,15 @@ for(int i=0; i<4; ++i){
   
 }
 
+for(int i=0; i<4; ++i){
+
+ for(int b=1; b<=binsx; ++b){
+  if(hxMC[i]->GetBinContent(b) != 0){ pullsx[i]->Fill( (hxMC[i]->GetBinContent(b)-hx[i]->GetBinContent(b))/hxMC[i]->GetBinError(b) ); }
+  if(hyMC[i]->GetBinContent(b) != 0){ pullsy[i]->Fill( (hyMC[i]->GetBinContent(b)-hy[i]->GetBinContent(b))/hyMC[i]->GetBinError(b) ); }
+ }
+
+}
+
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
 leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");
 leg->AddEntry(hx[0],"Template","L");
@@ -118,6 +121,7 @@ for(int i=0; i<4; ++i){ hx[i]->Draw("HISTsame"); hxMC[i]->Draw("PEsame");}
 hx[0]->GetXaxis()->SetTitle("m_{jet1} (proj. x) [GeV]");
 leg->Draw();
 cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.png"),"png");
+cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.root"),"root");
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
@@ -126,6 +130,7 @@ for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
 cy->SaveAs(TString(outDirName)+TString("/")+TString("cy.png"),"png");
+cy->SaveAs(TString(outDirName)+TString("/")+TString("cy.root"),"root");
 
 std::string labelsXY[4] = {"All m_{jj} bins","1 < m_{jj} < 1.3 TeV","1.3 < m_{jj} < 2 TeV","2 < m_{jj} < 5 TeV"};
 for(int i=0; i<4; ++i){
@@ -252,18 +257,14 @@ for(int i=0; i<5; ++i){
     
 }
 
-for(int i=0; i<5; ++i){
-
- for(int b=1; b<=binsx; ++b){
-  if(hzMC[i]->GetBinContent(b) != 0){ pullsz[i]->Fill( (hzMC[i]->GetBinContent(b)-hz[i]->GetBinContent(b))/hzMC[i]->GetBinError(b) ); }
- }
-
-}
 
 for(int i=0; i<5; ++i){
+
+ std::cout << "histo " << i << " int_z " << hz[i]->Integral() << " int_MCz " << hzMC[i]->Integral() << std::endl;
  
- hz[i]->Scale(scalez[i]);
+ //hz[i]->Scale(scalez[i]);
  hzMC[i]->Scale(scalez[i]);
+ hz[i]->Scale(hzMC[i]->Integral()/hz[i]->Integral());
    
  hz[i]->SetLineColor(colors[i]);
  hz[i]->SetMarkerColor(colors[i]);
@@ -276,6 +277,14 @@ for(int i=0; i<5; ++i){
  pullsz[i]->SetLineWidth(2);
  pullsz[i]->SetMarkerSize(0);
      
+}
+
+for(int i=0; i<5; ++i){
+
+ for(int b=1; b<=binsx; ++b){
+  if(hzMC[i]->GetBinContent(b) != 0){ pullsz[i]->Fill( (hzMC[i]->GetBinContent(b)-hz[i]->GetBinContent(b))/hzMC[i]->GetBinError(b) ); }
+ }
+
 }
 
 TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);

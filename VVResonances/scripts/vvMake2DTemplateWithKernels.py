@@ -205,7 +205,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   #norm=histI.Integral()
   #y:x
   histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"Softdrop mass","M_{JJ} mass","GeV","GeV","COLZ" )
-  hist3D=plotter.drawTH3("jj_LV_mass:jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{JJ} mass","GeV","Softdrop mass","GeV","COLZ" )
+  #hist3D=plotter.drawTH3("jj_LV_mass:jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{JJ} mass","GeV","Softdrop mass","GeV","COLZ" )
 
   print " - Creating dataset - "
   #dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
@@ -228,7 +228,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histTMP.Scale(histI2D.Integral()/histTMP.Integral())
    histogram.Add(histTMP)
    mjet_mvv_nominal.Add(histI2D)
-   mjet_mvv_nominal_3D.Add(hist3D)
+   #mjet_mvv_nominal_3D.Add(hist3D)
    
   #histI.Delete()  	  
   histTMP.Delete()
@@ -256,7 +256,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   # histogram_scale_down.Add(histTMP)
     
   histI2D.Delete()	
-  hist3D.Delete()  
+  #hist3D.Delete()  
   #histTMP.Delete()
     
  if len(sampleTypes)<2: continue 

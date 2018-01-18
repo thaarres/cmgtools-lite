@@ -41,7 +41,6 @@ GaussianSumTemplateMaker1D::GaussianSumTemplateMaker1D(const RooDataSet* dataset
     for (int i=1;i<output->GetNbinsX()+1;++i) {
       x=output->GetXaxis()->GetBinCenter(i);
       output->Fill(x,reweight*dataset->weight()*gaus(x,scalex,resx));
-      //std::cout << genpt << " " << genx << std::endl;
     }
   }
 }
