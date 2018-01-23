@@ -1,5 +1,6 @@
 import ROOT
 import sys,commands
+import os
 from array import array
 import pickle
 from PlotterBase import PlotterBase
@@ -31,28 +32,6 @@ class TreePlotter(PlotterBase):
 
     def drawTH1(self,var,cuts,lumi,bins,min,max,titlex = "",units = "",drawStyle = "HIST"):
         h = ROOT.TH1D("tmpTH1","",bins,min,max)
-        h.Sumw2()
-        h.SetLineStyle(self.linestyle)
-        h.SetLineColor(self.linecolor)
-        h.SetLineWidth(self.linewidth)
-        h.SetFillStyle(self.fillstyle)
-        h.SetFillColor(self.fillcolor)
-        h.SetMarkerStyle(self.markerstyle)
-        if units=="":
-            h.GetXaxis().SetTitle(titlex)
-        else:
-            h.GetXaxis().SetTitle(titlex+ " ["+units+"]")
-
-        #Apply correction factors
-        corrString='1'
-        for corr in self.corrFactors:
-                corrString = corrString+"*("+str(corr['value'])+")" 
-        self.tree.Draw(var+">>tmpTH1","("+cuts+")*"+lumi+"*"+self.weight+"*("+corrString+")","goff")
-
-        return h
-
-    def drawTH1(self,var,cuts,lumi,bins,binning,titlex = "",units = "",drawStyle = "HIST"):
-        h = ROOT.TH1D("tmpTH1","",bins,binning)
         h.Sumw2()
         h.SetLineStyle(self.linestyle)
         h.SetLineColor(self.linecolor)
@@ -258,7 +237,10 @@ class TreePlotter(PlotterBase):
     def makeDataSet(self,var,cut,firstEv=0,lastEv=-1):
         variables=var.split(',')
 	
-        self.cache=ROOT.TFile("/tmp/%s/cache%i.root"%(commands.getoutput("whoami"),random.randint(0, 1e+6)),"RECREATE")
+        #self.cache=ROOT.TFile("/home/%s/tmp/cache%i.root"%(commands.getoutput("whoami"),random.randint(0, 1e+6)),"RECREATE")
+        self.cache=ROOT.TFile(os.getcwd()+"/tmp/cache%i.root"%(random.randint(0,1e+6)),"RECREATE")
+        os.system("echo 'save chache file to '")
+        os.system("echo "+os.getcwd())
         w=ROOT.RooWorkspace("w","w")
         argset=ROOT.RooArgSet()
         argset2=ROOT.RooArgSet()

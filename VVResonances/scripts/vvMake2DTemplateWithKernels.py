@@ -32,7 +32,7 @@ parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default=
 def getBinning(binsMVV,minx,maxx,bins):
     l=[]
     if binsMVV=="":
-        for i in range(0,bins):
+        for i in range(0,bins+1):
             l.append(minx + i* (maxx - minx)/bins)
     else:
         s = binsMVV.split(",")
@@ -195,15 +195,11 @@ binsx=[]
 for i in range(0,options.binsx+1):
     binsx.append(options.minx+i*(options.maxx-options.minx)/options.binsx)
 
-<<<<<<< HEAD
+
 #binsy=[1000+i*100 for i in range(41)]
 binsy = getBinning(options.binsMVV,options.miny,options.maxy,options.binsy)
 print binsy
 
-=======
-binsy=[1000+i*100 for i in range(41)]
-    
->>>>>>> FETCH_HEAD
 scaleUp = ROOT.TH1F(scale_x)
 scaleUp.SetName("scaleUp")
 scaleDown = ROOT.TH1F(scale_x)
@@ -409,7 +405,7 @@ finalHistograms={}
 f.cd()
 for hist in histograms:
  print "Working on histogram " ,hist.GetName()
- #hist.Write(hist.GetName()+"_coarse")
+ hist.Write(hist.GetName()+"_coarse")
  #smooth
  #print "Smoothing tail for " ,hist.GetName()
  #smoothTail(hist)

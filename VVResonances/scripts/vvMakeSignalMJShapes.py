@@ -34,6 +34,8 @@ parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fi
 
 samples={}
 graphs={'mean':ROOT.TGraphErrors(),'sigma':ROOT.TGraphErrors(),'alpha':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'slope':ROOT.TGraphErrors(),'alpha2':ROOT.TGraphErrors(),'n2':ROOT.TGraphErrors()}
+#if options.sample.find("Wprime")!=-1:
+    #graphs = {'meanW':ROOT.TGraphErrors(),'sigmaW':ROOT.TGraphErrors(),'alphaW':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'alphaW2':ROOT.TGraphErrors(),'meanZ':ROOT.TGraphErrors(),'sigmaZ':ROOT.TGraphErrors(),'alphaZ':ROOT.TGraphErrors(),'alphaZ2':ROOT.TGraphErrors()}
 
 for filename in os.listdir(args[0]):
     if not (filename.find(options.sample)!=-1):
@@ -72,17 +74,27 @@ for mass in sorted(samples.keys()):
         
     fitter=Fitter(['x'])
     if options.doExp==1:
-        fitter.jetResonance('model','x')
+        #if options.sample.find("Wprime")!=-1:
+            #print "fit double peak "
+            #fitter.jetDoublePeakZ('model','x')
+        #else:
+            fitter.jetResonance('model','x')
+        
 #        fitter.w.var("alpha").setVal(1.41)
 #        fitter.w.var("alpha").setConstant(1)
     else:
-        fitter.jetResonanceNOEXP('model','x')
+        #if options.sample.find("Wprime")!=-1:
+            #print "fit double peak "
+            #fitter.jetDoublePeakZ('model','x')
+        #else:
+            fitter.jetResonanceNOEXP('model','x')
 #        fitter.w.var("alpha").setVal(0.50)
 #        fitter.w.var("alpha").setConstant(1)
 
 
     if options.fixPars!="":
         fixedPars =options.fixPars.split(',')
+        print fixedPars
         for par in fixedPars:
             parVal = par.split(':')
             fitter.w.var(parVal[0]).setVal(float(parVal[1]))
@@ -98,6 +110,7 @@ for mass in sorted(samples.keys()):
     fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_"+str(mass)+".png")
 
     for var,graph in graphs.iteritems():
+        print var
         value,error=fitter.fetch(var)
         graph.SetPoint(N,mass,value)
         graph.SetPointError(N,0.0,error)

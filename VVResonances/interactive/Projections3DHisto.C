@@ -3,16 +3,16 @@ void Projections3DHisto(){
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 
-TFile* fin = new TFile("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_tails3D_nonRes_2D_HPHP.root","READ");
+TFile* fin = new TFile("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_nonRes_2D_HPHP.root","READ");
 TH3F* hin = (TH3F*)fin->Get("histo");
 hin->Scale(1./hin->Integral());
 
 
-TFile* finMC = new TFile("JJ_HPHP_herwigMC_herwigData.root","READ");
+TFile* finMC = new TFile("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/JJ_pythia_HPHP.root","READ");
 TH3F* hinMC = (TH3F*)finMC->Get("nonRes");
 hinMC->Scale(1./hinMC->Integral());
 
-const char* sample = "pythianominal_madgraphdata";
+const char* sample = "pythia";
 
 int binsx = hin->GetNbinsX();
 float xmin = hin->GetXaxis()->GetXmin();
@@ -79,9 +79,9 @@ for(int i=0; i<4; ++i){
 
 }
 hx[0]->SetMinimum(0);
-hx[0]->SetMaximum(0.1);
+hx[0]->SetMaximum(0.03);
 hy[0]->SetMinimum(0);
-hy[0]->SetMaximum(0.1);
+hy[0]->SetMaximum(0.03);
 
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
 leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");

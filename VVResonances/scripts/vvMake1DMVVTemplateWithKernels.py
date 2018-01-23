@@ -34,7 +34,7 @@ parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default=
 def getBinning(binsMVV,minx,maxx,bins):
     l=[]
     if binsMVV=="":
-        for i in range(0,bins):
+        for i in range(0,bins+1):
             l.append(minx + i* (maxx - minx)/bins)
     else:
         s = binsMVV.split(",")
@@ -177,7 +177,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print "filename: ", plotter.filename, " preparing central values histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)   
-   histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,array('f',binning))
+   histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
    
    #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
@@ -209,7 +209,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
-   histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,array('f',binning))
+   histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
 
    #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
@@ -241,7 +241,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
-   histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,array('f',binning))
+   histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
 
    #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
@@ -290,16 +290,6 @@ alpha=1.5*1000
 histogram_opt_down,histogram_opt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT",alpha,-1)
 histogram_opt_down.Write()
 histogram_opt_up.Write()
-
-alpha=5000.*5000.
-histogram_pt2_down,histogram_pt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT2",alpha,2)
-histogram_pt2_down.Write()
-histogram_pt2_up.Write()
-
-alpha=1000.*1000.
-histogram_opt2_down,histogram_opt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT2",alpha,-2)
-histogram_opt2_down.Write()
-histogram_opt2_up.Write()  
 
 f.Close()
 

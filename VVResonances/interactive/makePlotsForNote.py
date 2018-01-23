@@ -4,7 +4,7 @@ from CMGTools.VVResonances.plotting.tdrstyle import *
 from  CMGTools.VVResonances.plotting.CMS_lumi import *
 
 #from start16 import *
-directory='plots16'
+directory='plots18'
 lumi='35900'
 period='2016'
 
@@ -1240,9 +1240,12 @@ def makeKernelScaleResolution(filename,histoname):
 
     histo.GetXaxis().SetTitle("gen jet p_{T} (GeV)")
     histo.SetLineWidth(2)
+    histo.GetYaxis().SetTitleOffset(1.4)
     c=ROOT.TCanvas("c")
+    c.SetLeftMargin(0.15)
+    #c.SetTopMargin(0.15)
     histo.Draw()
-    cmslabel_sim(c,period,12)
+    cmslabel_sim(c,period,0)
     c.SaveAs(directory+"/"+name)
     c.SaveAs(directory+"/"+name.replace(".root",".pdf"))
     
@@ -1294,14 +1297,14 @@ def makeKernelScaleResolution(filename,histoname):
 #makeShapeUncertaintiesMVV("LNUJJ_2016/LNuJJ_MVVHist_Wjets_mu_HP.root","Wjets","mu","widthSyst")
 
 
-for c in ['nob']:
-    if c=='vbf':
-        pur=['NP']
-    else:
-        pur=['HP','LP']
-    for p in pur:
-        for l in ['mu','e']:
-            continue
+#for c in ['nob']:
+    #if c=='vbf':
+        #pur=['NP']
+    #else:
+        #pur=['HP','LP']
+    #for p in pur:
+        #for l in ['mu','e']:
+            #continue
 #            makeTemplates2D("LNuJJ_nonRes_2D_"+l+"_"+p+"_"+c+".root","template_nonRes",l+"_"+p+"_"+c)
 #            makeTemplates1D("LNuJJ_resW_MVV_"+l+"_"+p+"_"+c+".root","template_resW",l+"_"+p+"_"+c)
 #            makeShapeUncertaintiesProj2D("LNuJJ_nonRes_2D_"+l+"_"+p+"_"+c+".root","systs_nonRes_"+l+"_"+p+"_"+c,"PTX")
@@ -1323,7 +1326,7 @@ for c in ['nob']:
 #makeTopMJJParam('LNuJJ_MJJ_resW_NP.root','NP')
             
 #makeGOF("gof.root",23447.0)
-makeBias()
+#makeBias()
 
 
 
@@ -1331,8 +1334,8 @@ makeBias()
 #makeTopVsVJetsMVV("LNuJJ_nonRes_COND2D_mu_HP_nob.root")
 
 
-#makeKernelScaleResolution("LNuJJ_nonRes_detectorResponse.root","scalexHisto")
-#makeKernelScaleResolution("LNuJJ_nonRes_detectorResponse.root","scaleyHisto")
+makeKernelScaleResolution("JJ_nonRes_detectorResponse.root","scalexHisto")
+makeKernelScaleResolution("JJ_nonRes_detectorResponse.root","scaleyHisto")
 
-#makeKernelScaleResolution("LNuJJ_nonRes_detectorResponse.root","resxHisto")
-#makeKernelScaleResolution("LNuJJ_nonRes_detectorResponse.root","resyHisto")
+makeKernelScaleResolution("JJ_nonRes_detectorResponse.root","resxHisto")
+makeKernelScaleResolution("JJ_nonRes_detectorResponse.root","resyHisto")

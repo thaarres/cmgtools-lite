@@ -7,7 +7,7 @@ import os, sys, re, optparse,pickle,shutil,json
 
 def getBinning(histo):
     b = []
-    for i in range(0,histo.GetNbinsX()+2):
+    for i in range(1,histo.GetNbinsX()+2):
         b.append(histo.GetBinLowEdge(i))
     return array('d',b)
 
@@ -15,21 +15,35 @@ def makeHisto(name,fx,nhistox,fy,nhistoy,fz,nhistoz,fout):
     histox=fx.Get(nhistox)
     histoy=fy.Get(nhistoy)
     histoz=fz.Get(nhistoz)
-    #print  getBinning(histoz)
+    try:
+        if histox == None: 
+            raise TypeError
+        if histoy == None: 
+            raise TypeError
+        if histoz == None: 
+            raise TypeError
+    except TypeError: return -1
     hxx = histox.ProjectionX("projX")
     hxy = histox.ProjectionY("projY")
     binningx= getBinning(hxx)
     binningz= getBinning(hxy)
-    
+    binningz2= getBinning(histoz)
+    binningz3= getBinning(histoy.ProjectionY("projY2"))
     print binningx
     print binningz
+    print binningz2
+    print binningz3
    
-    h=ROOT.TH3F(name,name,histox.GetNbinsX(),binningx,histox.GetNbinsX(),binningx,histox.GetNbinsY(),binningz)
-    for k in range(1,histoz.GetNbinsX()+1):
-     #print k,histoz.GetBinCenter(k),histoz.GetBinContent(k)
-     for j in range(1,histoy.GetNbinsX()+1):
-        for i in range(1,histox.GetNbinsX()+1):
-            h.SetBinContent(i,j,k,histoz.GetBinContent(k)*histox.GetBinContent(i,k)*histoy.GetBinContent(j,k))
+    print len(binningz)-1
+    print histoz.GetNbinsX() 
+    h=ROOT.TH3F(name,name,len(binningx)-1,binningx,len(binningx)-1,binningx,len(binningz)-1,binningz)
+    for k in range(1,histoz.GetNbinsX()+2):
+     for j in range(1,histoy.GetNbinsX()+2):
+        for i in range(1,histox.GetNbinsX()+2):
+            c = histoz.GetBinContent(k)*histox.GetBinContent(i,k)*histoy.GetBinContent(j,k)
+            #if c == 0:
+            #    print histoz.GetBinCenter(k)
+            h.SetBinContent(i,j,k,c)
     fout.cd()
     h.Write()
 
@@ -119,6 +133,8 @@ makeHisto("histo_altshapeDown",inputx,"histo_altshapeDown",inputy,"histo_altshap
 print "Merge madgraph"
 makeHisto("histo_altshape2",inputx,"histo_altshape2",inputy,"histo_altshape2",inputz,"histo_altshape2",output)
 
+
+print "Write file "+options.output
 
 inputx.Close()
 inputy.Close()

@@ -9,6 +9,7 @@ import subprocess, thread
 sys.path.append('/home/dschaefer/jdl_creator/')
 #sys.path.append('/home/dschaefer/jdl_creator/classes/')
 from classes.JDLCreator import JDLCreator
+from array import array
 
 timeCheck = "30"
 userName=os.environ['USER']
@@ -28,6 +29,15 @@ def writeJDL(arguments,mem,time,name):
     jobs.SetArguments(arguments)              # write an JDL file and create folder f            # set arguments
     jobs.WriteJDL() # write an JDL file and create folder for log files
 
+def getBinning(binsMVV):
+    l=[]
+    if binsMVV=="":
+        return l
+    else:
+        s = binsMVV.split(",")
+        for w in s:
+            l.append(int(w))
+    return l
 
 
 def waitForBatchJobs( jobname, remainingjobs, listOfJobs, userName, timeCheck="30"):
@@ -297,6 +307,17 @@ def expandHisto(histo,suffix,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):
             bin=histogram.GetBin(i,j)
             histogram.SetBinContent(bin,graph.Eval(x,0,"S"))
     return histogram
+
+def expandHistoBinned(histo,suffix ,binsx,binsy):
+    histogram=ROOT.TH2F(histo.GetName()+suffix,"histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
+    for i in range(1,histo.GetNbinsX()+1):
+        proje = histo.ProjectionY("q",i,i)
+        graph=ROOT.TGraph(proje)
+        for j in range(1,histogram.GetNbinsY()+1):
+            x=histogram.GetYaxis().GetBinCenter(j)
+            bin=histogram.GetBin(i,j)
+            histogram.SetBinContent(bin,graph.Eval(x,0,"S"))
+    return histogram
         
 def conditional(hist):
     for i in range(1,hist.GetNbinsY()+1):
@@ -352,7 +373,7 @@ def reSubmit(jobdir,resubmit,jobname):
 			 os.chdir("../..")
  return jobs
  	
-def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):
+def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV):
 	print jobList
 	print "Merging 1D templates"
 	print
@@ -394,6 +415,12 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 	 finalHistos = {}
 	 finalHistos['histo_nominal'] = ROOT.TH1F("histo_nominal_out","histo_nominal_out",binsMVV,minMVV,maxMVV)
 	 finalHistos['mvv_nominal'] = ROOT.TH1F("mvv_nominal_out","mvv_nominal_out",binsMVV,minMVV,maxMVV)
+	 if HCALbinsMVV!="":
+             a,b,bins = HCALbinsMVV.split(" ")
+             binning = getBinning(bins)
+             binning = array("f",binning)
+             finalHistos['histo_nominal'] = ROOT.TH1F("histo_nominal_out","histo_nominal_out",len(binning)-1,binning)
+             finalHistos['mvv_nominal'] = ROOT.TH1F("mvv_nominal_out","mvv_nominal_out",len(binning)-1,binning)
     
 	 for f in jobsPerSample[s]:
     
@@ -536,7 +563,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 	os.system('rm -rf '+outdir+'_out/')
 	#os.system('rm -rf '+outdir+'/')
 
-def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ):  
+def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV):  
 	
 	print "Merging 2D templates"
 	print
@@ -581,7 +608,20 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal_3D'] = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",binsMJ,minMJ,maxMJ,binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
-    
+         if HCALbinsMVV!="":
+             a,b,bins = HCALbinsMVV.split(" ")
+             binning = getBinning(bins)
+             binning = array("d",binning)
+             xbins = []
+             for i in range(0,binsMJ+1):
+                xbins.append(minMJ + i* (maxMJ - minMJ)/binsMJ)
+             xbins = array("d",xbins)
+             finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",len(xbins)-1,xbins,len(binning)-1,binning)
+             finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",len(xbins)-1,xbins,len(binning)-1,binning)
+             finalHistos['mjet_mvv_nominal_3D'] = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",len(xbins)-1,xbins,len(xbins)-1,xbins,len(binning)-1,binning)
+             print "use binning "+str(binning)
+         print binsMVV
+         print finalHistos['histo_nominal_coarse'].GetNbinsY()
 	 for f in jobsPerSample[s]:
 
 	  inf = ROOT.TFile.Open(f,'READ')
@@ -592,8 +632,6 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	   for k in finalHistos.keys():
         
 	    if h.GetName() == k:
-             #print "add histos with key "
-             #print k
 	     histo = ROOT.TH1F()
 	     histo = inf.Get(h.GetName())
 
@@ -717,6 +755,8 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		conditional(histo_nominal)
 		print "expand histogram"
 		expanded=expandHisto(histo_nominal,"",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+		if HCALbinsMVV!="":
+                    expanded=expandHistoBinned(histo_nominal,"",xbins,binning)
 		conditional(expanded)
 		expanded.SetName('histo_nominal')
 		expanded.SetTitle('histo_nominal')
@@ -736,7 +776,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		#expanded.Write('histo_nominal_ScaleDown')
 		
 		alpha=1.5/215.
-		histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha)
+		histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha,1,2)
 		conditional(histogram_pt_down)
 		histogram_pt_down.SetName('histo_nominal_PTDown')
 		histogram_pt_down.SetTitle('histo_nominal_PTDown')
@@ -747,7 +787,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histogram_pt_up.Write('histo_nominal_PTUp')
 
 		alpha=1.5*55.
-		h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1)
+		h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1,2)
 		conditional(h1)
 		h1.SetName('histo_nominal_OPTDown')
 		h1.SetTitle('histo_nominal_OPTDown')
@@ -762,6 +802,8 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histo_altshapeUp.Write('histo_altshapeUp_coarse')
 		conditional(histo_altshapeUp)
 		expanded=expandHisto(histo_altshapeUp,"herwig",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+		if HCALbinsMVV!="":
+                    expanded=expandHistoBinned(histo_nominal,"",xbins,binning)
 		conditional(expanded)
 		expanded.SetName('histo_altshapeUp')
 		expanded.SetTitle('histo_altshapeUp')
@@ -792,6 +834,8 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histo_altshape2.Write('histo_altshape2_coarse')
 		conditional(histo_altshape2)
 		expanded=expandHisto(histo_altshape2,"madgraph",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+		if HCALbinsMVV!="":
+                    expanded=expandHistoBinned(histo_nominal,"",xbins,binning)
 		conditional(expanded)
 		expanded.SetName('histo_altshape2')
 		expanded.SetTitle('histo_altshape2')
@@ -821,7 +865,6 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	print 
 	if mypath!="":
             os.chdir(startpath)
-        #minEv, maxEv, NumberOfJobs, files = getEvents(template,samples)
 	files = []
 	sampleTypes = template.split(',')
 	for f in os.listdir(samples):
@@ -950,16 +993,52 @@ def mergeData(jobname,purity):
 		 cmd += ' '
 		print cmd
 		os.system(cmd)
+
+
+def getListOfBinsLowEdge(hist,dim):
+    axis =0
+    N = 0
+    if dim =="x":
+        axis= hist.GetXaxis()
+        N = hist.GetNbinsX()
+    if dim =="y":
+        axis = hist.GetYaxis()
+        N = hist.GetNbinsY()
+    if dim =="z":
+        axis = hist.GetZaxis()
+        N = hist.GetNbinsZ()
+    if axis==0:
+        return {}
+    
+    mmin = axis.GetXmin()
+    mmax = axis.GetXmax()
+    r =[]
+    for i in range(1,N+2):
+        #v = mmin + i * (mmax-mmin)/float(N)
+        r.append(axis.GetBinLowEdge(i))
+    return r
+
+
 	
 def makePseudodata(infile,purity):
 	print "Making pseudodata from infile " ,infile
 	fin = ROOT.TFile.Open(infile,'READ')
 	hmcin = fin.Get('nonRes')
 	
+	xbins = array("f",getListOfBinsLowEdge(hmcin,"x"))
+	zbins = array("f",getListOfBinsLowEdge(hmcin,"z"))
+	print xbins
+	#print zbins
+	#print xbins
 	fout = ROOT.TFile.Open('JJ_%s.root'%purity,'RECREATE')
-	hout = ROOT.TH3F('data','data',hmcin.GetNbinsX(),hmcin.GetXaxis().GetXmin(),hmcin.GetXaxis().GetXmax(),hmcin.GetNbinsY(),hmcin.GetYaxis().GetXmin(),hmcin.GetYaxis().GetXmax(),hmcin.GetNbinsZ(),hmcin.GetZaxis().GetXmin(),hmcin.GetZaxis().GetXmax())
-	hmcout = ROOT.TH3F('nonRes','nonRes',hmcin.GetNbinsX(),hmcin.GetXaxis().GetXmin(),hmcin.GetXaxis().GetXmax(),hmcin.GetNbinsY(),hmcin.GetYaxis().GetXmin(),hmcin.GetYaxis().GetXmax(),hmcin.GetNbinsZ(),hmcin.GetZaxis().GetXmin(),hmcin.GetZaxis().GetXmax())
+	hout = ROOT.TH3F('data','data',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+	hmcout = ROOT.TH3F('nonRes','nonRes',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+	xbins2 = array("f",getListOfBinsLowEdge(hmcout,"x"))
+	zbins2 = array("f",getListOfBinsLowEdge(hmcout,"z"))
+	print xbins2
 	hmcout.Add(hmcin)
+	
+	
 	
 	for k in range(1,hmcin.GetNbinsZ()+1):
 	 for j in range(1,hmcin.GetNbinsY()+1):
@@ -975,3 +1054,4 @@ def makePseudodata(infile,purity):
 	
 	fin.Close()
         fout.Close()
+        print "made pseudo-data : JJ_"+purity+".root"
