@@ -1,6 +1,5 @@
 #include "CMGTools/VVResonances/interface/GaussianSumTemplateMaker1D.h"
 #include "RooArgSet.h"
-#include "TMath.h"
 
 using namespace cmg;
 GaussianSumTemplateMaker1D::GaussianSumTemplateMaker1D() {}
