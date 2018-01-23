@@ -6,14 +6,17 @@ import sys
 import ROOT
 from ROOT import *
 import subprocess, thread
+######## comment out for lxplus ###########
 sys.path.append('/home/dschaefer/jdl_creator/')
 #sys.path.append('/home/dschaefer/jdl_creator/classes/')
 from classes.JDLCreator import JDLCreator
+###########################################
 from array import array
 
 timeCheck = "30"
 userName=os.environ['USER']
-useCondorBatch =True
+######## comment out for lxplus ##############
+#useCondorBatch =True
 mypath = "/portal/ekpbms2/home/dschaefer/tmp/"
 startpath="/usr/users/dschaefer/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive"
 
@@ -28,6 +31,7 @@ def writeJDL(arguments,mem,time,name):
     #jobs.SetFolder('/usr/users/dschaefer/job_submission/local/sframe')  # set subfolder !!! you have to copy your job file into the folder
     jobs.SetArguments(arguments)              # write an JDL file and create folder f            # set arguments
     jobs.WriteJDL() # write an JDL file and create folder for log files
+################################################
 
 def getBinning(binsMVV):
     l=[]
@@ -39,15 +43,28 @@ def getBinning(binsMVV):
             l.append(int(w))
     return l
 
+useCondorBatch = True
 
+def makeSubmitFileCondor(exe,jobname,jobflavour):
+    print "make options file for condor job submission "
+    submitfile = open("submit.sub","w")
+    submitfile.write("executable  = "+exe+"\n")
+    submitfile.write("arguments             = $(ClusterID) $(ProcId)\n")
+    submitfile.write("output                = "+jobname+".$(ClusterId).$(ProcId).out\n")
+    submitfile.write("error                 = "+jobname+".$(ClusterId).$(ProcId).err\n")
+    submitfile.write("log                   = "+jobname+".$(ClusterId).log\n")
+    submitfile.write('+JobFlavour           = "'+jobflavour+'"\n')
+    submitfile.write("queue")
+    submitfile.close()
+	
 def waitForBatchJobs( jobname, remainingjobs, listOfJobs, userName, timeCheck="30"):
 	if listOfJobs-remainingjobs < listOfJobs:
 	    time.sleep(float(timeCheck))
 	    # nprocess = "bjobs -u %s | awk {'print $9'} | grep %s | wc -l" %(userName,jobname)
-	    if not useCondorBatch:
-                nprocess = "bjobs -u %s | grep %s | wc -l" %(userName,jobname)
+	    if useCondorBatch:
+                nprocess = "condor_q %s | grep %s | wc -l"%(userName,jobname)
             else:
-                nprocess = "condor_q %s | grep %s | wc -l" %(userName,jobname)
+                nprocess = "bjobs -u %s | grep %s | wc -l" %(userName,jobname)
 	    result = subprocess.Popen(nprocess, stdout=subprocess.PIPE, shell=True)
 	    runningJobs =  int(result.stdout.read())
 	    print "waiting for %d job(s) in the queue (out of total %d)" %(runningJobs,listOfJobs)
@@ -95,13 +112,18 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("echo 'STOP---------------'\n")
 	      fout.write("echo\n")
 	      fout.write("echo\n")
-	   os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
-	   if not useCondorBatch:
-            os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
+
+	   if useCondorBatch:
+               os.system("mv  job_*.sh "+jobname+".sh")
+               ########## comment out for lxplus #########
+               writeJDL('',1*1000,20*60,jobname+'.sh')
+               os.system("condor_submit "+jobname+".jdl") 
+          #####################################################
+             #  makeSubmitFileCondor(jobname+".sh",jobname,"workday")
+             #  os.system("condor_submit submit.sub")
            else:
-            os.system("mv  job_*.sh "+jobname+".sh") 
-            writeJDL("",1*1000,20*60,jobname+".sh")
-            os.system("condor_submit "+jobname+".jdl")
+               os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
+               os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
 	   print "job nr " + str(j+1) + " file " + k + " being submitted"
 	   joblist.append("%s_%i"%(k.replace(".root",""),j+1))
 	   os.chdir("../..")
@@ -139,7 +161,90 @@ def getEvents(template,samples):
 
 	return minEv, maxEv, NumberOfJobs, files
 	
-def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV",binning=""):
+def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO! Buggy, fix
+   
+	print 
+	print 'START: Make2DDetectorParam with parameters:'
+	print
+	print "rootFile = %s" %rootFile  
+	print "template = %s" %template  
+	print "cut      = %s" %cut       
+	print "samples  = %s" %samples   
+	print "jobName  = %s" %jobName 
+	
+
+	cmd='vvMake2DDetectorParam.py  -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,infolder=samples)
+	
+	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
+	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
+	
+	files = []
+	sampleTypes = template.split(',')
+	for f in os.listdir(samples):
+		for t in sampleTypes:
+			if f.find('.root') != -1 and f.find(t) != -1: files.append(f)
+ 
+	NumberOfJobs= len(files) 
+	print
+	print "Submitting %i number of jobs "  ,NumberOfJobs
+	print
+	
+	path = os.getcwd()
+	try: os.system("rm -r tmp"+jobName)
+	except: print "No tmp/ directory"
+	os.system("mkdir tmp"+jobName)
+	try: os.stat("res"+jobName) 
+	except: os.mkdir("res"+jobName)
+	print
+
+	#### Creating and sending jobs #####
+	joblist = []
+	##### loop for creating and sending jobs #####
+	for x in range(1, int(NumberOfJobs)+1):
+	 
+	   os.system("mkdir tmp"+jobName+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir("tmp"+jobName+"/"+str(files[x-1]).replace(".root",""))
+	 
+	   with open('job_%s.sh'%files[x-1].replace(".root",""), 'w') as fout:
+	      fout.write("#!/bin/sh\n")
+	      fout.write("echo\n")
+	      fout.write("echo\n")
+	      fout.write("echo 'START---------------'\n")
+	      fout.write("echo 'WORKDIR ' ${PWD}\n")
+	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
+	      fout.write("cd "+str(path)+"\n")
+	      fout.write("cmsenv\n")
+	      fout.write(cmd+" -o "+path+"/res"+jobName+"/"+OutputFileNames+"_"+files[x-1]+" -s "+files[x-1]+"\n")
+	      fout.write("echo 'STOP---------------'\n")
+	      fout.write("echo\n")
+	      fout.write("echo\n")
+           if useCondorBatch:
+               os.system("mv  job_*.sh "+jobName+".sh")
+               makeSubmitFileCondor(jobName+".sh",jobName,"workday")
+               os.system("condor_submit submit.sub")
+           else:
+               os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
+               os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobName))
+	   print "job nr " + str(x) + " submitted"
+	   joblist.append("%s"%(files[x-1].replace(".root","")))
+	   os.chdir("../..")
+   
+	print
+	print "your jobs:"
+	if useCondorBatch:
+            os.system("condor_q")
+        else:
+            os.system("bjobs")
+	userName=os.environ['USER']
+	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	
+	print
+	print 'END: Make2DDetectorParam'
+	print
+	return joblist, files	
+	
+def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV",wait=True,binning=''):
+
 	
 	print 
 	print 'START: Make1DMVVTemplateWithKernels with parameters:'
@@ -174,26 +279,25 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
-	
+	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
+		outfile.write("jobList = %s\n" % joblist)
+		outfile.write("files = %s\n" % files)
+	outfile.close()
 	print
 	print "your jobs:"
-	if not useCondorBatch:
-            os.system("bjobs")
-        else:
+        if useCondorBatch:
             os.system("condor_q")
-	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
-	
-	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
-		outfile.write("jobList: %s\n" % joblist)
-		outfile.write("files: %s\n" % files)
-	outfile.close()
-	
+        else:
+            os.system("bjobs")
+	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	print
 	print 'END: Make1DMVVTemplateWithKernels'
 	print
 	return joblist, files 
 
-def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobName="2DMVV",binning=""):
+
+def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,resFile,binsMJ,minMJ,maxMJ,samples,jobName="2DMVV",wait=True,binning=''):
+
 	
 	print 
 	print 'START: Make2DTemplateWithKernels'
@@ -232,26 +336,26 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
-	
+	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
+		outfile.write("jobList = %s\n" % joblist)
+		outfile.write("files = %s\n" % files)
+	outfile.close()
 	print
 	print "your jobs:"
-	if not useCondorBatch:
-            os.system("bjobs")
-        else:
+        if useCondorBatch:
             os.system("condor_q")
+        else:
+            os.system("bjobs")
 	userName=os.environ['USER']
-	waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	if wait: waitForBatchJobs(jobName,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
-	with open('tmp'+jobName+'_joblist.txt','w') as outfile:
-		outfile.write("jobList: %s\n" % joblist)
-		outfile.write("files: %s\n" % files)
-	outfile.close()
+	
 	  
 	print
 	print 'END: Make2DTemplateWithKernels'
 	print
 	return joblist, files
-		
+
 def unequalScale(histo,name,alpha,power=1,dim=1):
     newHistoU =copy.deepcopy(histo) 
     newHistoU.SetName(name+"Up")
@@ -360,21 +464,160 @@ def reSubmit(jobdir,resubmit,jobname):
 		 if o.find(jobs) != -1: 
 			 jobfolder = jobdir+"/"+jobs+"/"
 			 os.chdir(jobfolder)
-			 if not useCondorBatch:
+			 if useCondorBatch:
+			    cmd = "condor_submit submit.sub"
+			    script = jobname+".sh"
+                         else:
                             script = "job_"+jobs+".sh"
                             cmd = "bsub -q 8nh -o logs %s -J %s"%(script,jobname)
-                         else:
-                             script = jobname+".sh"
-                             cmd = "condor_submit "+jobname+".jdl"
 			 print cmd
 			 jobs += cmd
 			 os.system("chmod 755 %s"%script)
 			 os.system(cmd)
 			 os.chdir("../..")
  return jobs
- 	
+
+def merge2DDetectorParam(jobList,files,binsxStr,jobname):
+	
+	print "Merging 2D detector parametrization"
+	print
+	print "Jobs to merge :   " ,jobList
+	print "Files ran over:   " ,files
+	
+	outdir = 'res'+jobname
+	jobdir = 'tmp'+jobname
+	
+	''' I DO NOT GET THIS! TO BE FIXED!
+	resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+	
+	if exit_flag:
+	 submit = raw_input("The following files are missing: %s. Do you  want to resubmit the jobs to the batch system before merging? [y/n] "%resubmit)
+	 if submit == 'y' or submit=='Y':
+		 print "Resubmitting jobs:"
+		 jobs = reSubmit(jobdir,resubmit,jobname)
+		 waitForBatchJobs(jobname,len(resubmit),len(resubmit), userName, timeCheck)
+		 resubmit, jobsPerSample,exit_flag = getJobs(files,jobList,outdir)
+		 if exit_flag: 
+			 print "Job crashed again! Please resubmit manually before attempting to merge again"
+			 for j in jobs: print j 
+			 sys.exit()
+	else:
+		 submit = raw_input("Some files are missing. [y] == Exit without merging, [n] == continue ? ")
+		 if submit == 'y' or submit=='Y':
+			 print "Exit without merging!"
+			 sys.exit()
+		 else:
+			 print "Continuing merge!"
+ 
+	try: 
+		os.stat(outdir+'_out') 
+		os.system('rm -r '+outdir+'_out')
+		os.mkdir(outdir+'_out')
+	except: os.mkdir(outdir+'_out')
+        '''
+	
+	filelist = os.listdir('./res'+jobname+'/')
+
+	pythia_files = []
+	herwig_files = []
+	mg_files = []
+
+	for f in filelist:
+	 if f.find('QCD_Pt_') != -1: pythia_files.append('./res'+jobname+'/'+f)
+	 elif f.find('QCD_HT') != -1: mg_files.append('./res'+jobname+'/'+f)
+	 else: herwig_files.append('./res'+jobname+'/'+f)
+	
+
+	#now hadd them
+	tmp_files = []
+	if len(pythia_files) > 0:
+		cmd = 'hadd -f tmp_nominal.root '
+		for f in pythia_files:
+		 cmd += f
+		 cmd += ' '
+		print cmd
+		os.system(cmd)
+		tmp_files.append('tmp_nominal.root')
+		
+	if len(mg_files) > 0:
+		cmd = 'hadd -f tmp_altshape2.root '
+		for f in mg_files:
+		 cmd += f
+		 cmd += ' '
+		print cmd
+		os.system(cmd)	
+		tmp_files.append('tmp_altshape2.root')	
+
+	if len(herwig_files) > 0:
+		cmd = 'hadd -f tmp_altshapeUp.root '
+		for f in herwig_files:
+		 cmd += f
+		 cmd += ' '
+		print cmd
+		os.system(cmd)	
+		tmp_files.append('tmp_altshapeUp.root')
+		
+	#produce final det resolution files (one per sample, but at the end we use the pythia one in the following steps for all the samples)
+	for f in tmp_files:
+	
+	 fin = ROOT.TFile.Open(f,'READ')
+	 
+         superHX = fin.Get("dataX")
+	 superHY = fin.Get("dataY")
+	 superHNsubj = fin.Get("dataNsubj")
+
+	 binsx=[]
+	 for b in binsxStr.split(','):
+	     binsx.append(float(b))
+	  
+	 fout = ROOT.TFile("JJ_nonRes_detectorResponse_"+f.split('_')[1],"RECREATE")
+
+	 scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+	 resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
+	 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+	 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
+	 #scaleNsubjHisto=ROOT.TH1F("scaleNsubjHisto","scaleHisto",len(binsx)-1,array('d',binsx))
+	 #resNsubjHisto=ROOT.TH1F("resNsubjHisto","resHisto",len(binsx)-1,array('d',binsx))
+
+	 for bin in range(1,superHX.GetNbinsX()+1):
+
+	     tmp=superHX.ProjectionY("q",bin,bin)
+	     scalexHisto.SetBinContent(bin,tmp.GetMean())
+	     scalexHisto.SetBinError(bin,tmp.GetMeanError())
+	     resxHisto.SetBinContent(bin,tmp.GetRMS())
+	     resxHisto.SetBinError(bin,tmp.GetRMSError())
+
+	     tmp=superHY.ProjectionY("q",bin,bin)
+	     scaleyHisto.SetBinContent(bin,tmp.GetMean())
+	     scaleyHisto.SetBinError(bin,tmp.GetMeanError())
+	     resyHisto.SetBinContent(bin,tmp.GetRMS())
+	     resyHisto.SetBinError(bin,tmp.GetRMSError())
+
+	     #tmp=superHNsubj.ProjectionY("q",bin,bin)
+	     #scaleNsubjHisto.SetBinContent(bin,tmp.GetMean())
+	     #scaleNsubjHisto.SetBinError(bin,tmp.GetMeanError())
+	     #resNsubjHisto.SetBinContent(bin,tmp.GetRMS())
+	     #resNsubjHisto.SetBinError(bin,tmp.GetRMSError())
+	     
+	 scalexHisto.Write()
+	 scaleyHisto.Write()
+	 #scaleNsubjHisto.Write()
+	 resxHisto.Write()
+	 resyHisto.Write()
+	 #resNsubjHisto.Write()
+	 superHX.Write("dataX")
+	 superHY.Write("dataY")
+	 #superHNsubj.Write("dataNsubj")
+
+	 fout.Close()
+	 fin.Close()
+	 
+	 os.system('rm '+f)
+	
+	#use the pythia det resolution for all the sample in the following steps
+	os.system('cp JJ_nonRes_detectorResponse_nominal.root JJ_nonRes_detectorResponse.root')
+		 	
 def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV):
-	print jobList
 	print "Merging 1D templates"
 	print
 	print "Jobs to merge :   " ,jobList
@@ -397,8 +640,12 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 			 for j in jobs: print j 
 			 sys.exit()
 	 else:
-		 print "Some files are missing. Exit without merging!"
-	 sys.exit()
+		 submit = raw_input("Some files are missing. [y] == Exit without merging, [n] == continue ? ")
+		 if submit == 'y' or submit=='Y':
+			 print "Exit without merging!"
+			 sys.exit()
+		 else:
+			 print "Continuing merge!"
  
 	try: 
 		os.stat(outdir+'_out') 
@@ -544,6 +791,31 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_opt_up.SetTitle('histo_nominal_OPTUp')
 		histogram_opt_up.Write('histo_nominal_OPTUp')
 		
+		alpha=5000.*5000.
+		histogram_pt2_down,histogram_pt2_up=unequalScale(histo_nominal,"histo_nominal_PT2",alpha,2)
+		histogram_pt2_down.SetName('histo_nominal_PT2Down')
+		histogram_pt2_down.SetTitle('histo_nominal_PT2Down')
+		histogram_pt2_down.Write('histo_nominal_PT2Down')
+		histogram_pt2_down.Write()
+		
+		histogram_pt2_up.SetName('histo_nominal_PT2Up')
+		histogram_pt2_up.SetTitle('histo_nominal_PT2Up')
+		histogram_pt2_up.Write('histo_nominal_PT2Up')
+		histogram_pt2_up.Write()
+		
+		alpha=1000.*1000.
+		histogram_opt2_down,histogram_opt2_up=unequalScale(histo_nominal,"histo_nominal_OPT2",alpha,-2)
+		
+		histogram_opt2_up.SetName('histo_nominal_OPT2Up')
+		histogram_opt2_up.SetTitle('histo_nominal_OPT2Up')
+		histogram_opt2_up.Write()
+		
+		histogram_opt2_down.SetName('histo_nominal_OPT2Up')
+		histogram_opt2_down.SetTitle('histo_nominal_OPT2Up')
+		histogram_opt2_down.Write()
+		
+		
+		
 	if doHerwig:
 		mvv_altshapeUp.Write('mvv_altshapeUp')
 		histo_altshapeUp.Write('histo_altshapeUp')
@@ -587,8 +859,12 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 			 for j in jobs: print j 
 			 sys.exit()
 	 else:
-		 print "Some files are missing. Exit without merging!"
-		 sys.exit()
+		 submit = raw_input("Some files are missing. [y] == Exit without merging, [n] == continue ? ")
+		 if submit == 'y' or submit=='Y':
+			 print "Exit without merging!"
+			 sys.exit()
+		 else:
+			 print "Continuing merge!"
 	
  
 	try: 
@@ -657,6 +933,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	herwig_files = []
 
 	for f in filelist:
+	 if f.find('COND2D') == -1: continue
 	 if f.find('QCD_HT') != -1: mg_files.append('./'+outdir+'_out'+'/'+f)
 	 elif f.find('QCD_Pt_') != -1: pythia_files.append('./'+outdir+'_out'+'/'+f)
 	 else: herwig_files.append('./'+outdir+'_out'+'/'+f)
@@ -674,13 +951,9 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		 cmd += ' '
 		print cmd
 		os.system(cmd)
-		
-		
+
+
 		fhadd_madgraph = ROOT.TFile.Open('JJ_nonRes_COND2D_%s_%s_altshape2.root'%(purity,leg),'READ')
-		#mjet_mvv_nominal = fhadd_madgraph.Get('mjet_mvv_nominal')
-		#histo_nominal = fhadd_madgraph.Get('histo_nominal_coarse')
-		#histo_nominal_ScaleUp = fhadd_madgraph.Get('histo_nominal_ScaleUp_coarse')
-		#histo_nominal_ScaleDown = fhadd_madgraph.Get('histo_nominal_ScaleDown_coarse')
 		mjet_mvv_altshape2_3D = fhadd_madgraph.Get('mjet_mvv_nominal_3D') 
 		mjet_mvv_altshape2_3D.SetName('mjet_mvv_altshape2_3D')
 		mjet_mvv_altshape2_3D.SetTitle('mjet_mvv_altshape2_3D')
@@ -690,9 +963,12 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histo_altshape2 = fhadd_madgraph.Get('histo_nominal_coarse')
 		histo_altshape2.SetName('histo_altshape2_coarse')
 		histo_altshape2.SetTitle('histo_altshape2_coarse')
-		
+		#histo_altshape2 = fhadd_madgraph.Get('histo_nominal')
+		#histo_altshape2.SetName('histo_altshape2')
+		#histo_altshape2.SetTitle('histo_altshape2')
+
 		doMadGraph = True
-		
+
 
 	if len(herwig_files) > 0:
 		cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_altshapeUp.root '%(purity,leg)
@@ -701,7 +977,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		 cmd += ' '
 		print cmd
 		os.system(cmd)
-		
+
 		fhadd_herwig = ROOT.TFile.Open('JJ_nonRes_COND2D_%s_%s_altshapeUp.root'%(purity,leg),'READ')
 		mjet_mvv_altshapeUp_3D = fhadd_herwig.Get('mjet_mvv_nominal_3D') 
 		mjet_mvv_altshapeUp_3D.SetName('mjet_mvv_altshapeUp_3D')
@@ -712,11 +988,11 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histo_altshapeUp = fhadd_herwig.Get('histo_nominal_coarse')
 		histo_altshapeUp.SetName('histo_altshapeUp_coarse')
 		histo_altshapeUp.SetTitle('histo_altshapeUp_coarse')
-		#histo_altshape_ScaleUp = fhadd_herwig.Get('histo_nominal_ScaleUp_coarse')
-		#histo_altshape_ScaleDown = fhadd_herwig.Get('histo_nominal_ScaleDown_coarse')
-		
+		#histo_altshapeUp = fhadd_herwig.Get('histo_nominal')
+		#histo_altshapeUp.SetName('histo_altshapeUp')
+		#histo_altshapeUp.SetTitle('histo_altshapeUp')
 		doHerwig = True
- 	
+
 	if len(pythia_files) > 0:
 		cmd = 'hadd -f JJ_nonRes_COND2D_%s_%s_nominal.root '%(purity,leg)
 		for f in pythia_files:
@@ -736,10 +1012,9 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histo_nominal = fhadd_pythia.Get('histo_nominal_coarse')
 		histo_nominal.SetName('histo_nominal_coarse')
 		histo_nominal.SetTitle('histo_nominal_coarse')
-		#histo_nominal_ScaleUp = fhadd_pythia.Get('histo_nominal_ScaleUp_coarse')
-		#histo_nominal_ScaleDown = fhadd_pythia.Get('histo_nominal_ScaleDown_coarse')
-		#mjet_mvv_altshape2 = fhadd_pythia.Get('mjet_mvv_nominal')
-		#histo_altshape2 = fhadd_pythia.Get('histo_nominal_coarse')
+		#histo_nominal = fhadd_pythia.Get('histo_nominal')
+		#histo_nominal.SetName('histo_nominal')
+		#histo_nominal.SetTitle('histo_nominal')
 		
 		doPythia = True
 
@@ -753,7 +1028,6 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histo_nominal.Write('histo_nominal_coarse')
 		print "make conditional histogram"
 		conditional(histo_nominal)
-		print "expand histogram"
 		expanded=expandHisto(histo_nominal,"",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		if HCALbinsMVV!="":
                     expanded=expandHistoBinned(histo_nominal,"",xbins,binning)
@@ -761,21 +1035,21 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		expanded.SetName('histo_nominal')
 		expanded.SetTitle('histo_nominal')
 		expanded.Write('histo_nominal')
-		finalHistograms['histo_nominal'] = expanded
+		finalHistograms['histo_nominal'] = histo_nominal
 		
-		#histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp_coarse')
+		#histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp')
 		#conditional(histo_nominal_ScaleUp)
 		#expanded=expandHisto(histo_nominal_ScaleUp,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		#conditional(expanded)
 		#expanded.Write('histo_nominal_ScaleUp')
 
-		#histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown_coarse')
+		#histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown')
 		#conditional(histo_nominal_ScaleDown)
 		#expanded=expandHisto(histo_nominal_ScaleDown,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
 		#conditional(expanded)
 		#expanded.Write('histo_nominal_ScaleDown')
 		
-		alpha=1.5/215.
+		alpha=1.5/float(maxMJ)
 		histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha,1,2)
 		conditional(histogram_pt_down)
 		histogram_pt_down.SetName('histo_nominal_PTDown')
@@ -786,7 +1060,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histogram_pt_up.SetTitle('histo_nominal_PTUp')
 		histogram_pt_up.Write('histo_nominal_PTUp')
 
-		alpha=1.5*55.
+		alpha=1.5*float(minMJ)
 		h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1,2)
 		conditional(h1)
 		h1.SetName('histo_nominal_OPTDown')
@@ -796,8 +1070,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		h2.SetName('histo_nominal_OPTUp')
 		h2.SetTitle('histo_nominal_OPTUp')
 		h2.Write('histo_nominal_OPTUp')
-		
-		
+
 	if doHerwig:
 		histo_altshapeUp.Write('histo_altshapeUp_coarse')
 		conditional(histo_altshapeUp)
@@ -807,7 +1080,6 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		conditional(expanded)
 		expanded.SetName('histo_altshapeUp')
 		expanded.SetTitle('histo_altshapeUp')
-		print "NEW NAME = ", expanded.GetName()
 		expanded.Write('histo_altshapeUp')
 		finalHistograms['histo_altshapeUp'] = expanded
 		if doPythia:
@@ -817,19 +1089,6 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 			histogram_altshapeDown.SetTitle('histo_altshapeDown')
 			histogram_altshapeDown.Write()
 
-		#histo_altshape_ScaleUp.Write('histo_altshape_ScaleUp_coarse')
-		#conditional(histo_altshape_ScaleUp)
-		#expanded=expandHisto(histo_altshape_ScaleUp,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-		#conditional(expanded)
-		#expanded.Write('histo_altshape_ScaleUp')
-
-		#histo_altshape_ScaleDown.Write('histo_altshape_ScaleDown_coarse')
-		#conditional(histo_altshape_ScaleDown)
-		#expanded=expandHisto(histo_altshape_ScaleDown,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-		#conditional(expanded)
-		#expanded.Write('histo_altshape_ScaleDown')
-
-		
 	if doMadGraph:
 		histo_altshape2.Write('histo_altshape2_coarse')
 		conditional(histo_altshape2)
@@ -840,12 +1099,10 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		expanded.SetName('histo_altshape2')
 		expanded.SetTitle('histo_altshape2')
 		expanded.Write('histo_altshape2')
-	
-	#os.system('mv JJ_nonRes_COND2D_'+purity+'_'+leg+'.root '+startpath)
 	os.system('rm -r '+outdir+'_out')
 	# os.system('rm -r '+outdir)
 	
-def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,factor,name,data,jobname,samples,binning):
+def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,factor,name,data,jobname,samples,wait=True,binning=''):
 	print 
 	print 'START: makeData'
 	print "template = ",template
@@ -918,32 +1175,39 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("echo\n")
 	      fout.write("echo\n")
 	   os.system("chmod 755 job_%s.sh"%(files[x-1].replace(".root","")) )
-	   if not useCondorBatch:
-            os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
+
+           if useCondorBatch:
+               os.system("mv  job_*.sh "+jobname+".sh")
+               #makeSubmitFileCondor(jobname+".sh",jobname,"workday")
+               #os.system("condor_submit submit.sub")
+               ############ comment out for lxplus #######
+               writeJDL("",500,10*60,jobname+".sh")
+               os.system("condor_submit "+jobname+".jdl")
+               #####################
            else:
-            os.system("mv  job_*.sh "+jobname+".sh") 
-            writeJDL("",500,10*60,jobname+".sh")
-            os.system("condor_submit "+jobname+".jdl")
-   
+               os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
 	   print "job nr " + str(x) + " submitted"
 	   joblist.append("%s"%(files[x-1].replace(".root","")))
 	   os.chdir("../..")
    
 	print
 	print "your jobs:"
-	if not useCondorBatch:
-            os.system("bjobs")
-        else:
+        if useCondorBatch:
             os.system("condor_q")
+        else:
+            os.system("bjobs")
 	userName=os.environ['USER']
-	waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
+	if wait: waitForBatchJobs(jobname,NumberOfJobs,NumberOfJobs, userName, timeCheck)
 	
 	print
 	print 'END: makeData'
 	print
 	return joblist, files
 
-def mergeData(jobname,purity):
+def mergeData(jobname,purity,rootFile):
+	
+	print "Merging data from job " ,jobname
+	print "Purity is " ,purity
 	# read out files
 	filelist = os.listdir('./res'+jobname+'/')
 
@@ -979,7 +1243,7 @@ def mergeData(jobname,purity):
 		os.system(cmd)
 
 	if len(pythia_files) > 0:
-		cmd = 'hadd -f JJ_nonRes_%s_nominal.root '%purity
+		cmd = 'hadd -f %s '%rootFile
 		for f in pythia_files:
 		 cmd += f
 		 cmd += ' '
@@ -993,6 +1257,7 @@ def mergeData(jobname,purity):
 		 cmd += ' '
 		print cmd
 		os.system(cmd)
+	print "Done merging data!"
 
 
 def getListOfBinsLowEdge(hist,dim):
@@ -1017,7 +1282,6 @@ def getListOfBinsLowEdge(hist,dim):
         #v = mmin + i * (mmax-mmin)/float(N)
         r.append(axis.GetBinLowEdge(i))
     return r
-
 
 	
 def makePseudodata(infile,purity):

@@ -175,31 +175,20 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
  if plotter.filename.find(sampleTypes[0].replace('.root','')) != -1: 
    print "Preparing nominal histogram for sampletype " ,sampleTypes[0]
    print "filename: ", plotter.filename, " preparing central values histo"
-   
-   #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)   
    histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
    
-   #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning)) 
    if not(options.usegenmass): 
     datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
    else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
-   
-   #if histTMP.Integral()>0:
-   # histTMP.Scale(histI.Integral()/histTMP.Integral())
-   # histogram_nominal.Add(histTMP)
-   #if histI2.Integral()>0:
-   # histI2.Scale(histI.Integral()/histI2.Integral())
-   # mvv_nominal.Add(histI2)
 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_nominal.Add(histTMP)
     mvv_nominal.Add(histI2)
     
-   #histI.Delete()
    histI2.Delete()
    histTMP.Delete()
 
@@ -207,31 +196,21 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
  elif plotter.filename.find(sampleTypes[1].replace('.root','')) != -1: #alternative shape Herwig
    print "Preparing alternative shapes for sampletype " ,sampleTypes[1]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
-   
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
    histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
-
-   #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
+ 
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning))  
    if not(options.usegenmass): 
     datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
    else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
-   
-   #if histTMP.Integral()>0:
-   # histTMP.Scale(histI.Integral()/histTMP.Integral())
-   # histogram_altshapeUp.Add(histTMP)
-   #if histI2.Integral()>0:
-   # histI2.Scale(histI.Integral()/histI2.Integral())
-   # mvv_altshapeUp.Add(histI2)
 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_altshapeUp.Add(histTMP)
     mvv_altshapeUp.Add(histI2)
     
-   #histI.Delete()
    histI2.Delete()
    histTMP.Delete()
 		          	      
@@ -243,27 +222,18 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
    histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
 
-   #dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,maxEvents)     
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning))
    if not(options.usegenmass): 
     datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
    else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
-   
-   #if histTMP.Integral()>0:
-   # histTMP.Scale(histI.Integral()/histTMP.Integral())
-   # histogram_altshape2.Add(histTMP)
-   #if histI2.Integral()>0:
-   # histI2.Scale(histI.Integral()/histI2.Integral())
-   # mvv_altshape2.Add(histI2)
 
    if histTMP.Integral()>0:
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_altshape2.Add(histTMP)
     mvv_altshape2.Add(histI2)
     
-   #histI.Delete()
    histI2.Delete()
    histTMP.Delete()
 

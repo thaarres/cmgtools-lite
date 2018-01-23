@@ -174,7 +174,6 @@ def doZprojection(pdfs,data,norm,proj=0):
     h[0].SetLineColor(colors[0])
     h[0].SetTitle("Z-Proj. x : "+options.xrange+" y : "+options.yrange)
     h[0].GetXaxis().SetTitle("m_{jj}")
-    #h[0].GetXaxis().SetRangeUser(1000,5000)
     #h[0].SetMaximum(1e6)
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
@@ -279,7 +278,6 @@ def doXprojection(pdfs,data,norm,hin=0):
     h[0].SetLineColor(colors[0])
     h[0].SetTitle("X-Proj. y : "+options.yrange+" z : "+options.zrange)
     h[0].GetXaxis().SetTitle("m_{jet1}")
-    #h[0].GetXaxis().SetRangeUser(55,215)
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
     if postfit:
@@ -374,7 +372,6 @@ def doYprojection(pdfs,data,norm):
     h[0].GetXaxis().SetTitle("m_{jet2}")
     h[0].GetYaxis().SetTitleOffset(1.3)
     h[0].GetYaxis().SetTitle("events")
-    #h[0].GetXaxis().SetRangeUser(55,215)
     if postfit:
         h[0].GetYaxis().SetTitleOffset(0.6)
         h[0].GetYaxis().SetTitle("events")
@@ -453,7 +450,6 @@ def addPullPlot(hdata,hprefit,hpostfit):
 def builtFittedPdf(pdfs,coefficients):
     result = RooAddPdf(pdfs,coefficients)
     return result
-
 
 def plotDiffMjet1Mjet2(pdfs,data,norm):
     # do some z projections
@@ -535,7 +531,6 @@ if __name__=="__main__":
      
      zBinslowedge = getListOfBinsLowEdge(hinMC,'z')
      zBinsWidth   = getListOfBinsWidth(hinMC,"z")
-     print zBinslowedge
      print "open file " +options.name
      f = ROOT.TFile(options.name,"READ")
      workspace = f.Get("w")
@@ -588,8 +583,6 @@ if __name__=="__main__":
      # get data from workspace 
      norm = (args["pdf_binJJ_"+purity+"_13TeV_bonly"].getComponents())["n_exp_binJJ_"+purity+"_13TeV_proc_nonRes"].getVal()
      # check normalization with from pdf generated data:
-     #pdfdata_shape_postfit = (pdf_shape_postfit.generateBinned(ROOT.RooArgSet(workspace.var('MJ1'), workspace.var('MJ2'), workspace.var('MJJ')), norm,True,True))#.binnedClone("datafrompdf","datafrompdf")
-     #pdfdata_shape_postfit.SetName("pdfdata_shape_postfit")
      #pdf_shape_postfit.syncTotal()
      #################################################
      print "norm after fit "+str(norm)

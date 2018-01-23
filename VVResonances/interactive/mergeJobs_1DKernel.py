@@ -63,7 +63,7 @@ for s in samples:
 if exit_flag:
  print "Mergin not done: some files are missing. Exiting!"
  sys.exit()
- 
+
 
 os.system('rm -r '+outdir+'_out')
 os.system('mkdir '+outdir+'_out')

@@ -5,9 +5,9 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 purities=['HPHP','HPLP','LPLP']
-purities=['HPHP']
 label="testBinning_"
 directory = ""
+purities=['HPHP']
 
 for p in purities:
 
@@ -35,17 +35,10 @@ for p in purities:
  #QCD
  rootFile=directory+"JJ_"+label+"nonRes_2D_"+p+".root"
 
- #rootFile="JJ_testBinning_pythia_nonRes_2D_"+p+".root"
- #rootFile="JJ_testBinning_nonRes_2D_HPHP.root"
- #rootFile="JJ_testBinning_pythia_tails3D_nonRes_2D_HPHP.root"
- print rootFile
-
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
  card.addFixedYieldFromFile("nonRes",1,directory+"JJ_"+label+"nonRes_"+p+"_nominal.root","nonRes")
 
  #DATA
- #card.importBinnedData("JJ_testBinning_"+p+".root","data",["MJ1","MJ2","MJJ"])
- #card.importBinnedData("/home/dschaefer/DiBoson3D/test_kernelSmoothing_pythia/pythia_"+p+".root","data",["MJ1","MJ2","MJJ"])
  card.importBinnedData(directory+"JJ_"+label+p+".root","data",["MJ1","MJ2","MJJ"])
  
  #SYSTEMATICS
