@@ -5,8 +5,6 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 purities=['HPHP','HPLP','LPLP']
-label="testBinning_"
-directory = ""
 purities=['HPHP']
 
 for p in purities:
@@ -33,13 +31,13 @@ for p in purities:
  card.product3D("BulkGWW","Wqq1","Wqq2","BulkGWW_MVV")
    
  #QCD
- rootFile=directory+"JJ_"+label+"nonRes_2D_"+p+".root"
+ rootFile="JJ_nonRes_2D_"+p+".root"
 
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
- card.addFixedYieldFromFile("nonRes",1,directory+"JJ_"+label+"nonRes_"+p+"_nominal.root","nonRes")
+ card.addFixedYieldFromFile("nonRes",1,"JJ_nonRes_"+p+"_nominal.root","nonRes")
 
  #DATA
- card.importBinnedData(directory+"JJ_"+label+p+".root","data",["MJ1","MJ2","MJJ"])
+ card.importBinnedData("JJ_"+p+".root","data",["MJ1","MJ2","MJJ"])
  
  #SYSTEMATICS
 
