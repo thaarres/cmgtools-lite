@@ -42,8 +42,7 @@ cuts['NP'] = '(('+cat['LP1']+'&&'+cat['NP2']+')||('+cat['NP1']+'&&'+cat['LP2']+'
 cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
-purities=['HPHP','HPLP']
-purities=['HPLP']
+purities=['HPHP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -68,9 +67,7 @@ binsMJ=80
 binsMVV=100
 
 cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMVV=minMVV,maxMVV=maxMVV,minMJ=minMJ,maxMJ=maxMJ)
-cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>40&&jj_l2_gen_softDrop_mass>40&&jj_l1_gen_softDrop_mass<300&&jj_l2_gen_softDrop_mass<300&&jj_gen_partialMass>800&&jj_gen_partialMass<6000)'
-cuts['acceptanceGENMJJ']='(jj_gen_partialMass>800&&jj_gen_partialMass<6000)'
-cuts['acceptanceGENMJ']='(jj_l1_gen_softDrop_mass>40&&jj_l2_gen_softDrop_mass>40&&jj_l1_gen_softDrop_mass<300&&jj_l2_gen_softDrop_mass<300)'
+cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>30&&jj_l2_gen_softDrop_mass>30&&jj_l1_gen_softDrop_mass<300&&jj_l2_gen_softDrop_mass<300&&jj_gen_partialMass>600&&jj_gen_partialMass<6000)'
 
 cuts['acceptanceMJ']= "(jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMJ=minMJ,maxMJ=maxMJ) 
 cuts['acceptanceMVV'] = "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV})".format(minMVV=minMVV,maxMVV=maxMVV)
@@ -119,18 +116,21 @@ def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP
 def makeDetectorResponse(name,filename,template,addCut="1",jobName="DetPar"):
 		pwd = os.getcwd()
 		samples = pwd +"/samples"
-		cut='*'.join([cuts['common'],addCut,'(jj_l1_gen_softDrop_mass>40&&jj_l2_gen_softDrop_mass>40&&jj_gen_partialMass>0)'])
+		# cut='*'.join([cuts['common'],addCut,'(jj_l1_gen_softDrop_mass>30&&jj_l2_gen_softDrop_mass>30&&jj_gen_partialMass>500)'])
+		cut='*'.join([cuts['common'],addCut,cuts['acceptanceGEN'],'(jj_l1_softDrop_mass>30&&jj_l1_softDrop_mass<300&&jj_l2_softDrop_mass>30&&jj_l2_softDrop_mass<300)'])
 		resFile=filename+"_"+name+"_detectorResponse.root"		 
 		print "Saving detector resolution to file: " ,resFile
+		bins = "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"
 		if submitToBatch:
-		        template += ",QCD_Pt-,QCD_HT"
+		        #template += ",QCD_Pt-,QCD_HT"
 			from modules.submitJobs import Make2DDetectorParam,merge2DDetectorParam
-			jobList, files = Make2DDetectorParam(resFile,template,cut,samples,jobName)
+			
+			jobList, files = Make2DDetectorParam(resFile,template,cut,samples,bins,jobName)
 			jobList = []
 			files = []
-			merge2DDetectorParam(jobList,files,"200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000",jobName)
+			merge2DDetectorParam(jobList,files,bins,jobName)
 		else:
-			cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name)
+			cmd='vvMake2DDetectorParam.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b {bins}   samples'.format(rootFile=resFile,samples=template,cut=cut,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,tag=name,bins=bins)
 			os.system(cmd)
 		
 		print "Done with ",resFile
@@ -165,7 +165,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1D"
   rootFile = filename+"_"+name+"_MVV_"+p+".root"
   print "Reading " ,resFile
   print "Saving to ",rootFile
-  cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGENMJJ'],cuts['acceptanceMJ']])
+  cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],cuts['acceptanceMJ']])
   samples = pwd +"/samples"
 
   if submitToBatch:
@@ -186,7 +186,7 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobN
   rootFile=filename+"_"+name+"_COND2D_"+p+"_"+leg+".root"		
   print "Reading " ,resFile
   print "Saving to ",rootFile
-  cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN']])
+  cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],"(jj_l1_softDrop_mass>30&&jj_l1_softDrop_mass<300&&jj_l2_softDrop_mass>30&&jj_l2_softDrop_mass<300)"])
   samples = pwd +"/samples" 
   
   if submitToBatch:
@@ -261,10 +261,10 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
 	   os.system(cmd)
 	
 
-#makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-#makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-#makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-#makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
 makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 

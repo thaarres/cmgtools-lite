@@ -113,7 +113,7 @@ def getEvents(template,samples):
 
 	return minEv, maxEv, NumberOfJobs, files
 	
-def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO! Buggy, fix
+def Make2DDetectorParam(rootFile,template,cut,samples,bins,jobName="DetPar"): # TODO! Buggy, fix
    
 	print 
 	print 'START: Make2DDetectorParam with parameters:'
@@ -125,7 +125,7 @@ def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO!
 	print "jobName  = %s" %jobName 
 	
 
-	cmd='vvMake2DDetectorParam.py  -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,infolder=samples)
+	cmd='vvMake2DDetectorParam.py  -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b {bins}   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,infolder=samples,bins=bins)
 	
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
