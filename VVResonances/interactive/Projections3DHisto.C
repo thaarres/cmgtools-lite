@@ -1,6 +1,6 @@
 // Run from command line with
-// root .x 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
-// root .x 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
+// root 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
+// root 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
 // 
 void Projections3DHisto(std::string dataFile, std::string hdataName, std::string fitFile, std::string hfitName, std::string outDirName){
 
@@ -404,11 +404,13 @@ hx_OPTXDown->SetLineColor(210);
 
 TCanvas* cxSyst = new TCanvas("cxSyst","cxSyst");
 cxSyst->cd();
+hx[0]->Scale(1./hx[0]->Integral());
 hx[0]->Draw("HIST");
 hx_PTXUp->Draw("HISTsame");
 hx_PTXDown->Draw("HISTsame"); 
 hx_OPTXUp->Draw("HISTsame");
 hx_OPTXDown->Draw("HISTsame");
+hxMC[0]->Scale(1./hxMC[0]->Integral());
 hxMC[0]->Draw("same");
 leg3->Draw();
 

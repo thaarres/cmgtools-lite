@@ -2,7 +2,7 @@ import ROOT
 import os,sys
 
 submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
-runParallel   = False #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
+runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
  	
 cat={}
 # For standard tau 21, use this
@@ -42,7 +42,7 @@ cuts['NP'] = '(('+cat['LP1']+'&&'+cat['NP2']+')||('+cat['NP1']+'&&'+cat['LP2']+'
 cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
-purities=['HPHP','HPLP']
+purities=['HPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -262,11 +262,11 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
 	   os.system(cmd)
 	
 
-makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+# makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+# makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+# makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
 # ------ do not use these ------
 # makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
@@ -275,20 +275,20 @@ makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 # makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 # ------------------------------
 
-if runParallel and submitToBatch:
-	wait = False
-	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-	print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
-	sys.exit()
-	mergeKernelJobs()
-else:
-	wait = True
-	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-mergeBackgroundShapes("nonRes","JJ")
+# if runParallel and submitToBatch:
+# 	wait = False
+# 	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+# 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+# 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+# 	print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
+# 	sys.exit()
+# 	mergeKernelJobs()
+# # else:
+# # 	wait = True
+# # 	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+# # 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+# # 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+# mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"nR")
 # makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)

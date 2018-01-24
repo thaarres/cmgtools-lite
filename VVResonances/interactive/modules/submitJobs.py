@@ -875,11 +875,16 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	 print "sample: ", s,"number of files:",len(jobsPerSample[s]),"adding histo with scale factor:",factor
  
 	 outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_COND2D_%s_%s_%s.root'%(s,leg,purity),'RECREATE')
-  
+	 
+	 binsy=[1000+i*100 for i in range(41)]
+	 binsx=[]
+	 for i in range(0,binsMJ+1):
+	     binsx.append(minMJ+i*(maxMJ-minMJ)/binsMJ)
+
 	 finalHistos = {}
-	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,40,minMVV,maxMVV)
-	 finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
-	 finalHistos['mjet_mvv_nominal_3D'] = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",binsMJ,minMJ,maxMJ,binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
+	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse","histo_nominal_coarse",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
+	 finalHistos['mjet_mvv_nominal']     = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
+	 finalHistos['mjet_mvv_nominal_3D']  = ROOT.TH3F("mjet_mvv_nominal_3D_out","mjet_mvv_nominal_3D_out",binsMJ,minMJ,maxMJ,binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
     
 	 for f in jobsPerSample[s]:
 
@@ -1028,7 +1033,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		#conditional(expanded)
 		#expanded.Write('histo_nominal_ScaleDown')
 		
-		alpha=1.5/float(maxMJ)
+		alpha=1.5/215.
 		histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha,1,2)
 		conditional(histogram_pt_down)
 		histogram_pt_down.SetName('histo_nominal_PTDown')
@@ -1039,7 +1044,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histogram_pt_up.SetTitle('histo_nominal_PTUp')
 		histogram_pt_up.Write('histo_nominal_PTUp')
 
-		alpha=1.5*float(minMJ)
+		alpha=1.5*55.
 		h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1,2)
 		conditional(h1)
 		h1.SetName('histo_nominal_OPTDown')
