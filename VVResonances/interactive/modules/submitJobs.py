@@ -65,15 +65,8 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	for k,v in minEv.iteritems():
 
 	  for j in range(len(v)):
-	   if useCondorBatch:
-                os.system("echo "+path)
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/out")
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/error")
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)+"/log")
-           else:
-               os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1)) 
-	   os.chdir(path+"tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
+	   os.system("mkdir tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
+	   os.chdir("tmp"+jobname+"/"+str(k).replace(".root","")+"_"+str(j+1))
 	  
 	   with open('job_%s_%i.sh'%(k.replace(".root",""),j+1), 'w') as fout:
 	      fout.write("#!/bin/sh\n")
@@ -81,10 +74,7 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 	      fout.write("echo\n")
 	      fout.write("echo 'START---------------'\n")
 	      fout.write("echo 'WORKDIR ' ${PWD}\n")
-	      if not useCondorBatch:
-                fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
-              else:
-                  fout.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
+	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
 	      fout.write("cd "+str(path)+"\n")
 	      fout.write("cmsenv\n")
 	      fout.write(cmd+" -o res"+jobname+"/"+OutputFileNames+"_"+str(j+1)+"_"+k+" -s "+k+" -e "+str(minEv[k][j])+" -E "+str(maxEv[k][j])+"\n")
@@ -243,12 +233,11 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 	path = os.getcwd()
-	try: os.system("rm -r "+path+"tmp"+jobName)
-	except: print "No "+path+"tmp/ directory"
-	os.system("mkdir "+path+"tmp"+jobName)
-	try: os.stat(path+"res"+jobName) 
-	except: os.mkdir(path+"res"+jobName)
-	print
+	try: os.system("rm -r tmp"+jobName)
+	except: print "No tmp/ directory"
+	os.system("mkdir tmp"+jobName)
+        try: os.stat("res"+jobName) 
+	except: os.mkdir("res"+jobName)
 
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
@@ -298,12 +287,11 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 	path = os.getcwd()
-	try: os.system("rm -r "+path+"tmp"+jobName)
-	except: print "No "+path+"tmp/ directory"
-	os.system("mkdir "+path+"tmp"+jobName)
-	try: os.stat(path+"res"+jobName) 
-	except: os.mkdir(path+"res"+jobName)
-	print
+	try: os.system("rm -r tmp"+jobName)
+	except: print "No tmp/ directory"
+	os.system("mkdir tmp"+jobName)
+	try: os.stat("res"+jobName) 
+	except: os.mkdir("res"+jobName)
 
 	#### Creating and sending jobs #####
 	joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobName,path)
@@ -1165,27 +1153,19 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	queue = "1nd" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 
-	path = os.getcwd()
-	try: os.system("rm -r "+path+"tmp"+jobname)
-	except: print "No "+path+"tmp/ directory"
-	os.system("mkdir "+path+"tmp"+jobname)
-	try: os.stat(path+"res"+jobname) 
-	except: os.mkdir(path+"res"+jobname)
-	print
+	try: os.system("rm -r tmp"+jobname)
+	except: print "No tmp/ directory"
+	os.system("mkdir tmp"+jobname)
+	try: os.stat("res"+jobname) 
+	except: os.mkdir("res"+jobname)
         
-        #joblist = submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path)
+    
 	##### Creating and sending jobs #####
 	joblist = []
 	###### loop for creating and sending jobs #####
 	for x in range(1, int(NumberOfJobs)+1):
-	   if useCondorBatch:
-                os.system("echo "+path)
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root","")+"/out")
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root","")+"/error")
-                os.system("mkdir "+path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root","")+"/log")
-           else:
-               os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir("tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	   #os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	   os.chdir(path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	 
@@ -1195,10 +1175,7 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	      fout.write("echo\n")
 	      fout.write("echo 'START---------------'\n")
 	      fout.write("echo 'WORKDIR ' ${PWD}\n")
-	      if not useCondorBatch:
-                fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
-              else:
-                  fout.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
+	      fout.write("source /afs/cern.ch/cms/cmsset_default.sh\n")
 	      fout.write("cd "+str(path)+"\n")
 	      fout.write("cmsenv\n")
 	      fout.write(cmd+" -o "+path+"/res"+jobname+"/"+OutputFileNames+"_"+files[x-1]+" -s "+files[x-1]+"\n")

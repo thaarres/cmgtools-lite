@@ -34,7 +34,7 @@ for p in purities:
  rootFile="JJ_nonRes_2D_"+p+".root"
 
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
- card.addFixedYieldFromFile("nonRes",1,"JJ_nonRes_"+p+"_nominal.root","nonRes")
+ card.addFixedYieldFromFile("nonRes",1,"JJ_"+p+".root","nonRes")
 
  #DATA
  card.importBinnedData("JJ_"+p+".root","data",["MJ1","MJ2","MJJ"])
