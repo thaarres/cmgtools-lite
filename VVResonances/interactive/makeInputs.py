@@ -255,10 +255,10 @@ def mergeBackgroundShapes(name,filename):
   inputy=filename+"_"+name+"_COND2D_"+p+"_l2.root"	
   inputz=filename+"_"+name+"_MVV_"+p+".root"      
   rootFile=filename+"_"+name+"_2D_"+p+".root"
-  print "use input files : "
-  print inputx
-  print inputz
-  print inputy
+  print "Reading " ,inputx
+  print "Reading " ,inputy
+  print "Reading " ,inputz
+  print "Saving to ",rootFile 
   cmd='vvMergeHistosToPDF3D.py -i "{inputx}" -I "{inputy}" -z "{inputz}" -o "{rootFile}"'.format(rootFile=rootFile,inputx=inputx,inputy=inputy,inputz=inputz)
   os.system(cmd)
 
