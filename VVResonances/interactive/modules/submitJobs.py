@@ -6,33 +6,11 @@ import sys
 import ROOT
 from ROOT import *
 import subprocess, thread
-######## comment out for lxplus ###########
-sys.path.append('/home/dschaefer/jdl_creator/')
-#sys.path.append('/home/dschaefer/jdl_creator/classes/')
-from classes.JDLCreator import JDLCreator
-###########################################
 from array import array
 
 timeCheck = "30"
 userName=os.environ['USER']
 
-######## comment out for lxplus ##############
-#useCondorBatch =True
-mypath = "/portal/ekpbms2/home/dschaefer/tmp/"
-startpath="/usr/users/dschaefer/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive"
-
-def writeJDL(arguments,mem,time,name):
-    #jobs = JDLCreator('condocker')  #run jobs on condocker cloude site
-    jobs = JDLCreator('condocker')
-    jobs.wall_time = time
-    jobs.memory = mem 
-    jobs.requirements = "(TARGET.ProvidesCPU) && (TARGET.ProvidesEkpResources)"
-    jobs.accounting_group = "cms.top"
-    jobs.SetExecutable(name)  # set job script
-    #jobs.SetFolder('/usr/users/dschaefer/job_submission/local/sframe')  # set subfolder !!! you have to copy your job file into the folder
-    jobs.SetArguments(arguments)              # write an JDL file and create folder f            # set arguments
-    jobs.WriteJDL() # write an JDL file and create folder for log files
-################################################
 
 def getBinning(binsMVV):
     l=[]
@@ -116,12 +94,8 @@ def submitJobs(minEv,maxEv,cmd,OutputFileNames,queue,jobname,path):
 
 	   if useCondorBatch:
                os.system("mv  job_*.sh "+jobname+".sh")
-               ########## comment out for lxplus #########
-               writeJDL('',1*1000,20*60,jobname+'.sh')
-               os.system("condor_submit "+jobname+".jdl") 
-          #####################################################
-             #  makeSubmitFileCondor(jobname+".sh",jobname,"workday")
-             #  os.system("condor_submit submit.sub")
+               makeSubmitFileCondor(jobname+".sh",jobname,"workday")
+               os.system("condor_submit submit.sub")
            else:
                os.system("chmod 755 job_%s_%i.sh"%(k.replace(".root",""),j+1) )
                os.system("bsub -q "+queue+" -o logs job_%s_%i.sh -J %s"%(k.replace(".root",""),j+1,jobname))
@@ -260,8 +234,6 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	print "samples  = %s" %samples   
 	print "jobName  = %s" %jobName 
 	print
-	if mypath!="":
-            os.chdir(startpath)
 	minEv, maxEv, NumberOfJobs, files = getEvents(template,samples) 
 	print "Submitting %i number of jobs "  ,NumberOfJobs
 	print
@@ -270,7 +242,7 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
-	path = mypath# os.getcwd()
+	path = os.getcwd()
 	try: os.system("rm -r "+path+"tmp"+jobName)
 	except: print "No "+path+"tmp/ directory"
 	os.system("mkdir "+path+"tmp"+jobName)
@@ -317,8 +289,6 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	print "samples   = %s" %samples   
 	print "jobName   = %s" %jobName   
 	print
-        if mypath!="":
-            os.chdir(startpath)
 	minEv, maxEv, NumberOfJobs, files = getEvents(template,samples) 
 	print "Submitting %i number of jobs "  ,NumberOfJobs
 	print
@@ -327,7 +297,7 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
-	path = mypath #os.getcwd()
+	path = os.getcwd()
 	try: os.system("rm -r "+path+"tmp"+jobName)
 	except: print "No "+path+"tmp/ directory"
 	os.system("mkdir "+path+"tmp"+jobName)
@@ -1183,8 +1153,6 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	print "jobname  = ",jobname
 	print "samples  = ",samples
 	print 
-	if mypath!="":
-            os.chdir(startpath)
 	files = []
 	sampleTypes = template.split(',')
 	for f in os.listdir(samples):
@@ -1197,7 +1165,7 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	queue = "1nd" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
 
-	path = mypath# os.getcwd()
+	path = os.getcwd()
 	try: os.system("rm -r "+path+"tmp"+jobname)
 	except: print "No "+path+"tmp/ directory"
 	os.system("mkdir "+path+"tmp"+jobname)
@@ -1241,12 +1209,8 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 
            if useCondorBatch:
                os.system("mv  job_*.sh "+jobname+".sh")
-               #makeSubmitFileCondor(jobname+".sh",jobname,"workday")
-               #os.system("condor_submit submit.sub")
-               ############ comment out for lxplus #######
-               writeJDL("",500,10*60,jobname+".sh")
-               os.system("condor_submit "+jobname+".jdl")
-               #####################
+               makeSubmitFileCondor(jobname+".sh",jobname,"workday")
+               os.system("condor_submit submit.sub")
            else:
                os.system("bsub -q "+queue+" -o logs job_%s.sh -J %s"%(files[x-1].replace(".root",""),jobname))
 	   print "job nr " + str(x) + " submitted"
