@@ -1,6 +1,7 @@
 import ROOT
 import json
 from numpy import random
+from array import array
 
 class Fitter(object):
     def __init__(self,poi = ['x']):
@@ -391,6 +392,30 @@ class Fitter(object):
 
         peak = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
         getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name+'S'))
+
+
+
+    def jetDoublePeakZ(self,name = 'model',poi='x'):
+        ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
+        
+        self.w.factory("meanW[80,75,85]")
+        self.w.factory("sigmaW[10,5,20]")
+        self.w.factory("alphaW[1,0.1,10]")
+        self.w.factory("alphaW2[1,0.1,10]")
+        self.w.factory("n[0.65]")
+
+        self.w.factory("meanZ[90,70,105]")
+        self.w.factory("sigmaZ[10,5,20]")
+        self.w.factory("alphaZ[1,0.1,10]")
+        self.w.factory("alphaZ2[1,0.1,10]")
+        #self.w.factory("nZ[5,0,10]")
+
+
+        peak = ROOT.RooDoubleCB('WPeak','modelS',self.w.var(poi),self.w.var('meanW'),self.w.var('sigmaW'),self.w.var('alphaW'),self.w.var('n'),self.w.var("alphaW2"),self.w.var("n"))
+        getattr(self.w,'import')(peak,ROOT.RooFit.Rename('WPeak'))
+        peak2 = ROOT.RooDoubleCB('ZPeak','modelS',self.w.var(poi),self.w.var('meanZ'),self.w.var('sigmaZ'),self.w.var('alphaZ'),self.w.var('n'),self.w.var("alphaZ2"),self.w.var("n"))
+        getattr(self.w,'import')(peak2,ROOT.RooFit.Rename('ZPeak'))
+        self.w.factory("SUM::"+name+"(f[0]*WPeak,ZPeak)")
 
 
 
@@ -887,9 +912,18 @@ class Fitter(object):
             mini=axis.GetXmin()
             maxi=axis.GetXmax()
             bins=axis.GetNbins()
+            binningx =[]
+            for i in range(1,bins+2):
+                #v = mmin + i * (mmax-mmin)/float(N)
+                binningx.append(axis.GetBinLowEdge(i))
+            print binningx
             self.w.var(p).setMin(mini)
             self.w.var(p).setMax(maxi)
-            self.w.var(p).setBins(bins)
+            print " set binning "+str(binningx)
+            self.w.var(p).setBinning(ROOT.RooBinning(len(binningx)-1,array("d",binningx)))
+            #a = self.w.var(p).getBinning()
+            #for b in range(0,a.numBins()+1):
+                #print a.binLow(b)
         dataHist=ROOT.RooDataHist(name,name,cList,histogram)
         getattr(self.w,'import')(dataHist,ROOT.RooFit.Rename(name))
 
@@ -949,6 +983,7 @@ class Fitter(object):
 
     def projection(self,model = "model",data="data",poi="x",filename="fit.root",xtitle='x',mass=1000):
         self.frame=self.w.var(poi).frame()
+        a = self.w.var(poi).getBinning()
 	# self.w.var(poi).setRange("signal",1000,8000)
 	# self.w.pdf(model).setNormRange("NormalizationRangeForfit")
         # gx_Int = self.w.pdf(model).createIntegral(ROOT.RooArgSet(self.w.var(poi)),ROOT.RooFit.NormSet(ROOT.RooArgSet(self.w.var(poi))),ROOT.RooFit.Range("NormalizationRangeForfit"))
@@ -1005,6 +1040,17 @@ class Fitter(object):
         self.c.SaveAs(filename)
         return self.frame.chiSquare()
         
-        
+    def getFrame(self,model = "model",data="data",poi="x",xtitle='x',mass=1000):
+        self.frame=self.w.var(poi).frame()
+        self.w.data(data).plotOn(self.frame)
+        self.w.pdf(model).plotOn(self.frame)
+        self.legend = self.getLegend()
+	self.legend.AddEntry( self.w.pdf(model)," Full PDF","l")
+        self.frame.GetYaxis().SetTitle('# events')
+        self.frame.GetYaxis().SetTitleOffset(1.6)
+        self.frame.GetXaxis().SetTitle(xtitle)
+        self.frame.SetTitle(str(mass))
+        pullDist = self.frame.pullHist()
+        return [self.frame, self.legend, pullDist, self.frame.chiSquare()]   
                                 
 

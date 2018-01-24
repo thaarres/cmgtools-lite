@@ -5,7 +5,7 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 purities=['HPHP','HPLP','LPLP']
-purities=['HPLP']
+purities=['HPHP']
 
 for p in purities:
 
@@ -17,11 +17,14 @@ for p in purities:
  card.addMVVSignalParametricShape2("BulkGWW_MVV","MJJ","JJ_BulkGWW_MVV.json",{'CMS_scale_j':1},{'CMS_res_j':1.0})
 
  if p=='HPLP':
-     card.addMJJSignalParametricShape("Wqq","MJ","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
-     card.addParametricYieldWithUncertainty("XqW",0,"JJ_BulkGWW_MJl1_"+p+".json",1,'CMS_tau21_PtDependence','((0.054/0.041)*(-log(MH/600)))',0.041)
- else:
+     #card.addMJJSignalParametricShape("Wqq","MJ","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+     #card.addParametricYieldWithUncertainty("XqW",0,"JJ_BulkGWW_MJl1_"+p+".json",1,'CMS_tau21_PtDependence','((0.054/0.041)*(-log(MH/600)))',0.041)
      card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
      card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2","JJ_BulkGWW_MJl2_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
+     card.addParametricYieldWithUncertainty("BulkGWW",0,"JJ_BulkGWW_"+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
+ else:
+     card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
+     card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
 
      card.addParametricYieldWithUncertainty("BulkGWW",0,"JJ_BulkGWW_"+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
     
@@ -29,6 +32,7 @@ for p in purities:
    
  #QCD
  rootFile="JJ_nonRes_2D_"+p+".root"
+
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
  card.addFixedYieldFromFile("nonRes",1,"JJ_"+p+".root","nonRes")
 

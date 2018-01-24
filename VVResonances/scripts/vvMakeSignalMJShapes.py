@@ -34,6 +34,8 @@ parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fi
 
 samples={}
 graphs={'mean':ROOT.TGraphErrors(),'sigma':ROOT.TGraphErrors(),'alpha':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'slope':ROOT.TGraphErrors(),'alpha2':ROOT.TGraphErrors(),'n2':ROOT.TGraphErrors()}
+#if options.sample.find("Wprime")!=-1:
+    #graphs = {'meanW':ROOT.TGraphErrors(),'sigmaW':ROOT.TGraphErrors(),'alphaW':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'alphaW2':ROOT.TGraphErrors(),'meanZ':ROOT.TGraphErrors(),'sigmaZ':ROOT.TGraphErrors(),'alphaZ':ROOT.TGraphErrors(),'alphaZ2':ROOT.TGraphErrors()}
 
 for filename in os.listdir(args[0]):
     if not (filename.find(options.sample)!=-1):
@@ -72,13 +74,9 @@ for mass in sorted(samples.keys()):
         
     fitter=Fitter(['x'])
     if options.doExp==1:
-        fitter.jetResonance('model','x')
-#        fitter.w.var("alpha").setVal(1.41)
-#        fitter.w.var("alpha").setConstant(1)
+            fitter.jetResonance('model','x')
     else:
-        fitter.jetResonanceNOEXP('model','x')
-#        fitter.w.var("alpha").setVal(0.50)
-#        fitter.w.var("alpha").setConstant(1)
+            fitter.jetResonanceNOEXP('model','x')
 
 
     if options.fixPars!="":

@@ -26,8 +26,22 @@ parser.add_option("-w","--weights",dest="weights",help="additional weights",defa
 parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help="use gen mass for det resolution",default=False)
 parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
 parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
+parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
 
-(options,args) = parser.parse_args()     
+(options,args) = parser.parse_args()
+
+
+def getBinning(binsMVV,minx,maxx,bins):
+    l=[]
+    if binsMVV=="":
+        for i in range(0,bins+1):
+            l.append(minx + i* (maxx - minx)/bins)
+    else:
+        s = binsMVV.split(",")
+        for w in s:
+            l.append(int(w))
+    return l
+
 
 def unequalScale(histo,name,alpha,power=1):
     newHistoU =copy.deepcopy(histo) 
@@ -121,23 +135,27 @@ fcorr=ROOT.TFile(options.res)
 scale = fcorr.Get("scale"+options.resHisto+"Histo")
 res   = fcorr.Get("res"  +options.resHisto+"Histo")
 
+binning = getBinning(options.binsMVV,options.minx,options.maxx,options.binsx)
+print binning
+
+
 #distribution of mjet from simulation --> use to validate kernel
-mvv_nominal=ROOT.TH1F("mvv_nominal","mvv_nominal",options.binsx,options.minx,options.maxx)
+mvv_nominal=ROOT.TH1F("mvv_nominal","mvv_nominal",options.binsx,array('f',binning))
 mvv_nominal.Sumw2()
 
-mvv_altshapeUp=ROOT.TH1F("mvv_altshapeUp","mvv_altshapeUp",options.binsx,options.minx,options.maxx)
+mvv_altshapeUp=ROOT.TH1F("mvv_altshapeUp","mvv_altshapeUp",options.binsx,array('f',binning))
 mvv_altshapeUp.Sumw2()
 
-mvv_altshape2=ROOT.TH1F("mvv_altshape2","mvv_altshape2",options.binsx,options.minx,options.maxx)
+mvv_altshape2=ROOT.TH1F("mvv_altshape2","mvv_altshape2",options.binsx,array('f',binning))
 mvv_altshape2.Sumw2()
 
-histogram_nominal=ROOT.TH1F("histo_nominal","histo_nominal",options.binsx,options.minx,options.maxx)
+histogram_nominal=ROOT.TH1F("histo_nominal","histo_nominal",options.binsx,array('f',binning))
 histogram_nominal.Sumw2()
 
-histogram_altshapeUp=ROOT.TH1F("histo_altshapeUp","histo_altshapeUp",options.binsx,options.minx,options.maxx)
+histogram_altshapeUp=ROOT.TH1F("histo_altshapeUp","histo_altshapeUp",options.binsx,array('f',binning))
 histogram_altshapeUp.Sumw2()
 
-histogram_altshape2=ROOT.TH1F("histo_altshape2","histo_altshape2",options.binsx,options.minx,options.maxx)
+histogram_altshape2=ROOT.TH1F("histo_altshape2","histo_altshape2",options.binsx,array('f',binning))
 histogram_altshape2.Sumw2()
 
 histograms=[
@@ -157,12 +175,11 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
  if plotter.filename.find(sampleTypes[0].replace('.root','')) != -1: 
    print "Preparing nominal histogram for sampletype " ,sampleTypes[0]
    print "filename: ", plotter.filename, " preparing central values histo"
-   
-   histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
+   histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
    
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
-   histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)   
+   histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning)) 
    if not(options.usegenmass): 
     datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
    else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
@@ -179,12 +196,12 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
  elif plotter.filename.find(sampleTypes[1].replace('.root','')) != -1: #alternative shape Herwig
    print "Preparing alternative shapes for sampletype " ,sampleTypes[1]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
-   
-   histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
-
+   #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
+   histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
+ 
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
-   histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
+   histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning))  
    if not(options.usegenmass): 
     datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
    else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
@@ -202,11 +219,12 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
-   histI2=plotter.drawTH1('jj_LV_mass',options.cut,"1",options.binsx,options.minx,options.maxx)
+   #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
+   histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
 
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
-   histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,options.minx,options.maxx)    
+   histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning))
    if not(options.usegenmass): 
     datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_pt',scale,res,histTMP)
    else: datamaker=ROOT.cmg.GaussianSumTemplateMaker1D(dataset,options.var,'jj_l1_gen_softDrop_mass',scale,res,histTMP) 
@@ -251,7 +269,7 @@ histogram_pt2_up.Write()
 alpha=1000.*1000.
 histogram_opt2_down,histogram_opt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT2",alpha,-2)
 histogram_opt2_down.Write()
-histogram_opt2_up.Write()  
+histogram_opt2_up.Write() 
 
 f.Close()
 

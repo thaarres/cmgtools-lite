@@ -75,7 +75,6 @@ class TreePlotter(PlotterBase):
 
 
 
-
     def drawProfile(self,var,cuts,lumi,binsx,minx,maxx,miny,maxy,titlex = "",unitsx = "",titley="",unitsy="", drawStyle = "COLZ"):
         h = ROOT.TProfile("tmpTH2","",binsx,minx,maxx,miny,maxy)
         h.Sumw2()
