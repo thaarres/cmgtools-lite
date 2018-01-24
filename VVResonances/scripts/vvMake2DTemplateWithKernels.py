@@ -27,6 +27,20 @@ parser.add_option("-w","--weights",dest="weights",help="additional weights",defa
 parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help="use gen mass for det resolution",default=False)
 parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
 parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
+parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
+
+def getBinning(binsMVV,minx,maxx,bins):
+    l=[]
+    if binsMVV=="":
+        for i in range(0,bins+1):
+            l.append(minx + i* (maxx - minx)/bins)
+    else:
+        s = binsMVV.split(",")
+        for w in s:
+            l.append(int(w))
+    return l
+
+
 
 def unequalScale(histo,name,alpha,power=1):
     newHistoU =copy.deepcopy(histo) 
@@ -60,7 +74,7 @@ def mirror(histo,histoNominal,name):
     return newHisto       
 	
 def expandHisto(histo,options):
-    histogram=ROOT.TH2F(histo.GetName(),"histo",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
+    histogram=ROOT.TH2F(histo.GetName(),"histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
     for i in range(1,histo.GetNbinsX()+1):
         proje = histo.ProjectionY("q",i,i)
         graph=ROOT.TGraph(proje)
@@ -79,28 +93,6 @@ def conditional(hist):
             continue
         for j in range(1,hist.GetNbinsX()+1):
             hist.SetBinContent(j,i,hist.GetBinContent(j,i)/integral)
-            
-def smoothTail(hist):
-    hist.Scale(1.0/hist.Integral())
-    expo=ROOT.TF1("expo","expo",1000,8000)
-#    expo=ROOT.TF1("expo","[0]*(1-pow(x/13000.,[1]))/pow(x/13000.0,[2]+0.0*TMath::Log(x/13000.0))",1000,8000)
-#    expo.SetParameters(1,-)
-#    expo.SetParLimits(0,0,1)
-#    expo.SetParLimits(1,0.1,100)
-#    expo.SetParLimits(2,0.1,100)
-
-    for i in range(1,hist.GetNbinsY()+1):
-        proj=hist.ProjectionX("q",i,i)
-#        for j in range(1,proj.GetNbinsX()+1):
-#            if proj.GetBinContent(j)/proj.Integral()<0.0005:
-#                proj.SetBinError(j,1.8)
-        proj.Fit(expo,"","",2000,8000)
-        proj.Fit(expo,"","",2000,8000)
-        for j in range(1,hist.GetNbinsX()+1):
-            x=hist.GetXaxis().GetBinCenter(j)
-            if x>2500:
-                hist.SetBinContent(j,i,expo.Eval(x))
-
 
 
 (options,args) = parser.parse_args()
@@ -149,12 +141,17 @@ res_y=fcorr.Get("resxHisto")
 variables=options.vars.split(',')
 leg = options.vars.split(',')[0].split('_')[1]
 
+
+
 binsx=[]
 for i in range(0,options.binsx+1):
     binsx.append(options.minx+i*(options.maxx-options.minx)/options.binsx)
 
-binsy=[1000+i*100 for i in range(41)]
-    
+
+#binsy=[1000+i*100 for i in range(41)]
+binsy = getBinning(options.binsMVV,options.miny,options.maxy,options.binsy)
+print binsy
+
 scaleUp = ROOT.TH1F(scale_x)
 scaleUp.SetName("scaleUp")
 scaleDown = ROOT.TH1F(scale_x)
@@ -163,20 +160,20 @@ for i in range(1,scale_x.GetNbinsX()+1):
     scaleUp.SetBinContent(i,scale_x.GetBinContent(i)+0.09)
     scaleDown.SetBinContent(i,scale_x.GetBinContent(i)-0.09)
     
-mjet_mvv_nominal = ROOT.TH2F("mjet_mvv_nominal","mjet_mvv_nominal",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
+mjet_mvv_nominal = ROOT.TH2F("mjet_mvv_nominal","mjet_mvv_nominal",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram = ROOT.TH2F("histo_nominal","histo_nominal",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram_scale_up = ROOT.TH2F("histo_nominal_ScaleUp","histo_nominal_ScaleUp",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram_scale_down = ROOT.TH2F("histo_nominal_ScaleDown","histo_nominal_ScaleDown",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
-mjet_mvv_altshapeUp = ROOT.TH2F("mjet_mvv_altshapeUp","mjet_mvv_altshapeUp",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
+mjet_mvv_altshapeUp = ROOT.TH2F("mjet_mvv_altshapeUp","mjet_mvv_altshapeUp",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram_altshapeUp = ROOT.TH2F("histo_altshapeUp","histo_altshapeUp",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram_altshape_scale_up = ROOT.TH2F("histo_altshape_ScaleUp","histo_altshape_ScaleUp",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram_altshape_scale_down = ROOT.TH2F("histo_altshape_ScaleDown","histo_altshape_ScaleDown",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
-mjet_mvv_altshape2 = ROOT.TH2F("mjet_mvv_altshape2","mjet_mvv_altshape2",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
+mjet_mvv_altshape2 = ROOT.TH2F("mjet_mvv_altshape2","mjet_mvv_altshape2",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 histogram_altshape2 = ROOT.TH2F("histo_altshape2","histo_altshape2",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
-mjet_mvv_nominal_3D = ROOT.TH3F("mjet_mvv_nominal_3D","mjet_mvv_nominal_3D",options.binsx,options.minx,options.maxx,options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy)
+mjet_mvv_nominal_3D = ROOT.TH3F("mjet_mvv_nominal_3D","mjet_mvv_nominal_3D",len(binsx)-1,array('f',binsx),len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
 #systematics
 histograms=[
@@ -204,8 +201,8 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   #histI=plotter.drawTH1(variables[0],options.cut,"1",1,0,1000000000)
   #norm=histI.Integral()
   #y:x
-  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"Softdrop mass","M_{JJ} mass","GeV","GeV","COLZ" )
-  hist3D=plotter.drawTH3("jj_LV_mass:jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut,"1",options.binsx,options.minx,options.maxx,options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{JJ} mass","GeV","Softdrop mass","GeV","COLZ" )
+  histI2D=plotter.drawTH2Binned("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",array('f',binsx),array('f',binsy),"Softdrop mass","M_{JJ} mass","GeV","GeV","COLZ" )
+  hist3D=plotter.drawTH3Binned("jj_LV_mass:jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut,"1",array('f',binsx),array('f',binsx),array('f',binsy),"M_{JJ} mass","GeV","Softdrop mass","GeV","COLZ" )
 
   print " - Creating dataset - "
   #dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
@@ -266,7 +263,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
 
   #histI=plotter.drawTH1(variables[0],options.cut,"1",1,0,1000000000)
   #norm=histI.Integral()
-  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
+  histI2D=plotter.drawTH2Binned("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",array('f',binsx),array('f',binsy),"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
 
   print " - Creating dataset - "
   #dataset=plotterNW.makeDataSet(varsDataSet,options.cut,maxEvents)
@@ -326,7 +323,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
   #histI=plotter.drawTH1(variables[0],options.cut,"1",1,0,1000000000)
   #norm=histI.Integral()
 
-  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",options.binsx,options.minx,options.maxx,options.binsy,options.miny,options.maxy,"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
+  histI2D=plotter.drawTH2("jj_LV_mass:jj_%s_softDrop_mass"%(leg),options.cut,"1",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy),"M_{qV} mass","GeV","Softdrop mass","GeV","COLZ" )
   histTMP=ROOT.TH2F("histoTMP","histo",len(binsx)-1,array('f',binsx),len(binsy)-1,array('f',binsy))
 
   print " - Creating dataset - "
@@ -361,9 +358,6 @@ f.cd()
 for hist in histograms:
  print "Working on histogram " ,hist.GetName()
  hist.Write(hist.GetName()+"_coarse")
- #smooth
- #print "Smoothing tail for " ,hist.GetName()
- #smoothTail(hist)
  print "Creating conditional histogram for ",hist.GetName()
  conditional(hist)
  print "Expanding for " ,hist.GetName()

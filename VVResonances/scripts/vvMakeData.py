@@ -19,6 +19,7 @@ parser.add_option("-M","--max",dest="maxes",help="maximum separated by comma",de
 parser.add_option("-d","--isData",dest="data",type=int,help="isData",default=1)
 parser.add_option("-f","--factor",dest="factor",type=float,help="factor",default=1.0)
 parser.add_option("-n","--name",dest="name",help="name",default="histo")
+parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
 #parser.add_option("-z","--zeroNegative",dest="zeroNegative",type=int,help="zero bvins with negative weights",default=0)
 
 
@@ -28,7 +29,13 @@ parser.add_option("-n","--name",dest="name",help="name",default="histo")
 
 samples={}
 
-
+def getBinning(binsMVV):
+    l=[]
+    if binsMVV!="":
+        s = binsMVV.split(",")
+        for w in s:
+            l.append(int(w))
+    return l
 
 sampleTypes=options.samples.split(',')
 
@@ -88,11 +95,18 @@ if len(pvars)==2:
 
 
 if len(pvars)==3:
+    binning = getBinning(options.binsMVV)
     print "z ",pvars[2], "y ", pvars[1], "x ", pvars[0]
     print "binsz ",int(pbins[2])," minz ", float(pmins[2])," maxz ", float(pmaxes[2])
     print "binsy ",int(pbins[1])," miny ", float(pmins[1])," maxy ", float(pmaxes[1])
     print "binsx ",int(pbins[0])," minx ", float(pmins[0])," maxx ", float(pmaxes[0])
-    histo=data.drawTH3(pvars[2]+":"+pvars[1]+":"+pvars[0],options.cut,"1",int(pbins[0]),float(pmins[0]),float(pmaxes[0]),int(pbins[1]),float(pmins[1]),float(pmaxes[1]),int(pbins[2]),float(pmins[2]),float(pmaxes[2]))
+    if options.binsMVV=="":
+        histo=data.drawTH3(pvars[2]+":"+pvars[1]+":"+pvars[0],options.cut,"1",int(pbins[0]),float(pmins[0]),float(pmaxes[0]),int(pbins[1]),float(pmins[1]),float(pmaxes[1]),int(pbins[2]),float(pmins[2]),float(pmaxes[2]))
+    else:
+        binsx=[]
+        for i in range(0,int(pbins[0])+1):
+            binsx.append(float(pmins[0])+i*(float(pmaxes[0])-float(pmins[0]))/int(pbins[0]))
+        histo=data.drawTH3Binned(pvars[2]+":"+pvars[1]+":"+pvars[0],options.cut,"1",array('f',binsx),array('f',binsx),array('f',binning))
 #    if options.zeroNegative:
 #        for i in range(0,int(pbins[0])+2):
 #            for j in range(0,int(pbins[1])+2):

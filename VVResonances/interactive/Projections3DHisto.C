@@ -19,6 +19,8 @@ TFile* finMC = new TFile(dataFile.c_str(),"READ"); //dataFile: JJ_nonRes_HPHP_no
 TH3F* hinMC = (TH3F*)finMC->Get(hdataName.c_str()); //hdataName: nonRes
 hinMC->Scale(1./hinMC->Integral());
 
+
+
 int binsx = hin->GetNbinsX();
 float xmin = hin->GetXaxis()->GetXmin();
 float xmax = hin->GetXaxis()->GetXmax();
@@ -50,6 +52,7 @@ int zbinMax[4] = {binsz,hin->GetZaxis()->FindBin(1300),hin->GetZaxis()->FindBin(
 int colors[5] = {1,99,9,8,94};
 
 float scale[4] = {1.,0.8,2.,20.};
+
 
 for(int i=0; i<4; ++i){
 
@@ -107,6 +110,10 @@ for(int i=0; i<4; ++i){
  pullsy[i]->SetMarkerSize(0);
   
 }
+hx[0]->SetMinimum(0);
+hx[0]->SetMaximum(0.03);
+hy[0]->SetMinimum(0);
+hy[0]->SetMaximum(0.03);
 
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
 leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");
@@ -125,7 +132,6 @@ cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.png"),"png");
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
-hy[0]->SetMinimum(0);
 for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
@@ -374,6 +380,7 @@ leg3->AddEntry(hz[0],"Template","L");
 leg3->AddEntry(hz_PTZUp,"p_{T} syst. up/down","L");
 leg3->AddEntry(hz_OPTZUp,"1/p_{T} syst. up/down","L");
 
+
 TCanvas* czSyst = new TCanvas("czSyst","czSyst");
 czSyst->cd();
 czSyst->SetLogy();
@@ -385,13 +392,13 @@ hz_OPTZUp->Draw("HISTsame");
 hz_OPTZDown->Draw("HISTsame");
 hzMC[0]->Draw("same");
 leg3->Draw();
-
 czSyst->SaveAs(TString(outDirName)+TString("/")+TString("czSyst.png"),"png");
 
 TH3F* hin_PTXUp = (TH3F*)fin->Get("histo_PTXYUp"); hin_PTXUp->Scale(1./hin_PTXUp->Integral());
 TH3F* hin_PTXDown = (TH3F*)fin->Get("histo_PTXYDown"); hin_PTXDown->Scale(1./hin_PTXDown->Integral());
 TH3F* hin_OPTXUp = (TH3F*)fin->Get("histo_OPTXYUp"); hin_OPTXUp->Scale(1./hin_OPTXUp->Integral());
 TH3F* hin_OPTXDown = (TH3F*)fin->Get("histo_OPTXYDown"); hin_OPTXDown->Scale(1./hin_OPTXDown->Integral());
+
 
 TH1F* hx_PTXUp = (TH1F*)hin_PTXUp->ProjectionX("px_PTXUp",1,binsy,zbinMin[0],zbinMax[0]);
 hx_PTXUp->SetLineColor(kMagenta);
