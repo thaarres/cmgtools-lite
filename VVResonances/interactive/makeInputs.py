@@ -123,7 +123,7 @@ def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP
   cut = "*".join([cuts[p],cuts['common'],cuts['acceptance'],str(sfP[p])])
   #Signal yields
   yieldFile=filename+"_"+p+"_yield"
-  fnc = "pol0"
+  fnc = "pol2"
   if p == "HPHP": fnc = "pol2"
   if p == "HPLP": fnc = "pol2"
   cmd='vvMakeSignalYields.py -s {template} -c "{cut}" -o {output} -V "jj_LV_mass" -m {minMVV} -M {maxMVV} -f {fnc} -b {BR} --minMX {minMX} --maxMX {maxMX} samples'.format(template=template, cut=cut, output=yieldFile,minMVV=minMVV,maxMVV=maxMVV,fnc=fnc,BR=branchingFraction,minMX=minMX,maxMX=maxMX)
