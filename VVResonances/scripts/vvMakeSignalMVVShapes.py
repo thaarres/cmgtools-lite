@@ -97,8 +97,6 @@ for mass in sorted(samples.keys()):
     fitter.w.var("MH").setVal(mass)
     #histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.75*mass,1.25*mass),"1",1000,options.min,options.max)
     binning= truncate(getBinning(options.binsMVV,options.min,options.max,1000),0.75*mass,1.25*mass)
-    print binning
-    print len(binning)
     histo = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.75*mass,1.25*mass),"1",binning)
     Fhists.cd()
     histo.Write("%i"%mass)

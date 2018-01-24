@@ -74,27 +74,13 @@ for mass in sorted(samples.keys()):
         
     fitter=Fitter(['x'])
     if options.doExp==1:
-        #if options.sample.find("Wprime")!=-1:
-            #print "fit double peak "
-            #fitter.jetDoublePeakZ('model','x')
-        #else:
             fitter.jetResonance('model','x')
-        
-#        fitter.w.var("alpha").setVal(1.41)
-#        fitter.w.var("alpha").setConstant(1)
     else:
-        #if options.sample.find("Wprime")!=-1:
-            #print "fit double peak "
-            #fitter.jetDoublePeakZ('model','x')
-        #else:
             fitter.jetResonanceNOEXP('model','x')
-#        fitter.w.var("alpha").setVal(0.50)
-#        fitter.w.var("alpha").setConstant(1)
 
 
     if options.fixPars!="":
         fixedPars =options.fixPars.split(',')
-        print fixedPars
         for par in fixedPars:
             parVal = par.split(':')
             fitter.w.var(parVal[0]).setVal(float(parVal[1]))
@@ -110,7 +96,6 @@ for mass in sorted(samples.keys()):
     fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_"+str(mass)+".png")
 
     for var,graph in graphs.iteritems():
-        print var
         value,error=fitter.fetch(var)
         graph.SetPoint(N,mass,value)
         graph.SetPointError(N,0.0,error)
