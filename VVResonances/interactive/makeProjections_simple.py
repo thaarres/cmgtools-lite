@@ -68,7 +68,8 @@ if __name__=="__main__":
     c.SaveAs("testconditional.pdf")
     
     
-    oneD = ROOT.TFile("JJ_tau21DDT_nonRes_MVV_HPHP_nominal.root","READ")
+    #oneD = ROOT.TFile("/home/dschaefer/tmp/JJ_nonRes_MVV_HPLP.root","READ")
+    oneD = ROOT.TFile("JJ_testBinning_nonRes_MVV_HPHP.root","READ")
     oneDdata = oneD.Get("mvv_nominal")
     oneDhisto = oneD.Get("histo_nominal")
     plotTwoHisto(oneDhisto,"mVV.pdf",True,"",oneDdata)

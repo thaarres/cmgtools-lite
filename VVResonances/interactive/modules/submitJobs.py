@@ -15,6 +15,7 @@ from array import array
 
 timeCheck = "30"
 userName=os.environ['USER']
+
 ######## comment out for lxplus ##############
 #useCondorBatch =True
 mypath = "/portal/ekpbms2/home/dschaefer/tmp/"
@@ -161,7 +162,7 @@ def getEvents(template,samples):
 
 	return minEv, maxEv, NumberOfJobs, files
 	
-def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO! Buggy, fix
+def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar",bins="200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"):
    
 	print 
 	print 'START: Make2DDetectorParam with parameters:'
@@ -173,7 +174,7 @@ def Make2DDetectorParam(rootFile,template,cut,samples,jobName="DetPar"): # TODO!
 	print "jobName  = %s" %jobName 
 	
 
-	cmd='vvMake2DDetectorParam.py  -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,infolder=samples)
+	cmd='vvMake2DDetectorParam.py  -c "{cut}"  -v "jj_LV_mass,jj_l1_softDrop_mass"  -g "jj_gen_partialMass,jj_l1_gen_softDrop_mass,jj_l1_gen_pt"  -b {bins}   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,bins=bins,infolder=samples)
 	
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
@@ -559,39 +560,101 @@ def merge2DDetectorParam(jobList,files,binsxStr,jobname):
 		
 	#produce final det resolution files (one per sample, but at the end we use the pythia one in the following steps for all the samples)
 	for f in tmp_files:
+	 
 	
 	 fin = ROOT.TFile.Open(f,'READ')
+	 print "WORKING ON FILE ", fin.GetName()
 	 
-         superHX = fin.Get("dataX")
+	 superHX = fin.Get("dataX")
 	 superHY = fin.Get("dataY")
-	 superHNsubj = fin.Get("dataNsubj")
-
+	 # superHNsubj = fin.Get("dataNsubj")
+	 
 	 binsx=[]
 	 for b in binsxStr.split(','):
 	     binsx.append(float(b))
 	  
 	 fout = ROOT.TFile("JJ_nonRes_detectorResponse_"+f.split('_')[1],"RECREATE")
-
+	 
 	 scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 	 resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
 	 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 	 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
 	 #scaleNsubjHisto=ROOT.TH1F("scaleNsubjHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 	 #resNsubjHisto=ROOT.TH1F("resNsubjHisto","resHisto",len(binsx)-1,array('d',binsx))
-
+	 
 	 for bin in range(1,superHX.GetNbinsX()+1):
+	 	tmp=superHX.ProjectionY("q",bin,bin)
+	 	startbin   = 0.
+	 	maxcontent = 0.
+	 	for b in range(tmp.GetXaxis().GetNbins()):
+	 	  if tmp.GetXaxis().GetBinCenter(b+1) > startbin and tmp.GetBinContent(b+1)>maxcontent:
+	 	    maxbin = b
+	 	    maxcontent = tmp.GetBinContent(b+1)
+	 	tmpmean = tmp.GetXaxis().GetBinCenter(maxbin)
+	 	tmpwidth = 0.5
+	 	g1 = ROOT.TF1("g1","gaus", tmpmean-tmpwidth,tmpmean+tmpwidth)
+	 	tmp.Fit(g1, "SR")
+	 	c1 =ROOT.TCanvas("c","",800,800)
+	 	tmp.Draw()
+	 	c1.SaveAs("debug_fit1_mvvres_%i.png"%bin)
+	 	tmpmean = g1.GetParameter(1)
+	 	tmpwidth = g1.GetParameter(2)
+	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*2),tmpmean+(tmpwidth*2))
+	 	tmp.Fit(g1, "SR")
+	 	c1 =ROOT.TCanvas("c","",800,800)
+	 	tmp.Draw()
+	 	c1.SaveAs("debug_fit2_mvvres_%i.png"%bin)
+	 	tmpmean = g1.GetParameter(1)
+	 	tmpmeanErr = g1.GetParError(1)
+	 	tmpwidth = g1.GetParameter(2)
+	 	tmpwidthErr = g1.GetParError(2)
+	 	scalexHisto.SetBinContent(bin,tmpmean)
+	 	scalexHisto.SetBinError  (bin,tmpmeanErr)
+	 	resxHisto.SetBinContent  (bin,tmpwidth)
+	 	resxHisto.SetBinError    (bin,tmpwidthErr)
+	 for bin in range(1,superHY.GetNbinsX()+1):	
+	 	tmp=superHY.ProjectionY("q",bin,bin)
+	 	startbin   = 0.
+	 	maxcontent = 0.
+	 	for b in range(tmp.GetXaxis().GetNbins()):
+	 	  if tmp.GetXaxis().GetBinCenter(b+1) > startbin and tmp.GetBinContent(b+1)>maxcontent:
+	 	    maxbin = b
+	 	    maxcontent = tmp.GetBinContent(b+1)
+	 	tmpmean = tmp.GetXaxis().GetBinCenter(maxbin)
+	 	tmpwidth = 0.3
+	 	g1 = ROOT.TF1("g1","gaus", tmpmean-tmpwidth,tmpmean+tmpwidth)
+	 	tmp.Fit(g1, "SR")
+	 	c1 =ROOT.TCanvas("c","",800,800)
+	 	tmp.Draw()
+	 	c1.SaveAs("debug_fit1_mjres_%i.png"%bin)
+	 	tmpmean = g1.GetParameter(1)
+	 	tmpwidth = g1.GetParameter(2)
+	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*1.1),tmpmean+(tmpwidth*1.1))
+	 	tmp.Fit(g1, "SR")
+	 	c1 =ROOT.TCanvas("c","",800,800)
+	 	tmp.Draw()
+	 	c1.SaveAs("debug_fit2_mjres_%i.png"%bin)
+	 	tmpmean = g1.GetParameter(1)
+	 	tmpmeanErr = g1.GetParError(1)
+	 	tmpwidth = g1.GetParameter(2)
+	 	tmpwidthErr = g1.GetParError(2)
+	 	scaleyHisto.SetBinContent(bin,tmpmean)
+	 	scaleyHisto.SetBinError  (bin,tmpmeanErr)
+	 	resyHisto.SetBinContent  (bin,tmpwidth)
+	 	resyHisto.SetBinError    (bin,tmpwidthErr)
+		 
 
-	     tmp=superHX.ProjectionY("q",bin,bin)
-	     scalexHisto.SetBinContent(bin,tmp.GetMean())
-	     scalexHisto.SetBinError(bin,tmp.GetMeanError())
-	     resxHisto.SetBinContent(bin,tmp.GetRMS())
-	     resxHisto.SetBinError(bin,tmp.GetRMSError())
-
-	     tmp=superHY.ProjectionY("q",bin,bin)
-	     scaleyHisto.SetBinContent(bin,tmp.GetMean())
-	     scaleyHisto.SetBinError(bin,tmp.GetMeanError())
-	     resyHisto.SetBinContent(bin,tmp.GetRMS())
-	     resyHisto.SetBinError(bin,tmp.GetRMSError())
+	     # tmp=superHX.ProjectionY("q",bin,bin)
+# 	     scalexHisto.SetBinContent(bin,tmp.GetMean())
+# 	     scalexHisto.SetBinError(bin,tmp.GetMeanError())
+# 	     resxHisto.SetBinContent(bin,tmp.GetRMS())
+# 	     resxHisto.SetBinError(bin,tmp.GetRMSError())
+#
+# 	     tmp=superHY.ProjectionY("q",bin,bin)
+# 	     scaleyHisto.SetBinContent(bin,tmp.GetMean())
+# 	     scaleyHisto.SetBinError(bin,tmp.GetMeanError())
+# 	     resyHisto.SetBinContent(bin,tmp.GetRMS())
+# 	     resyHisto.SetBinError(bin,tmp.GetRMSError())
 
 	     #tmp=superHNsubj.ProjectionY("q",bin,bin)
 	     #scaleNsubjHisto.SetBinContent(bin,tmp.GetMean())
