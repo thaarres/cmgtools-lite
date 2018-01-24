@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     #### generate a sample from the roofitresult (same statistics as original)
     Nevt = int(workspace.data("data_obs").sumEntries())
-    pdfData = (model.generate(rt.RooArgSet(workspace.var('MJ1'), workspace.var('MJ2'), workspace.var('MJJ')), Nevt))
+    pdfData = (model.generate(rt.RooArgSet(workspace.var('MJ1'), workspace.var('MJ2'), workspace.var('MJJ')), Nevt)
     print "Done generating %i events" %pdfData.numEntries()
 
     # dump the generated dataset in a file
