@@ -9,8 +9,6 @@ from CMGTools.VVResonances.plotting.tdrstyle import *
 setTDRStyle()
 from CMGTools.VVResonances.plotting.TreePlotter import TreePlotter
 from CMGTools.VVResonances.plotting.MergedPlotter import MergedPlotter
-from time import sleep
-
 ROOT.gROOT.SetBatch(True)
 
 parser = optparse.OptionParser()
