@@ -1,3 +1,7 @@
+// Run from command line with
+// root .x 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
+// root .x 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
+// 
 void Projections3DHisto(std::string dataFile, std::string hdataName, std::string fitFile, std::string hfitName, std::string outDirName){
 
 std::stringstream ss; ss.str(""); ss << "mkdir " << outDirName << std::endl;
