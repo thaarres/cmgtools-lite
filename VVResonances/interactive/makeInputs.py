@@ -51,7 +51,7 @@ cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP','HPLP']
-purities=['HPHP']
+purities=['HPLP']
 
 BulkGravWWTemplate="BulkWW_"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -187,7 +187,7 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
 def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobname="1DMVV",wait=True):
  pwd = inpath #os.getcwd()
  for p in purities:
-  jobname = jobName+"_"+p
+  jobname = jobname+"_"+p
   print " Working on purity: ", p
   resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse.root"	
   rootFile = filename+"_"+name+"_MVV_"+p+".root"
@@ -226,8 +226,8 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobN
     if wait: merge2DTemplate(jobList,files,jobname,p,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
   else:
       cmd='vvMake2DTemplateWithKernels.py  -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass"  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} samples'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ)
-    cmd=cmd+HCALbinsMVV
-    os.system(cmd)
+      cmd=cmd+HCALbinsMVV
+      os.system(cmd)
 
 def mergeKernelJobs():
 	for p in purities:
@@ -321,7 +321,7 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
 #makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
 #makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
-makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+#makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
 ## ------ do not use these ------
 ## makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
@@ -346,6 +346,6 @@ else:
 mergeBackgroundShapes("nonRes","JJ")
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"nR")
-# makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
+## makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
 from modules.submitJobs import makePseudodata
 for p in purities: makePseudodata("JJ_nonRes_%s.root"%p,p) #remove this when running on data!!
