@@ -93,54 +93,6 @@ def conditional(hist):
             continue
         for j in range(1,hist.GetNbinsX()+1):
             hist.SetBinContent(j,i,hist.GetBinContent(j,i)/integral)
-            
-
-def smoothTail(hist):
-    if hist.Integral() == 0:
-        print "histogram has zero integral "+hist.GetName()
-        return 0
-    hist.Scale(1.0/hist.Integral())
-    print "y bins " +str(hist.GetNbinsY())
-    print "x bins " +str(hist.GetNbinsX())
-    for i in range(1,hist.GetNbinsX()+1):
-        print i
-        proj=hist.ProjectionY("q",i,i)
-#        for j in range(1,proj.GetNbinsX()+1):
-#            if proj.GetBinContent(j)/proj.Integral()<0.0005:
-#                proj.SetBinError(j,1.8)
-        
-        beginFit = proj.GetBinLowEdge( proj.GetMaximumBin() )
-        beginFitY = beginFit + 1500. * 1/(beginFit/1000.)
-        print beginFit
-        print beginFitY
-        #expo=ROOT.TF1("expo","expo",beginFitX,8000)
-        expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000) 
-        expo.SetParameters(0,16.,2.)
-        expo.SetParLimits(2,1.,20.)
-        proj.Fit(expo,"LLMR","",beginFitY,8000)
-        #proj.Fit(expo,"","",2000,8000)
-        c = ROOT.TCanvas("c","c",400,400)
-        c.SetLogy()
-        proj.Draw("hist")
-        proj.Draw("funcsame")
-        c.SaveAs(hist.GetName()+"_bin"+str(i)+".pdf")
-        beginsmooth = False
-        for j in range(1,hist.GetNbinsY()+1):
-            y=hist.GetYaxis().GetBinCenter(j)
-            if y>beginFitY:
-                if beginsmooth==False:
-                   if y<3000: 
-                       if abs(proj.GetBinContent(j) - expo.Eval(y)) < 0.0000001:# and abs(expo.Derivative(x)- (hist.GetBinContent(j):
-                        print beginFitY
-                        print "begin smoothing at " +str(y)
-                        beginsmooth = True 
-                   if abs(proj.GetBinContent(j) - expo.Eval(y)) < 0.00000001:# and abs(expo.Derivative(x)- (hist.GetBinContent(j):
-                       print beginFitY
-                       print "begin smoothing at " +str(y)
-                       beginsmooth = True 
-                if beginsmooth:
-                    hist.SetBinContent(j,i,expo.Eval(y))
-
 
 
 (options,args) = parser.parse_args()
@@ -406,9 +358,6 @@ f.cd()
 for hist in histograms:
  print "Working on histogram " ,hist.GetName()
  hist.Write(hist.GetName()+"_coarse")
- #smooth
- #print "Smoothing tail for " ,hist.GetName()
- #smoothTail(hist)
  print "Creating conditional histogram for ",hist.GetName()
  conditional(hist)
  print "Expanding for " ,hist.GetName()
