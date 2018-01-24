@@ -19,7 +19,7 @@ TFile* finMC = new TFile(dataFile.c_str(),"READ"); //dataFile: JJ_nonRes_HPHP_no
 TH3F* hinMC = (TH3F*)finMC->Get(hdataName.c_str()); //hdataName: nonRes
 hinMC->Scale(1./hinMC->Integral());
 
-const char* sample = "pythia";
+
 
 int binsx = hin->GetNbinsX();
 float xmin = hin->GetXaxis()->GetXmin();
@@ -132,7 +132,6 @@ cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.png"),"png");
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
-hy[0]->SetMinimum(0);
 for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
@@ -288,7 +287,7 @@ for(int i=0; i<5; ++i){
  pullsz[i]->SetMarkerSize(0);
      
 }
-cy->SaveAs(Form("ProjectionsY_%s.pdf",sample));
+
 TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
 leg2->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg2->AddEntry(hz[0],"Template","L");
@@ -381,7 +380,6 @@ leg3->AddEntry(hz[0],"Template","L");
 leg3->AddEntry(hz_PTZUp,"p_{T} syst. up/down","L");
 leg3->AddEntry(hz_OPTZUp,"1/p_{T} syst. up/down","L");
 
-cz->SaveAs(Form("ProjectionsZ_%s.pdf",sample));
 
 TCanvas* czSyst = new TCanvas("czSyst","czSyst");
 czSyst->cd();
