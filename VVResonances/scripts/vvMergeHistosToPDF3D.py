@@ -133,7 +133,6 @@ makeHisto("histo_altshapeDown",inputx,"histo_altshapeDown",inputy,"histo_altshap
 print "Merge madgraph"
 makeHisto("histo_altshape2",inputx,"histo_altshape2",inputy,"histo_altshape2",inputz,"histo_altshape2",output)
 
-
 print "Write file "+options.output
 
 inputx.Close()

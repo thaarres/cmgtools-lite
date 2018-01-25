@@ -8,9 +8,12 @@ from ROOT import *
 import subprocess, thread
 from array import array
 
+gStyle.SetOptStat(0)
+gStyle.SetOptTitle(0)
+
 timeCheck = "30"
 userName=os.environ['USER']
-
+useCondorBatch = False
 
 def getBinning(binsMVV):
     l=[]
@@ -22,7 +25,7 @@ def getBinning(binsMVV):
             l.append(int(w))
     return l
 
-useCondorBatch = True
+
 
 def makeSubmitFileCondor(exe,jobname,jobflavour):
     print "make options file for condor job submission "
@@ -549,19 +552,21 @@ def merge2DDetectorParam(jobList,files,binsxStr,jobname):
 	 	    maxbin = b
 	 	    maxcontent = tmp.GetBinContent(b+1)
 	 	tmpmean = tmp.GetXaxis().GetBinCenter(maxbin)
-	 	tmpwidth = 0.5
+	 	tmpwidth = 0.2
 	 	g1 = ROOT.TF1("g1","gaus", tmpmean-tmpwidth,tmpmean+tmpwidth)
 	 	tmp.Fit(g1, "SR")
-	 	c1 =ROOT.TCanvas("c","",800,800)
-	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit1_mvvres_%i.png"%bin)
+	 	# c1 =ROOT.TCanvas("c","",800,800)
+	 	# tmp.Draw()
+	 	# c1.SaveAs("debug_fit1_mvvres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpwidth = g1.GetParameter(2)
 	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*2),tmpmean+(tmpwidth*2))
 	 	tmp.Fit(g1, "SR")
 	 	c1 =ROOT.TCanvas("c","",800,800)
+		tmp.GetXaxis().SetTitle("m_{jj}^{reco}/m_{jj}^{gen}")
+		tmp.GetYaxis().SetTitle("A.U")
 	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit2_mvvres_%i.png"%bin)
+	 	c1.SaveAs("debug_fit_mvvres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpmeanErr = g1.GetParError(1)
 	 	tmpwidth = g1.GetParameter(2)
@@ -579,19 +584,21 @@ def merge2DDetectorParam(jobList,files,binsxStr,jobname):
 	 	    maxbin = b
 	 	    maxcontent = tmp.GetBinContent(b+1)
 	 	tmpmean = tmp.GetXaxis().GetBinCenter(maxbin)
-	 	tmpwidth = 0.3
+	 	tmpwidth = 0.2
 	 	g1 = ROOT.TF1("g1","gaus", tmpmean-tmpwidth,tmpmean+tmpwidth)
 	 	tmp.Fit(g1, "SR")
-	 	c1 =ROOT.TCanvas("c","",800,800)
-	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit1_mjres_%i.png"%bin)
+	 	# c1 =ROOT.TCanvas("c","",800,800)
+	 	# tmp.Draw()
+	 	# c1.SaveAs("debug_fit1_mjres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpwidth = g1.GetParameter(2)
-	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*1.1),tmpmean+(tmpwidth*1.1))
+	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*1.40),tmpmean+(tmpwidth*1.40))
 	 	tmp.Fit(g1, "SR")
 	 	c1 =ROOT.TCanvas("c","",800,800)
+		tmp.GetXaxis().SetTitle("m^{reco}/m^{gen}")
+		tmp.GetYaxis().SetTitle("A.U")
 	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit2_mjres_%i.png"%bin)
+	 	c1.SaveAs("debug_fit_mjres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpmeanErr = g1.GetParError(1)
 	 	tmpwidth = g1.GetParameter(2)
@@ -900,7 +907,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	 print "sample: ", s,"number of files:",len(jobsPerSample[s]),"adding histo with scale factor:",factor
  
 	 outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_COND2D_%s_%s_%s.root'%(s,leg,purity),'RECREATE')
-  
+
 	 finalHistos = {}
 	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
 	 finalHistos['mjet_mvv_nominal'] = ROOT.TH2F("mjet_mvv_nominal_out","mjet_mvv_nominal_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
@@ -919,6 +926,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
              print "use binning "+str(binning)
          print binsMVV
          print finalHistos['histo_nominal_coarse'].GetNbinsY()
+
 	 for f in jobsPerSample[s]:
 
 	  inf = ROOT.TFile.Open(f,'READ')
@@ -1070,7 +1078,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		#conditional(expanded)
 		#expanded.Write('histo_nominal_ScaleDown')
 		
-		alpha=1.5/float(maxMJ)
+		alpha=1.5/215.
 		histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha,1,2)
 		conditional(histogram_pt_down)
 		histogram_pt_down.SetName('histo_nominal_PTDown')
@@ -1081,7 +1089,7 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 		histogram_pt_up.SetTitle('histo_nominal_PTUp')
 		histogram_pt_up.Write('histo_nominal_PTUp')
 
-		alpha=1.5*float(minMJ)
+		alpha=1.5*55.
 		h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1,2)
 		conditional(h1)
 		h1.SetName('histo_nominal_OPTDown')
@@ -1163,11 +1171,12 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	##### Creating and sending jobs #####
 	joblist = []
 	###### loop for creating and sending jobs #####
+	path = os.getcwd()
 	for x in range(1, int(NumberOfJobs)+1):
 	   os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	   os.chdir("tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	   #os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
-	   os.chdir(path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir(path+"/tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	 
 	   with open('job_%s.sh'%files[x-1].replace(".root",""), 'w') as fout:
 	      fout.write("#!/bin/sh\n")
