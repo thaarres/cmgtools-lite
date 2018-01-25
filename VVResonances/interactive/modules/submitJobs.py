@@ -907,11 +907,6 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
 	 print "sample: ", s,"number of files:",len(jobsPerSample[s]),"adding histo with scale factor:",factor
  
 	 outf = ROOT.TFile.Open(outdir+'_out/JJ_nonRes_COND2D_%s_%s_%s.root'%(s,leg,purity),'RECREATE')
-	 
-	 binsy=[1000+i*100 for i in range(41)]
-	 binsx=[]
-	 for i in range(0,binsMJ+1):
-	     binsx.append(minMJ+i*(maxMJ-minMJ)/binsMJ)
 
 	 finalHistos = {}
 	 finalHistos['histo_nominal_coarse'] = ROOT.TH2F("histo_nominal_coarse_out","histo_nominal_coarse_out",binsMJ,minMJ,maxMJ,binsMVV,minMVV,maxMVV)
