@@ -8,9 +8,12 @@ from ROOT import *
 import subprocess, thread
 from array import array
 
+gStyle.SetOptStat(0)
+gStyle.SetOptTitle(0)
+
 timeCheck = "30"
 userName=os.environ['USER']
-
+useCondorBatch = False
 
 def getBinning(binsMVV):
     l=[]
@@ -22,7 +25,7 @@ def getBinning(binsMVV):
             l.append(int(w))
     return l
 
-useCondorBatch = True
+
 
 def makeSubmitFileCondor(exe,jobname,jobflavour):
     print "make options file for condor job submission "
@@ -549,19 +552,21 @@ def merge2DDetectorParam(jobList,files,binsxStr,jobname):
 	 	    maxbin = b
 	 	    maxcontent = tmp.GetBinContent(b+1)
 	 	tmpmean = tmp.GetXaxis().GetBinCenter(maxbin)
-	 	tmpwidth = 0.5
+	 	tmpwidth = 0.2
 	 	g1 = ROOT.TF1("g1","gaus", tmpmean-tmpwidth,tmpmean+tmpwidth)
 	 	tmp.Fit(g1, "SR")
-	 	c1 =ROOT.TCanvas("c","",800,800)
-	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit1_mvvres_%i.png"%bin)
+	 	# c1 =ROOT.TCanvas("c","",800,800)
+	 	# tmp.Draw()
+	 	# c1.SaveAs("debug_fit1_mvvres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpwidth = g1.GetParameter(2)
 	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*2),tmpmean+(tmpwidth*2))
 	 	tmp.Fit(g1, "SR")
 	 	c1 =ROOT.TCanvas("c","",800,800)
+		tmp.GetXaxis().SetTitle("m_{jj}^{reco}/m_{jj}^{gen}")
+		tmp.GetYaxis().SetTitle("A.U")
 	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit2_mvvres_%i.png"%bin)
+	 	c1.SaveAs("debug_fit_mvvres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpmeanErr = g1.GetParError(1)
 	 	tmpwidth = g1.GetParameter(2)
@@ -579,19 +584,21 @@ def merge2DDetectorParam(jobList,files,binsxStr,jobname):
 	 	    maxbin = b
 	 	    maxcontent = tmp.GetBinContent(b+1)
 	 	tmpmean = tmp.GetXaxis().GetBinCenter(maxbin)
-	 	tmpwidth = 0.3
+	 	tmpwidth = 0.2
 	 	g1 = ROOT.TF1("g1","gaus", tmpmean-tmpwidth,tmpmean+tmpwidth)
 	 	tmp.Fit(g1, "SR")
-	 	c1 =ROOT.TCanvas("c","",800,800)
-	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit1_mjres_%i.png"%bin)
+	 	# c1 =ROOT.TCanvas("c","",800,800)
+	 	# tmp.Draw()
+	 	# c1.SaveAs("debug_fit1_mjres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpwidth = g1.GetParameter(2)
-	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*1.1),tmpmean+(tmpwidth*1.1))
+	 	g1 = ROOT.TF1("g1","gaus", tmpmean-(tmpwidth*1.40),tmpmean+(tmpwidth*1.40))
 	 	tmp.Fit(g1, "SR")
 	 	c1 =ROOT.TCanvas("c","",800,800)
+		tmp.GetXaxis().SetTitle("m^{reco}/m^{gen}")
+		tmp.GetYaxis().SetTitle("A.U")
 	 	tmp.Draw()
-	 	c1.SaveAs("debug_fit2_mjres_%i.png"%bin)
+	 	c1.SaveAs("debug_fit_mjres_%i.png"%bin)
 	 	tmpmean = g1.GetParameter(1)
 	 	tmpmeanErr = g1.GetParError(1)
 	 	tmpwidth = g1.GetParameter(2)
@@ -1169,11 +1176,12 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
 	##### Creating and sending jobs #####
 	joblist = []
 	###### loop for creating and sending jobs #####
+	path = os.getcwd()
 	for x in range(1, int(NumberOfJobs)+1):
 	   os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	   os.chdir("tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	   #os.system("mkdir tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
-	   os.chdir(path+"tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
+	   os.chdir(path+"/tmp"+jobname+"/"+str(files[x-1]).replace(".root",""))
 	 
 	   with open('job_%s.sh'%files[x-1].replace(".root",""), 'w') as fout:
 	      fout.write("#!/bin/sh\n")

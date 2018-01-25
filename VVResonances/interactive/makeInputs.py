@@ -3,7 +3,7 @@ import os,sys
 
 submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
-dijetBinning = False
+dijetBinning = True
 
 if dijetBinning:
     HCALbinsMVV=" --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058"
@@ -52,7 +52,6 @@ cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP','HPLP']
-purities=['HPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -173,10 +172,10 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
   os.system(cmd)
 
 
-def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobname="1DMVV",wait=True):
+def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DMVV",wait=True):
  pwd = os.getcwd()
  for p in purities:
-  jobname = jobname+"_"+p
+  jobname = jobName+"_"+p
   print " Working on purity: ", p
   resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse.root"	
   rootFile = filename+"_"+name+"_MVV_"+p+".root"
@@ -230,9 +229,9 @@ def mergeKernelJobs():
 						jobList.append(job.replace("'","").replace(" ",""))
 			if line.startswith("file"):
 				for job in line.split("[")[1].split("]")[0].split(","):
-					files.append(job.replace("'","").replace(" ",""))	
+					files.append(job.replace("'","").replace(" ",""))
 		from modules.submitJobs import merge1DMVVTemplate
-		merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)		
+		merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
 		
 		jobList = []
 		files   = []
@@ -243,11 +242,11 @@ def mergeKernelJobs():
 						jobList.append(job.replace("'","").replace(" ",""))
 			if line.startswith("file"):
 				for job in line.split("[")[1].split("]")[0].split(","):
-					files.append(job.replace("'","").replace(" ",""))	
-		
+					files.append(job.replace("'","").replace(" ",""))
+
 		from modules.submitJobs import merge2DTemplate
 		merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
-		merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
+		merge2DTemplate(jobList,files,"2Dl2"+"_"+p,p,"l2",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
 
 def mergeBackgroundShapes(name,filename):
 
@@ -281,28 +280,28 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
         cmd=cmd+HCALbinsMVV
         os.system(cmd)
 	
-# makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
-# makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
-# makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
-# makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-# makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-# makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-# makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
-# makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-# makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-#
-# makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
-# makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
-# makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-# makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
+makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
+makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+
+makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
+makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
 # ------ do not use these ------
 # makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
@@ -313,21 +312,21 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
 
 
 if runParallel and submitToBatch:
-	# wait = False
-	# makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-	# makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-	# makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-	# print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
-	# sys.exit()
+	wait = False
+	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+	print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
+	sys.exit()
 	mergeKernelJobs()
 else:
 	wait = True
 	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-	
+
 mergeBackgroundShapes("nonRes","JJ")
-# makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"nR")
-# ### makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
-# from modules.submitJobs import makePseudodata
-# for p in purities: makePseudodata("JJ_nonRes_%s.root"%p,p) #remove this when running on data!!
+makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"nR")
+### makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)
+from modules.submitJobs import makePseudodata
+for p in purities: makePseudodata("JJ_nonRes_%s.root"%p,p) #remove this when running on data!!
