@@ -491,7 +491,7 @@ class Fitter(object):
 	gsigma = ROOT.RooFormulaVar("gsigma","gsigma","@0*@1", ROOT.RooArgList(self.w.var('SIGMA'),self.w.var('SCALESIGMA')))
 	getattr(self.w,'import')(gsigma,ROOT.RooFit.Rename('gsigma'))
         self.w.factory("ALPHA[0.85,0.60,1.20]")
-        self.w.factory("N[6,0.1,10]") #From @dani: N=126 from thea 126.9
+        self.w.factory("N[6,0.1,150]") #From @dani: N=126 from thea 126.9
 	self.w.factory("Gaussian::signalResonanceGaus(%s,MEAN,gsigma)"%poi)
 	self.w.factory("CBShape::signalResonanceCB(%s,MEAN,SIGMA,ALPHA,N)"%poi)
 	self.w.factory('SUM::'+name+'(f[0.00,0.00,0.85]*signalResonanceGaus,signalResonanceCB)')
