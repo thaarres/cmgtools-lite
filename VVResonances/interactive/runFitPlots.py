@@ -121,6 +121,26 @@ def reduceBinsToRange(Bins,r):
     return result
 
 
+def getChi2(pdf,data,norm):
+    pr=[]
+    dr=[]
+    for xk, xv in xBins_redux.iteritems():
+         MJ1.setVal(xv)
+         for yk, yv in yBins_redux.iteritems():
+             MJ2.setVal(yv)
+             for zk,zv in zBins_redux.iteritems():
+                 MJJ.setVal(zv)
+                 dr.append(data.weight(argset))
+                 binV = zBinsWidth[zk]*xBinsWidth[xk]*yBinsWidth[yk]
+                 pr.append( pdf.getVal(argset)*binV*norm)
+    ndof = 0
+    chi2 = 0
+    for i in range(0,len(pr)):
+        if dr[i]==0:
+            continue
+        ndof+=1
+        chi2+= pow((dr[i] - pr[i]),2)/pr[i]
+    return [chi2,ndof]
 
 
 def doZprojection(pdfs,data,norm,proj=0):
