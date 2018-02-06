@@ -136,7 +136,7 @@ def getChi2(pdf,data,norm):
     ndof = 0
     chi2 = 0
     for i in range(0,len(pr)):
-        if dr[i]==0:
+        if dr[i] < 10e-10:
             continue
         ndof+=1
         chi2+= pow((dr[i] - pr[i]),2)/pr[i]
