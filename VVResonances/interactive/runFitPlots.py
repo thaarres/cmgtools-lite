@@ -140,7 +140,7 @@ def getChi2(pdf,data,norm):
             continue
         ndof+=1
         #chi2+= pow((dr[i] - pr[i]),2)/pr[i]
-        chi2+= 2* pr[i] - dr[i] + dr[i]* ROOT.TMath.Log(dr[i]/pr[i])
+        chi2+= 2*( pr[i] - dr[i] + dr[i]* ROOT.TMath.Log(dr[i]/pr[i]))
     return [chi2,ndof]
 
 
