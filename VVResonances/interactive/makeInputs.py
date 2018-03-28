@@ -68,6 +68,10 @@ dataTemplate="JetHT"
 nonResTemplate="QCD_Pt_" #high stat
 # nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 #nonResTemplate="Dijet" #to compare shapes
+WJetsTemplate= "WJetsToQQ_HT600"
+ZJetsTemplate= "ZJetsToQQ_HT600"
+WJetsTemplate17= "WJetsToQQ_HT800"
+ZJetsTemplate17= "ZJetsToQQ_HT800"
 
 minMJ=55.0
 maxMJ=215.0
