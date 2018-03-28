@@ -232,7 +232,7 @@ def doZprojection(pdfs,data,norm,zBinslowedge,xBins_redux,yBins_redux,zBins_redu
         c.SaveAs(options.output+"Zproj"+options.label+"_x"+(options.xrange.split(","))[0]+"To"+(options.xrange.split(","))[1]+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+".pdf")
 
 
-def doXprojection(pdfs,data,norm,hin=0):
+def doXprojection(pdfs,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options,hin=0):
     postfit=False
     for p in pdfs:
         if p.GetName().find("postfit")!=-1:
@@ -320,7 +320,7 @@ def doXprojection(pdfs,data,norm,hin=0):
         c.SaveAs(options.output+"Xproj"+options.label+"_y"+(options.yrange.split(","))[0]+"To"+(options.yrange.split(","))[1]+"_z"+(options.zrange.split(","))[0]+"To"+(options.zrange.split(","))[1]+".pdf")   
     
 
-def doYprojection(pdfs,data,norm):
+def doYprojection(pdfs,data,norm,yBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options):
     postfit=False
     for p in pdfs:
         if p.GetName().find("postfit")!=-1:
@@ -597,38 +597,37 @@ if __name__=="__main__":
      #make projections onto MJJ axis
      if options.projection =="z":
          pdfs = allpdfs
-         doZprojection(pdfs,data,norm)
+         doZprojection(pdfs,data,norm,zBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
          if options.postfit == True:
              postfit = [pdf,pdf_shape_postfit,pdf_shape_postfit,model]
-             doZprojection(postfit,data,norm)
+             doZprojection(postfit,data,norm,zBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
          
      #make projections onto MJ1 axis
      if options.projection =="x":
          pdfs = allpdfs 
-         doXprojection(pdfs,data,norm)
+         doXprojection(pdfs,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
          if options.postfit == True:
              postfit = [pdf,pdf_shape_postfit,pdf_shape_postfit,model]
-             doXprojection(postfit,data,norm)
+             doXprojection(postfit,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
          
          
      #make projections onto MJ2 axis
      if options.projection =="y":
          pdfs = allpdfs
-         doYprojection(pdfs,data,norm)
-         
+         doYprojection(pdfs,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
          if options.postfit == True:
              postfit = [pdf,pdf_shape_postfit,pdf_shape_postfit,model]
-             doYprojection(postfit,data,norm)
+             doYprojection(postfit,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
          
      if options.projection =="xyz":
         pdfs = allpdfs
-        doXprojection(pdfs,data,norm)
-        doYprojection(pdfs,data,norm)
-        doZprojection(pdfs,data,norm)
+        doXprojection(pdfs,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
+        doYprojection(pdfs,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
+        doZprojection(pdfs,data,norm,zBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
         if options.postfit == True:
              postfit = [pdf,pdf_shape_postfit]
-             doXprojection(postfit,data,norm)
-             doYprojection(postfit,data,norm)
-             doZprojection(postfit,data,norm)
+             doXprojection(postfit,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
+             doYprojection(postfit,data,norm,xBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
+             doZprojection(postfit,data,norm,zBinslowedge,xBins_redux,yBins_redux,zBins_redux,xBinsWidth,yBinsWidth,zBinsWidth,MJ1,MJ2,MJJ,argset,options)
   
 
