@@ -76,26 +76,29 @@ for sig in signals:
     
     #SYSTEMATICS
 
-    #luminosity
-    card.addSystematic("CMS_lumi","lnN",{'BulkGWW':1.026})
+     #luminosity
+    card.addSystematic("CMS_lumi","lnN",{'%s':1.026})
 
-    #kPDF uncertainty for the signal
-    card.addSystematic("CMS_pdf","lnN",{'BulkGWW':1.01})
+   #kPDF uncertainty for the signal
+    card.addSystematic("CMS_pdf","lnN",{'%s':1.01})
 
-    #W+jets cross section in acceptance-dominated by pruned mass
+   #W+jets cross section in acceptance-dominated by pruned mass
     card.addSystematic("CMS_VV_JJ_nonRes_norm_"+p,"lnN",{'nonRes':1.5})
+   
+    card.addSystematic("CMS_VV_JJ_Wjets_norm_"+p,"lnN",{'Wjet':1.02})
+    card.addSystematic("CMS_VV_JJ_Zjets_norm_"+p,"lnN",{'Zjet':1.02})
 
-    #tau21 
+   #tau21 
     if p=='HPHP':
-        card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1+0.14})
+       card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s':1+0.14})
     if p=='HPLP':
-        card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1-0.33})
-                
+       card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s':1-0.33})
+               
     #pruned mass scale    
     card.addSystematic("CMS_scale_j","param",[0.0,0.02])
     card.addSystematic("CMS_res_j","param",[0.0,0.05])
-    card.addSystematic("CMS_scale_prunedj","param",[0.0,0.0094])
-    card.addSystematic("CMS_res_prunedj","param",[0.0,0.2])
+    card.addSystematic("CMS_scale_prunedj","param",[0.0,0.2])
+    card.addSystematic("CMS_res_prunedj","param",[-0.6,0.11])
 
     # #alternative shapes
     card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
