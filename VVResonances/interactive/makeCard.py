@@ -36,6 +36,43 @@ for p in purities:
  card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','OPTZ:CMS_VV_JJ_nonRes_OPTZ','PTZ:CMS_VV_JJ_nonRes_PTZ'],False,0)    
  card.addFixedYieldFromFile("nonRes",1,"JJ_"+p+".root","nonRes")
 
+ #Vjets
+ if p=='HPHP':
+        ##V+jets background ##############################################################################
+        from JJ_WJets_HPHP_jecv6 import JJ_WJets__MVV, JJ_WJets__Res_l1, JJ_WJets__ratio_l1, JJ_WJets__Res_l2, JJ_WJets__ratio_l2
+        from JJ_ZJets_HPHP_jecv6 import JJ_ZJets__MVV, JJ_ZJets__Res_l1, JJ_ZJets__ratio_l1, JJ_ZJets__Res_l2, JJ_ZJets__ratio_l2
+ if p=='HPLP':
+        #V+jets background ##############################################################################
+        from JJ_WJets_HPLP_jecv6 import JJ_WJets__MVV, JJ_WJets__Res_l1, JJ_WJets__ratio_l1, JJ_WJets__Res_l2, JJ_WJets__ratio_l2
+        from JJ_ZJets_HPLP_jecv6 import JJ_ZJets__MVV, JJ_ZJets__Res_l1, JJ_ZJets__ratio_l1, JJ_ZJets__Res_l2, JJ_ZJets__ratio_l2
+
+ print " start with vjets backgrounds"
+  
+ card.addMVVBackgroundShapeQCD("Wjets_mjj","MJJ",True,"",JJ_WJets__MVV)
+ card.addMjetBackgroundShapeVJetsRes("Wjets_mjetRes_l1","MJ1","",JJ_WJets__Res_l1,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+ card.addMjetBackgroundShapeVJetsRes("Wjets_mjetRes_l2","MJ2","",JJ_WJets__Res_l2,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+ card.product3D("Wjet","Wjets_mjetRes_l1","Wjets_mjetRes_l2","Wjets_mjj")
+ card.addFixedYieldFromFile("Wjet",1,"JJ_WJets_HPHP_jecv6.root","WJets",JJ_WJets__ratio_l1)
+     
+     
+     
+ card.addMVVBackgroundShapeQCD("Zjets_mjj","MJJ",True,"",JJ_ZJets__MVV)
+ card.addMjetBackgroundShapeVJetsRes("Zjets_mjetRes_l1","MJ1","",JJ_ZJets__Res_l1,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+ card.addMjetBackgroundShapeVJetsRes("Zjets_mjetRes_l2","MJ2","",JJ_ZJets__Res_l2,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+ card.product3D("Zjet","Zjets_mjetRes_l1","Zjets_mjetRes_l2","Zjets_mjj")
+ card.addFixedYieldFromFile("Zjet",1,"JJ_ZJets_HPHP_jecv6.root","ZJets",JJ_ZJets__ratio_l1)
+     
+ # add systematics for mjj part of resoant vjets contribution
+ card.addSystematic("CMS_VV_JJ_p0_Wjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_WJets__MVV['p0']['val'],JJ_WJets__MVV['p0']['err']*200])
+ card.addSystematic("CMS_VV_JJ_p0_Zjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_ZJets__MVV['p0']['val'],JJ_ZJets__MVV['p0']['err']*200])
+ card.addSystematic("CMS_VV_JJ_p1_Wjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_WJets__MVV['p1']['val'],JJ_WJets__MVV['p1']['err']*100])
+ card.addSystematic("CMS_VV_JJ_p1_Zjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_ZJets__MVV['p1']['val'],JJ_ZJets__MVV['p1']['err']*100])
+ card.addSystematic("CMS_VV_JJ_p2_Wjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_WJets__MVV['p2']['val'],JJ_WJets__MVV['p2']['err']*100])
+ card.addSystematic("CMS_VV_JJ_p2_Zjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_ZJets__MVV['p2']['val'],JJ_ZJets__MVV['p2']['err']*100])
+ # end V+jets background ####################################################
+
+
+
  #DATA
  card.importBinnedData("JJ_"+p+".root","data",["MJ1","MJ2","MJJ"])
  
