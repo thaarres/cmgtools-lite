@@ -293,6 +293,23 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
         cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}"  samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
         cmd=cmd+HCALbinsMVV
         os.system(cmd)
+        
+def fitVJets(filename,template):
+  for p in purities:
+    cut='*'.join([cuts['common'],cuts[p],cuts['acceptance']])
+    if template.find('HT800')!=-1:
+        cut='*'.join([cuts['common18'],cuts[p],cuts['acceptance']])
+    rootFile=filename+"_"+p+".root"
+    fixPars=""
+    if filename.find("W")!=-1:
+        fixPars="n:0.8"
+    cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} -f "{fixPars}" --store "/usr/users/dschaefer/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive/{filename}_{purity}_jecv6.py" samples'.format(template=template,cut=cut,rootFile=rootFile,minMJ=minMJ,maxMJ=maxMJ,fixPars=fixPars,filename=filename,purity=p)
+    os.system(cmd)
+    
+
+
+fitVJets("JJ_WJets",WJetsTemplate17)
+fitVJets("JJ_ZJets",ZJetsTemplate17)        
 	
 makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
 makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
