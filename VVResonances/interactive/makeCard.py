@@ -5,7 +5,7 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 purities=['HPHP','HPLP','LPLP']
-purities=['HPHP']
+purities=['HPHP','HPLP']
 
 for p in purities:
 
@@ -62,7 +62,7 @@ for p in purities:
  card.addSystematic("CMS_scale_prunedj","param",[0.0,0.0094])
  card.addSystematic("CMS_res_prunedj","param",[0.0,0.2])
 
- #alternative shapes
+ # #alternative shapes
  card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
  card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.333])
  #card.addSystematic("CMS_VV_JJ_nonRes_PT2","param",[0.0,0.333])
@@ -72,4 +72,5 @@ for p in purities:
  card.makeCard()
 
 #make combined cards
+cmd=cmd + ' >> datacard_'+cat.replace("_HPHP","").replace("_HPLP","")+'.txt '
 print cmd

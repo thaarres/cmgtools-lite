@@ -1,17 +1,18 @@
 import ROOT
 import os,sys
 
-submitToBatch = False #Set to true if you want to submit kernels + makeData to batch!
-runParallel   = False #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
+submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
+runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
 dijetBinning = True
 
 if dijetBinning:
-    HCALbinsMVV=" --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058"
+    HCALbinsMVV=" --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5000"
     HCALbinsMVVSignal=" --binsMVV 1,3,6,10,16,23,31,40,50,61,74,88,103,119,137,156,176,197,220,244,270,296,325,354,386,419,453,489,526,565,606,649,693,740,788,838,890,944,1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058,5253,5455,5663,5877,6099,6328,6564,6808"
     print "set binsMVV to 36"
 else:
     HCALbinsMVV=""
     HCALbinsMVVSignal=""
+
  	
 cat={}
 # For standard tau 21, use this
@@ -51,7 +52,6 @@ cuts['nonres'] = '1'
 
 purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP','HPLP']
-purities=['HPHP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -85,7 +85,7 @@ cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_m
 cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>20&&jj_l2_gen_softDrop_mass>20&&jj_l1_gen_softDrop_mass<300&&jj_l2_gen_softDrop_mass<300&&jj_gen_partialMass>600&&jj_gen_partialMass<6000)'
 
 cuts['acceptanceMJ']= "(jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMJ=minMJ,maxMJ=maxMJ) 
-cuts['looseacceptanceMJ']= "(jj_l1_softDrop_mass>35&&jj_l1_softDrop_mass<300&&jj_l2_softDrop_mass>35&&jj_l2_softDrop_mass<300)"
+cuts['looseacceptance']= "(jj_LV_mass>800&&jj_LV_mass<5200&&jj_l1_softDrop_mass>35&&jj_l1_softDrop_mass<300&&jj_l2_softDrop_mass>35&&jj_l2_softDrop_mass<300)"
 cuts['acceptanceMVV'] = "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV})".format(minMVV=minMVV,maxMVV=maxMVV)
 
 def makeSignalShapesMVV(filename,template):
@@ -147,7 +147,7 @@ def makeDetectorResponse(name,filename,template,addCut="1",jobName="DetPar"):
 		pwd = os.getcwd()
 		samples = pwd +"/samples"
 		# cut='*'.join([cuts['common'],addCut,'(jj_l1_gen_softDrop_mass>30&&jj_l2_gen_softDrop_mass>30&&jj_gen_partialMass>500)'])
-		cut='*'.join([cuts['common'],addCut,cuts['acceptanceGEN'],cuts['looseacceptanceMJ']])
+		cut='*'.join([cuts['common'],addCut,cuts['acceptanceGEN'],cuts['looseacceptance']])
 		resFile=filename+"_"+name+"_detectorResponse.root"		 
 		print "Saving detector resolution to file: " ,resFile
 		bins = "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"
@@ -186,10 +186,10 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
   os.system(cmd)
 
 
-def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobname="1DMVV",wait=True):
+def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DMVV",wait=True):
  pwd = os.getcwd()
  for p in purities:
-  jobname = jobname+"_"+p
+  jobname = jobName+"_"+p
   print " Working on purity: ", p
   resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse.root"	
   rootFile = filename+"_"+name+"_MVV_"+p+".root"
@@ -218,7 +218,7 @@ def makeBackgroundShapesMVVConditional(name,filename,template,leg,addCut="",jobN
   print "Reading " ,resFile
   print "Saving to ",rootFile
   # cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN']])
-  cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],cuts['looseacceptanceMJ']])
+  cut='*'.join([cuts['common'],cuts[p],addCut,cuts['acceptanceGEN'],cuts['looseacceptance']])
   samples = pwd +"/samples" 
   
   if submitToBatch:
@@ -243,9 +243,9 @@ def mergeKernelJobs():
 						jobList.append(job.replace("'","").replace(" ",""))
 			if line.startswith("file"):
 				for job in line.split("[")[1].split("]")[0].split(","):
-					files.append(job.replace("'","").replace(" ",""))	
+					files.append(job.replace("'","").replace(" ",""))
 		from modules.submitJobs import merge1DMVVTemplate
-		merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)		
+		merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
 		
 		jobList = []
 		files   = []
@@ -256,11 +256,11 @@ def mergeKernelJobs():
 						jobList.append(job.replace("'","").replace(" ",""))
 			if line.startswith("file"):
 				for job in line.split("[")[1].split("]")[0].split(","):
-					files.append(job.replace("'","").replace(" ",""))	
-		
+					files.append(job.replace("'","").replace(" ",""))
+
 		from modules.submitJobs import merge2DTemplate
-		merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-		merge2DTemplate(jobList,files,"2Dl2"+"_"+p,p,"l2",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
+		merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
+		merge2DTemplate(jobList,files,"2Dl2"+"_"+p,p,"l2",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
 
 def mergeBackgroundShapes(name,filename):
 
@@ -324,6 +324,7 @@ makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 # makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 # ------------------------------
 
+
 if runParallel and submitToBatch:
 	wait = False
 	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
@@ -337,7 +338,7 @@ else:
 	makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
 	makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-	
+
 mergeBackgroundShapes("nonRes","JJ")
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],1.0,"nR")
 ### makeNormalizations("data","JJ",dataTemplate,1,'1',1.0,"normD") #run on data. Currently run on pseudodata only (below)

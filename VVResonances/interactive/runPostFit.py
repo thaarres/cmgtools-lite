@@ -4,14 +4,14 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()    
-    parser.add_argument('-i','--input', type=str, help="input  ROOT FILE", default = "JJ_BulkGWW_HPHP_13TeV_workspace.root")
+    parser.add_argument('-i','--input', type=str, help="input  ROOT FILE", default = "JJ_BulkGWW_HPLP_13TeV_workspace.root")
+    parser.add_argument('-p','--purity', type=str, help="category", default = "HPHP")
     parser.add_argument('-o','--output', type=str, help="label string for output-file names", default = None)
     parser.add_argument('--png', action='store_true', help="save output plots also as .png files")
     parser.add_argument('--genonly', action='store_true', help="stop at generation step")
     args = parser.parse_args()
 
     rt.gSystem.Load("libHiggsAnalysisCombinedLimit")
-
     fin = rt.TFile.Open(args.input)
     workspace = fin.Get("w")
     workspace.Print()
@@ -113,7 +113,8 @@ if __name__ == '__main__':
         pdfData.reduce(selection).plotOn(frame3,rt.RooFit.MarkerColor(rt.kBlue), rt.RooFit.LineColor(rt.kBlue), rt.RooFit.Name("BkgProjMJJ"),rt.RooFit.DrawOption("C"))
  
         frame3.SetMinimum(1E-05)
-	frame3.SetMaximum(50000)
+        frame3.SetMaximum(50000)
+        if args.purity.find("LP") !=-1:  frame3.SetMaximum(500000)
         frame3.Draw("AH")
         if args.png: canvas3.SaveAs("MJJ.png")
 
