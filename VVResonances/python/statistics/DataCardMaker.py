@@ -86,7 +86,6 @@ class DataCardMaker:
 
         scaleSysts=[]
         resolutionSysts=[]
-        print "blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         for syst,factor in scale.iteritems():
             self.w.factory(syst+"[0,-0.1,0.1]")
             scaleStr=scaleStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
@@ -94,8 +93,6 @@ class DataCardMaker:
         for syst,factor in resolution.iteritems():
             self.w.factory(syst+"[0,-0.5,0.5]")
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
-            print syst+"[0,-0.5,0.5]"
-            print resolutionStr
             resolutionSysts.append(syst)
        
         MVV=variable            
@@ -110,8 +107,7 @@ class DataCardMaker:
 
         SIGMAVar="_".join(["SIGMA",name,self.tag])
         self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=SIGMAVar,param=info['SIGMA'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)))
-        print SIGMAVar
-
+        
         ALPHAVar="_".join(["ALPHA",name,self.tag])
         self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHAVar,param=info['ALPHA']))
 
@@ -323,7 +319,6 @@ class DataCardMaker:
         SCALEVar="_".join(["mean",name,self.tag])
         self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=SCALEVar,param=info['mean'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace))
 
-        print "expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=SCALEVar,param=info['mean'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace)
         
         SIGMAVar="_".join(["sigma",name,self.tag])
         self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=SIGMAVar,param=info['sigma'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)).replace("MH",varToReplace))
@@ -962,15 +957,10 @@ class DataCardMaker:
         self.w.factory("PROD::{name}({name1},{name2})".format(name=pdfName,name1=pdfName1,name2=pdfName2))
 
     def product3D(self,name,pdf1,pdf2,pdf3):
-        print self.tag
         pdfName="_".join([name,self.tag])
         pdfName1="_".join([pdf1,self.tag])
         pdfName2="_".join([pdf2,self.tag])
         pdfName3="_".join([pdf3,self.tag])
-        print pdfName
-        print pdfName1
-        print pdfName2
-        print pdfName3
         self.w.factory("PROD::{name}({name1},{name2},{name3})".format(name=pdfName,name1=pdfName1,name2=pdfName2,name3=pdfName3))
         
    
