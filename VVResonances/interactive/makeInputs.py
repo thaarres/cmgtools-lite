@@ -43,6 +43,8 @@ cuts={}
 
 cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(njj>0&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_eeBadScFilter&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.)'
 
+cuts['common17'] = '((HLT_JJ)*(run>500) + (run<500))*(njj>0&&Flag_goodVertices&&Flag_globalTightHalo2016Filter&&Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_eeBadScFilter&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.)'
+
 cuts['HPHP'] = '('+cat['HP1']+'&&'+cat['HP2']+')'
 cuts['LPLP'] = '('+cat['LP1']+'&&'+cat['LP2']+')'
 cuts['HPLP'] = '(('+cat['HP1']+'&&'+cat['LP2']+')||('+cat['LP1']+'&&'+cat['HP2']+'))'
@@ -66,6 +68,10 @@ dataTemplate="JetHT"
 nonResTemplate="QCD_Pt_" #high stat
 # nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 #nonResTemplate="Dijet" #to compare shapes
+WJetsTemplate= "WJetsToQQ_HT600"
+ZJetsTemplate= "ZJetsToQQ_HT600"
+WJetsTemplate17= "WJetsToQQ_HT800"
+ZJetsTemplate17= "ZJetsToQQ_HT800"
 
 minMJ=55.0
 maxMJ=215.0
@@ -293,6 +299,23 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',factor=1,jobName
         cmd='vvMakeData.py -s "{samples}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factor} -n "{name}"  samples'.format(samples=template,cut=cut,rootFile=rootFile,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factor=factor,name=name,data=data)
         cmd=cmd+HCALbinsMVV
         os.system(cmd)
+        
+def fitVJets(filename,template):
+  for p in purities:
+    cut='*'.join([cuts['common'],cuts[p],cuts['acceptance']])
+    if template.find('HT800')!=-1:
+        cut='*'.join([cuts['common17'],cuts[p],cuts['acceptance']])
+    rootFile=filename+"_"+p+".root"
+    fixPars=""
+    if filename.find("W")!=-1:
+        fixPars="n:0.8"
+    cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} -f "{fixPars}" --store "/usr/users/dschaefer/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive/{filename}_{purity}_jecv6.py" samples'.format(template=template,cut=cut,rootFile=rootFile,minMJ=minMJ,maxMJ=maxMJ,fixPars=fixPars,filename=filename,purity=p)
+    os.system(cmd)
+    
+
+
+fitVJets("JJ_WJets",WJetsTemplate17)
+fitVJets("JJ_ZJets",ZJetsTemplate17)        
 	
 makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
 makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
