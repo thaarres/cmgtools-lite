@@ -15,21 +15,18 @@ for sig in signals:
     cmd=cmd+" "+cat+'=datacard_'+cat+'.txt '
 
     #SIGNAL
-    card.addMVVSignalParametricShape2("BulkGWW_MVV","MJJ","JJ_BulkGWW_MVV.json",{'CMS_scale_j':1},{'CMS_res_j':1.0})
+    card.addMVVSignalParametricShape2("%s_MVV"%sig,"MJJ","JJ_%s_MVV.json"%sig,{'CMS_scale_j':1},{'CMS_res_j':1.0})
 
     if p=='HPLP':
-        #card.addMJJSignalParametricShape("Wqq","MJ","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
-        #card.addParametricYieldWithUncertainty("XqW",0,"JJ_BulkGWW_MJl1_"+p+".json",1,'CMS_tau21_PtDependence','((0.054/0.041)*(-log(MH/600)))',0.041)
-        card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
-        card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2","JJ_BulkGWW_MJl2_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
-        card.addParametricYieldWithUncertainty("BulkGWW",0,"JJ_BulkGWW_"+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
+       card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1","JJ_%s_MJl1_"%sig+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+       card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2","JJ_%s_MJl2_"%sig+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+       card.addParametricYieldWithUncertainty("%s"%sig,0,"JJ_%s_"%sig+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
     else:
-        card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
-        card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2","JJ_BulkGWW_MJl1_"+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})#
-
-        card.addParametricYieldWithUncertainty("BulkGWW",0,"JJ_BulkGWW_"+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
-        
-    card.product3D("BulkGWW","Wqq1","Wqq2","BulkGWW_MVV")
+       card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1","JJ_%s_MJl1_"%sig+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+       card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2","JJ_%s_MJl1_"%sig+p+".json",{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+       card.addParametricYieldWithUncertainty("%s"%sig,0,"JJ_%s_"%sig+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
+    
+    card.product3D("%s"%sig,"Wqq1","Wqq2","%s_MVV"%sig)
     
     #QCD
     rootFile="JJ_nonRes_2D_"+p+".root"
