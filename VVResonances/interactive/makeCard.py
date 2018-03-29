@@ -52,9 +52,9 @@ for sig in signals:
         
         
     # add systematics for mjj part of resoant vjets contribution
-    card.addSystematic("CMS_VV_JJ_p0_Vjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_VJets__MVV['p0']['val'],JJ_VJets__MVV['p0']['err']*200])
-    card.addSystematic("CMS_VV_JJ_p1_Vjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_VJets__MVV['p1']['val'],JJ_VJets__MVV['p1']['err']*100])
-    card.addSystematic("CMS_VV_JJ_p2_Vjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_VJets__MVV['p2']['val'],JJ_VJets__MVV['p2']['err']*100])
+    card.addSystematic("CMS_VV_JJ_p0_Vjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_VJets__MVV['p0']['val'],JJ_VJets__MVV['p0']['err']*20])
+    card.addSystematic("CMS_VV_JJ_p1_Vjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_VJets__MVV['p1']['val'],JJ_VJets__MVV['p1']['err']*10])
+    card.addSystematic("CMS_VV_JJ_p2_Vjets_mjj_JJ_WprimeWZ_"+p+"_13TeV","param",[JJ_VJets__MVV['p2']['val'],JJ_VJets__MVV['p2']['err']*10])
     # end V+jets background ####################################################
 
 
