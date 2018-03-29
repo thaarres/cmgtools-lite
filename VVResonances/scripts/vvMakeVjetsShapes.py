@@ -72,8 +72,11 @@ for leg in legs:
         plotters[-1].addCorrectionFactor('puWeight','tree')
         
     for p in plotters:
+        corr = options.corrFactorW
+        if name.find("Z")!=-1:
+            corr = options.corrFactorZ
         sigmas.append(p.tree.GetMaximum("xsec")/p.weightinv)
-        p.addCorrectionFactor(1.0/sigmas[-1],'flat')    
+        p.addCorrectionFactor(1.0/sigmas[-1]*float(corr),'flat')    
         
     plotter=MergedPlotter(plotters)        
     fitter=Fitter(['x'])
@@ -108,8 +111,11 @@ for leg in legs:
         plotters[-1].addCorrectionFactor('puWeight','tree')
     
     for p in plotters:
+        corr = options.corrFactorW
+        if name.find("Z")!=-1:
+            corr = options.corrFactorZ
         sigmas.append(p.tree.GetMaximum("xsec")/p.weightinv)
-        p.addCorrectionFactor(1.0/sigmas[-1],'flat') 
+        p.addCorrectionFactor(1.0/sigmas[-1]*float(corr),'flat') 
             
 
     plotter=MergedPlotter(plotters)
@@ -132,8 +138,11 @@ for name in samples.keys():
     plotters[-1].addCorrectionFactor('genWeight','tree')
     plotters[-1].addCorrectionFactor('puWeight','tree')
 for p in plotters:
+    corr = options.corrFactorW
+    if name.find("Z")!=-1:
+        corr = options.corrFactorZ
     sigmas.append(p.tree.GetMaximum("xsec")/p.weightinv)
-    p.addCorrectionFactor(1.0/sigmas[-1],'flat')    
+    p.addCorrectionFactor(1.0/sigmas[-1]*float(corr),'flat')    
    
 plotter=MergedPlotter(plotters)        
 fitter=Fitter(['MVV'])
