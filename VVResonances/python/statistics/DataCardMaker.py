@@ -626,18 +626,14 @@ class DataCardMaker:
         mean="_".join(["mean",tag])
         if "mean" in preconstrains.keys():
             val = preconstrains['mean']['val']
-            err = preconstrains['mean']['err']
-            if err==None:
-                err =0
+            err = 0
         self.w.factory("expr::{name}('{param}*(1+{vv_syst})',{vv_systs})".format(name=mean,param=val,vv_syst=scaleStr,vv_systs=','.join(scaleSysts)))
         
         
         sigma="_".join(["sigma",tag])
         if "sigma" in preconstrains.keys():
             val = preconstrains['sigma']['val']
-            err = preconstrains['sigma']['err']
-            if err==None:
-                err =0
+            err = 0
         else:
             val = 15.0
             print "attention set value to default in addMjetBackgroundShapeVJetsRes"
@@ -646,9 +642,7 @@ class DataCardMaker:
         alpha="_".join(["alpha",tag])
         if "alpha" in preconstrains.keys():
             val = preconstrains['alpha']['val']
-            err = preconstrains['alpha']['err']
-            if err==None:
-                err =0
+            err = 0
         else:
             val = 15.0
             print "attention set value to default in addMjetBackgroundShapeVJets"
@@ -658,19 +652,15 @@ class DataCardMaker:
         n="_".join(["n",tag])
         if "n" in preconstrains.keys():
             val = preconstrains['n']['val']
-            err = preconstrains['n']['err']
-            if err==None:
-                err =0
+            err = 0
         else:
             val = 15.0
             print "attention set value to default in addMjetBackgroundShapeVJets"
         self.w.factory("{name}[{val},-{err},{err}]".format(name=n,val=val,err=err))
         alpha2="_".join(["alpha2",tag])
-        if "mean" in preconstrains.keys():
+        if "alpha2" in preconstrains.keys():
             val = preconstrains['alpha2']['val']
-            err = preconstrains['alpha2']['err']
-            if err==None:
-                err =0
+            err = 0
         else:
             val = 15.0
             print "attention set value to default in addMjetBackgroundShapeVJets"
@@ -678,9 +668,7 @@ class DataCardMaker:
         n2="_".join(["n2",tag])
         if "n2" in preconstrains.keys():
             val = preconstrains['n2']['val']
-            err = preconstrains['n2']['err']
-            if err==None:
-                err =0
+            err = 0
         else:
             val = 15.0
             print "attention set value to default in addMjetBackgroundShapeVJets"

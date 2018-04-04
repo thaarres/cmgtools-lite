@@ -72,6 +72,7 @@ WJetsTemplate= "WJetsToQQ_HT600"
 ZJetsTemplate= "ZJetsToQQ_HT600"
 WJetsTemplate17= "WJetsToQQ_HT800"
 ZJetsTemplate17= "ZJetsToQQ_HT800"
+VJetsTemplate17= "JetsToQQ_HT800"
 
 minMJ=55.0
 maxMJ=215.0
@@ -307,15 +308,15 @@ def fitVJets(filename,template):
         cut='*'.join([cuts['common17'],cuts[p],cuts['acceptance']])
     rootFile=filename+"_"+p+".root"
     fixPars=""
-    if filename.find("W")!=-1:
+    if filename.find("V")!=-1:
         fixPars="n:0.8"
     cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} -f "{fixPars}" --store "/usr/users/dschaefer/CMSSW_7_4_7/src/CMGTools/VVResonances/interactive/{filename}_{purity}_jecv6.py" samples'.format(template=template,cut=cut,rootFile=rootFile,minMJ=minMJ,maxMJ=maxMJ,fixPars=fixPars,filename=filename,purity=p)
     os.system(cmd)
     
 
 
-fitVJets("JJ_WJets",WJetsTemplate17)
-fitVJets("JJ_ZJets",ZJetsTemplate17)        
+
+fitVJets("JJ_VJets",VJetsTemplate17)        
 	
 makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
 makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
