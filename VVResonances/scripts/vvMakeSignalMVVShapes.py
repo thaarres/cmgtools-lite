@@ -16,6 +16,23 @@ def returnString(func):
         st=st+"+("+str(func.GetParameter(i))+")"+("*MH"*i)
     return st    
 
+def getBinning(binsMVV,minx,maxx,bins):
+    l=[]
+    if binsMVV=="":
+        for i in range(0,bins+1):
+            l.append(minx + i* (maxx - minx)/bins)
+    else:
+        s = binsMVV.split(",")
+        for w in s:
+            l.append(int(w))
+    return l
+
+def truncate(binning,mmin,mmax):
+    res=[]
+    for b in binning:
+        if b >= mmin and b <= mmax:
+            res.append(b)
+    return res
 
 parser = optparse.OptionParser()
 parser.add_option("-s","--sample",dest="sample",default='',help="Type of sample")
@@ -23,10 +40,12 @@ parser.add_option("-c","--cut",dest="cut",help="Cut to apply for shape",default=
 parser.add_option("-o","--output",dest="output",help="Output JSON",default='')
 parser.add_option("-V","--MVV",dest="mvv",help="mVV variable",default='')
 parser.add_option("-f","--scaleFactors",dest="scaleFactors",help="Additional scale factors separated by comma",default='')
+parser.add_option("--fix",dest="fixPars",help="Fixed parameters",default="")
 parser.add_option("-m","--minMVV",dest="min",type=float,help="mVV variable",default=1)
 parser.add_option("-M","--maxMVV",dest="max",type=float, help="mVV variable",default=1)
 parser.add_option("-r","--minMX",dest="minMX",type=float, help="smallest Mx to fit ",default=1000.0)
 parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fit " ,default=7000.0)
+parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
 
 (options,args) = parser.parse_args()
 #define output dictionary
@@ -76,8 +95,17 @@ for mass in sorted(samples.keys()):
        
     fitter=Fitter(['MVV'])
     fitter.signalResonanceCBGaus('model','MVV',mass)
+    if options.fixPars!="":
+        fixedPars =options.fixPars.split(',')
+        print fixedPars
+        for par in fixedPars:
+            parVal = par.split(':')
+            fitter.w.var(parVal[0]).setVal(float(parVal[1]))
+            fitter.w.var(parVal[0]).setConstant(1)
     fitter.w.var("MH").setVal(mass)
-    histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.8*mass,1.2*mass),"1",1000,options.min,options.max)
+    #histo = plotter.drawTH1(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.75*mass,1.25*mass),"1",1000,options.min,options.max)
+    binning= truncate(getBinning(options.binsMVV,options.min,options.max,1000),0.75*mass,1.25*mass)
+    histo = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.75*mass,1.25*mass),"1",binning)
     Fhists.cd()
     histo.Write("%i"%mass)
     fitter.importBinnedData(histo,['MVV'],'data')
