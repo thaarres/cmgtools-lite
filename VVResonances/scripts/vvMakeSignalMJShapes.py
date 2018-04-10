@@ -25,7 +25,7 @@ parser.add_option("-V","--MVV",dest="mvv",help="mVV variable",default='')
 parser.add_option("-m","--min",dest="mini",type=float,help="min MJJ",default=40)
 parser.add_option("-M","--max",dest="maxi",type=float,help="max MJJ",default=160)
 parser.add_option("-e","--exp",dest="doExp",type=int,help="useExponential",default=1)
-parser.add_option("-f","--fix",dest="fixPars",help="Fixed parameters",default="")
+parser.add_option("-f","--fix",dest="fixPars",help="Fixed parameters",default="1")
 parser.add_option("-r","--minMX",dest="minMX",type=float, help="smallest Mx to fit ",default=1000.0)
 parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fit " ,default=7000.0)
 
@@ -79,12 +79,13 @@ for mass in sorted(samples.keys()):
             fitter.jetResonanceNOEXP('model','x')
 
 
-    if options.fixPars!="":
+    if options.fixPars!="1":
         fixedPars =options.fixPars.split(',')
         for par in fixedPars:
             parVal = par.split(':')
-            fitter.w.var(parVal[0]).setVal(float(parVal[1]))
-            fitter.w.var(parVal[0]).setConstant(1)
+	    if len(parVal) > 1:
+             fitter.w.var(parVal[0]).setVal(float(parVal[1]))
+             fitter.w.var(parVal[0]).setConstant(1)
 
 
 #    fitter.w.var("MH").setVal(mass)
