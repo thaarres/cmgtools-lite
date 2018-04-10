@@ -1,6 +1,6 @@
 // Run from command line with
-// root 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
-// root 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
+// root .x 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
+// root .x 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
 // 
 void Projections3DHisto(std::string dataFile, std::string hdataName, std::string fitFile, std::string hfitName, std::string outDirName){
 
@@ -74,14 +74,20 @@ for(int i=0; i<4; ++i){
 }
 
 for(int i=0; i<4; ++i){
-  
- std::cout << "histo " << i << " int_x " << hx[i]->Integral() << " int_MCx " << hxMC[i]->Integral();
- std::cout << " int_y " << hy[i]->Integral() << " int_MCy " << hyMC[i]->Integral() << std::endl;
 
+ for(int b=1; b<=binsx; ++b){
+  if(hxMC[i]->GetBinContent(b) != 0){ pullsx[i]->Fill( (hxMC[i]->GetBinContent(b)-hx[i]->GetBinContent(b))/hxMC[i]->GetBinError(b) ); }
+  if(hyMC[i]->GetBinContent(b) != 0){ pullsy[i]->Fill( (hyMC[i]->GetBinContent(b)-hy[i]->GetBinContent(b))/hyMC[i]->GetBinError(b) ); }
+ }
+
+}
+
+for(int i=0; i<4; ++i){
+
+ hx[i]->Scale(scale[i]);
+ hy[i]->Scale(scale[i]);
  hxMC[i]->Scale(scale[i]);
  hyMC[i]->Scale(scale[i]);
- hx[i]->Scale(hxMC[i]->Integral()/hx[i]->Integral());
- hy[i]->Scale(hyMC[i]->Integral()/hy[i]->Integral());
     
  hx[i]->SetLineColor(colors[i]);
  hx[i]->SetMarkerColor(colors[i]);
@@ -109,15 +115,6 @@ hx[0]->SetMaximum(0.03);
 hy[0]->SetMinimum(0);
 hy[0]->SetMaximum(0.03);
 
-for(int i=0; i<4; ++i){
-
- for(int b=1; b<=binsx; ++b){
-  if(hxMC[i]->GetBinContent(b) != 0){ pullsx[i]->Fill( (hxMC[i]->GetBinContent(b)-hx[i]->GetBinContent(b))/hxMC[i]->GetBinError(b) ); }
-  if(hyMC[i]->GetBinContent(b) != 0){ pullsy[i]->Fill( (hyMC[i]->GetBinContent(b)-hy[i]->GetBinContent(b))/hyMC[i]->GetBinError(b) ); }
- }
-
-}
-
 TLegend* leg = new TLegend(0.6,0.6,0.85,0.8);
 leg->AddEntry(hxMC[0],"Simulation (Pythia8)","LP");
 leg->AddEntry(hx[0],"Template","L");
@@ -132,7 +129,6 @@ for(int i=0; i<4; ++i){ hx[i]->Draw("HISTsame"); hxMC[i]->Draw("PEsame");}
 hx[0]->GetXaxis()->SetTitle("m_{jet1} (proj. x) [GeV]");
 leg->Draw();
 cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.png"),"png");
-cx->SaveAs(TString(outDirName)+TString("/")+TString("cx.root"),"root");
 
 TCanvas* cy = new TCanvas("cy","cy");
 cy->cd();
@@ -140,7 +136,6 @@ for(int i=0; i<4; ++i){ hy[i]->Draw("HISTsame"); hyMC[i]->Draw("PEsame");}
 hy[0]->GetXaxis()->SetTitle("m_{jet2} (proj. y) [GeV]");
 leg->Draw();
 cy->SaveAs(TString(outDirName)+TString("/")+TString("cy.png"),"png");
-cy->SaveAs(TString(outDirName)+TString("/")+TString("cy.root"),"root");
 
 std::string labelsXY[4] = {"All m_{jj} bins","1 < m_{jj} < 1.3 TeV","1.3 < m_{jj} < 2 TeV","2 < m_{jj} < 5 TeV"};
 for(int i=0; i<4; ++i){
@@ -267,14 +262,18 @@ for(int i=0; i<5; ++i){
     
 }
 
-
 for(int i=0; i<5; ++i){
 
- std::cout << "histo " << i << " int_z " << hz[i]->Integral() << " int_MCz " << hzMC[i]->Integral() << std::endl;
+ for(int b=1; b<=binsx; ++b){
+  if(hzMC[i]->GetBinContent(b) != 0){ pullsz[i]->Fill( (hzMC[i]->GetBinContent(b)-hz[i]->GetBinContent(b))/hzMC[i]->GetBinError(b) ); }
+ }
+
+}
+
+for(int i=0; i<5; ++i){
  
- //hz[i]->Scale(scalez[i]);
+ hz[i]->Scale(scalez[i]);
  hzMC[i]->Scale(scalez[i]);
- hz[i]->Scale(hzMC[i]->Integral()/hz[i]->Integral());
    
  hz[i]->SetLineColor(colors[i]);
  hz[i]->SetMarkerColor(colors[i]);
@@ -289,15 +288,7 @@ for(int i=0; i<5; ++i){
      
 }
 
-for(int i=0; i<5; ++i){
-
- for(int b=1; b<=binsx; ++b){
-  if(hzMC[i]->GetBinContent(b) != 0){ pullsz[i]->Fill( (hzMC[i]->GetBinContent(b)-hz[i]->GetBinContent(b))/hzMC[i]->GetBinError(b) ); }
- }
-
-}
-
-TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
+TLegend* leg2 = new TLegend(0.6,0.6,0.85,0.85);
 leg2->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg2->AddEntry(hz[0],"Template","L");
 leg2->AddEntry(hz[1],"55 < m_{jet} < 70 GeV");
@@ -394,6 +385,7 @@ TCanvas* czSyst = new TCanvas("czSyst","czSyst");
 czSyst->cd();
 czSyst->SetLogy();
 
+hz[0]->SetMinimum(1E-06);
 hz[0]->Draw("HIST");
 hz_PTZUp->Draw("HISTsame");
 hz_PTZDown->Draw("HISTsame"); 
@@ -420,22 +412,20 @@ hx_OPTXDown->SetLineColor(210);
 
 TCanvas* cxSyst = new TCanvas("cxSyst","cxSyst");
 cxSyst->cd();
-hx[0]->Scale(1./hx[0]->Integral());
 hx[0]->Draw("HIST");
 hx_PTXUp->Draw("HISTsame");
 hx_PTXDown->Draw("HISTsame"); 
 hx_OPTXUp->Draw("HISTsame");
 hx_OPTXDown->Draw("HISTsame");
-hxMC[0]->Scale(1./hxMC[0]->Integral());
 hxMC[0]->Draw("same");
 leg3->Draw();
 
 cxSyst->SaveAs(TString(outDirName)+TString("/")+TString("cxSyst.png"),"png");
 
-TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTYUp"); hin_PTYUp->Scale(1./hin_PTYUp->Integral());
-TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTYDown"); hin_PTYDown->Scale(1./hin_PTYDown->Integral());
-TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTYUp"); hin_OPTYUp->Scale(1./hin_OPTYUp->Integral());
-TH3F* hin_OPTYDown = (TH3F*)fin->Get("histo_OPTYDown"); hin_OPTYDown->Scale(1./hin_OPTYDown->Integral());
+TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTXYUp"); hin_PTYUp->Scale(1./hin_PTYUp->Integral());
+TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTXYDown"); hin_PTYDown->Scale(1./hin_PTYDown->Integral());
+TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTXYUp"); hin_OPTYUp->Scale(1./hin_OPTYUp->Integral());
+TH3F* hin_OPTYDown = (TH3F*)fin->Get("histo_OPTXYDown"); hin_OPTYDown->Scale(1./hin_OPTYDown->Integral());
 
 TH1F* hy_PTYUp = (TH1F*)hin_PTYUp->ProjectionY("py_PTYUp",1,binsy,zbinMin[0],zbinMax[0]);
 hy_PTYUp->SetLineColor(kMagenta);
