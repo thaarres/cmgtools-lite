@@ -147,7 +147,7 @@ def fitVJets(filename,template):
   for p in purities:
     cut='*'.join([cuts['common'],cuts[p],cuts['acceptance']])
     rootFile=filename+"_"+p+".root"
-    cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} --store "{filename}_{purity}.py" --minMVV {minMVV} --maxMVV {maxMVV} samples'.format(template=template,cut=cut,rootFile=rootFile,minMJ=minMJ,maxMJ=maxMJ,fixPars=fixPars,filename=filename,purity=p,minMVV=minMVV,maxMVV=maxMVV)
+    cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} --store "{filename}_{purity}.py" --minMVV {minMVV} --maxMVV {maxMVV} samples'.format(template=template,cut=cut,rootFile=rootFile,minMJ=minMJ,maxMJ=maxMJ,filename=filename,purity=p,minMVV=minMVV,maxMVV=maxMVV)
     cmd+=HCALbinsMVV
     os.system(cmd)
     
