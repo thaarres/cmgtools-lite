@@ -5,7 +5,7 @@ import sys
 
 
 class DataCardMaker:
-    def __init__(self,finalstate,category,period,luminosity=1.0,physics="LJ"):
+    def __init__(self,finalstate,category,period,luminosity=1.0,physics="LJ",cat):
         self.physics=physics
         self.finalstate=finalstate
         self.category=category
@@ -14,7 +14,9 @@ class DataCardMaker:
         self.systematics=[]
 
         self.tag=self.physics+"_"+category+"_"+period
-        self.rootFile = ROOT.TFile("datacardInputs_"+self.tag+".root","RECREATE")
+	self.cat=cat
+	if self.cat!="": self.rootFile = ROOT.TFile("datacardInputs_"+cat+".root","RECREATE")
+        else: self.rootFile = ROOT.TFile("datacardInputs_"+self.tag+".root","RECREATE")
         self.rootFile.cd()
         self.w=ROOT.RooWorkspace("w","w")
         self.luminosity=luminosity
@@ -1173,14 +1175,17 @@ class DataCardMaker:
 
     def makeCard(self):
 
-        f = open("datacard_"+self.tag+'.txt','w')
+        if self.cat!="":f = open("datacard_"+self.cat+'.txt','w')
+        else: f = open("datacard_"+self.tag+'.txt','w')
         f.write('imax 1\n')
         f.write('jmax {n}\n'.format(n=len(self.contributions)-1))
         f.write('kmax *\n')
         f.write('-------------------------\n')
         for c in self.contributions:
-            f.write('shapes {name} {channel} {file}.root w:{pdf}\n'.format(name=c['name'],channel=self.tag,file="datacardInputs_"+self.tag,pdf=c['pdf']))
-        f.write('shapes {name} {channel} {file}.root w:{name}\n'.format(name="data_obs",channel=self.tag,file="datacardInputs_"+self.tag))
+            if self.cat!="": f.write('shapes {name} {channel} {file}.root w:{pdf}\n'.format(name=c['name'],channel=self.tag,file="datacardInputs_"+self.cat,pdf=c['pdf']))
+            else: f.write('shapes {name} {channel} {file}.root w:{pdf}\n'.format(name=c['name'],channel=self.tag,file="datacardInputs_"+self.tag,pdf=c['pdf']))
+        if self.cat!="": f.write('shapes {name} {channel} {file}.root w:{name}\n'.format(name="data_obs",channel=self.tag,file="datacardInputs_"+self.cat))  
+        else: f.write('shapes {name} {channel} {file}.root w:{name}\n'.format(name="data_obs",channel=self.tag,file="datacardInputs_"+self.tag))
         f.write('-------------------------\n')
         f.write('bin '+self.tag+'\n')
         f.write('observation  -1\n')
