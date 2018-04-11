@@ -1,6 +1,6 @@
 // Run from command line with
-// root 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
-// root 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
+// root .x 'Projections3DHisto.C ("JJ_nonRes_HPHP.root", "nonRes", "JJ_nonRes_2D_HPHP.root","histo","2Dkernels_HPHP")' --> HPHP
+// root .x 'Projections3DHisto.C ("JJ_nonRes_HPLP.root", "nonRes", "JJ_nonRes_2D_HPLP.root","histo","2Dkernels_HPLP")' --> HPLP
 // 
 void Projections3DHisto(std::string dataFile, std::string hdataName, std::string fitFile, std::string hfitName, std::string outDirName){
 
@@ -83,7 +83,7 @@ for(int i=0; i<4; ++i){
 }
 
 for(int i=0; i<4; ++i){
-  
+
  hx[i]->Scale(scale[i]);
  hy[i]->Scale(scale[i]);
  hxMC[i]->Scale(scale[i]);
@@ -288,7 +288,7 @@ for(int i=0; i<5; ++i){
      
 }
 
-TLegend* leg2 = new TLegend(0.6,0.55,0.85,0.8);
+TLegend* leg2 = new TLegend(0.6,0.6,0.85,0.85);
 leg2->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg2->AddEntry(hz[0],"Template","L");
 leg2->AddEntry(hz[1],"55 < m_{jet} < 70 GeV");
@@ -385,6 +385,7 @@ TCanvas* czSyst = new TCanvas("czSyst","czSyst");
 czSyst->cd();
 czSyst->SetLogy();
 
+hz[0]->SetMinimum(1E-06);
 hz[0]->Draw("HIST");
 hz_PTZUp->Draw("HISTsame");
 hz_PTZDown->Draw("HISTsame"); 
@@ -411,22 +412,20 @@ hx_OPTXDown->SetLineColor(210);
 
 TCanvas* cxSyst = new TCanvas("cxSyst","cxSyst");
 cxSyst->cd();
-hx[0]->Scale(1./hx[0]->Integral());
 hx[0]->Draw("HIST");
 hx_PTXUp->Draw("HISTsame");
 hx_PTXDown->Draw("HISTsame"); 
 hx_OPTXUp->Draw("HISTsame");
 hx_OPTXDown->Draw("HISTsame");
-hxMC[0]->Scale(1./hxMC[0]->Integral());
 hxMC[0]->Draw("same");
 leg3->Draw();
 
 cxSyst->SaveAs(TString(outDirName)+TString("/")+TString("cxSyst.png"),"png");
 
-TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTYUp"); hin_PTYUp->Scale(1./hin_PTYUp->Integral());
-TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTYDown"); hin_PTYDown->Scale(1./hin_PTYDown->Integral());
-TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTYUp"); hin_OPTYUp->Scale(1./hin_OPTYUp->Integral());
-TH3F* hin_OPTYDown = (TH3F*)fin->Get("histo_OPTYDown"); hin_OPTYDown->Scale(1./hin_OPTYDown->Integral());
+TH3F* hin_PTYUp = (TH3F*)fin->Get("histo_PTXYUp"); hin_PTYUp->Scale(1./hin_PTYUp->Integral());
+TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTXYDown"); hin_PTYDown->Scale(1./hin_PTYDown->Integral());
+TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTXYUp"); hin_OPTYUp->Scale(1./hin_OPTYUp->Integral());
+TH3F* hin_OPTYDown = (TH3F*)fin->Get("histo_OPTXYDown"); hin_OPTYDown->Scale(1./hin_OPTYDown->Integral());
 
 TH1F* hy_PTYUp = (TH1F*)hin_PTYUp->ProjectionY("py_PTYUp",1,binsy,zbinMin[0],zbinMax[0]);
 hy_PTYUp->SetLineColor(kMagenta);
