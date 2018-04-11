@@ -10,8 +10,8 @@ signals = ["BulkGWW"]
 for sig in signals:
   for p in purities:
 
-    card=DataCardMaker('',p,'13TeV',35900,'JJ_%s'%sig)
     cat='_'.join(['JJ',sig,p,'13TeV'])
+    card=DataCardMaker('',p,'13TeV',35900,'JJ',cat)
     cmd=cmd+" "+cat+'=datacard_'+cat+'.txt '
 
     #SIGNAL
