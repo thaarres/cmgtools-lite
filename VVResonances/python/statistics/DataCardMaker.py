@@ -580,7 +580,7 @@ class DataCardMaker:
         if logTerm: self.w.factory("{name}[{val},0,10]".format(name=p2,val=preconstrains['CMS_p2']['val']))
 
         pdfName="_".join([name,self.tag])
-        qcd = ROOT.RooQCDPdf(pdfName,pdfName,self.w.var(MVV),self.w.var(systp0),self.w.var(systp1),self.w.var(systp2))
+        qcd = ROOT.RooQCDPdf(pdfName,pdfName,self.w.var(MVV),self.w.var(p0),self.w.var(p1),self.w.var(p2))
         getattr(self.w,'import')(qcd,ROOT.RooFit.Rename(pdfName))
 
 
