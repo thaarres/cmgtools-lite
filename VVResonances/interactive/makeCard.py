@@ -63,9 +63,9 @@ for sig in signals:
     card.addSystematic("CMS_res_prunedj","param",[-0.2,0.001])
 
     #dijet function parameters for V+jets
-    card.addSystematic("CMS_VV_JJ_p0_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['p0']['val']],1.0)
-    card.addSystematic("CMS_VV_JJ_p1_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['p1']['val']],1.0)
-    card.addSystematic("CMS_VV_JJ_p2_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['p2']['val']],1.0)
+    card.addSystematic("CMS_VV_JJ_p0_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p0']['val'],1.0])
+    card.addSystematic("CMS_VV_JJ_p1_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p1']['val'],1.0])
+    card.addSystematic("CMS_VV_JJ_p2_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p2']['val'],1.0])
     
     #alternative shapes for QCD background
     card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
