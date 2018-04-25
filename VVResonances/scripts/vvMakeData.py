@@ -20,6 +20,7 @@ parser.add_option("-d","--isData",dest="data",type=int,help="isData",default=1)
 parser.add_option("-f","--factor",dest="factor",type=float,help="factor",default=1.0)
 parser.add_option("-n","--name",dest="name",help="name",default="histo")
 parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
+parser.add_option("-t","--triggerweight",dest="triggerW",action="store_true",help="Use trigger weights",default=False)
 #parser.add_option("-z","--zeroNegative",dest="zeroNegative",type=int,help="zero bvins with negative weights",default=0)
 
 
@@ -55,6 +56,7 @@ for filename in os.listdir(args[0]):
                 dataPlotters[-1].addCorrectionFactor('xsec','tree')
                 dataPlotters[-1].addCorrectionFactor('genWeight','tree')
                 dataPlotters[-1].addCorrectionFactor('puWeight','tree')
+                if options.triggerW: dataPlotters[-1].addCorrectionFactor('triggerWeight','tree')
 if options.data==2:
     sigmas=[]
     for d in dataPlotters:

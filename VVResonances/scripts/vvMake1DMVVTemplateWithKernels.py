@@ -27,6 +27,7 @@ parser.add_option("-u","--usegenmass",dest="usegenmass",action="store_true",help
 parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",default=0)
 parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
 parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
+parser.add_option("-t","--triggerweight",dest="triggerW",action="store_true",help="Use trigger weights",default=False)
 
 (options,args) = parser.parse_args()
 
@@ -118,12 +119,17 @@ for filename in os.listdir(args[0]):
             dataPlotters[-1].addCorrectionFactor('xsec','tree')
             dataPlotters[-1].addCorrectionFactor('genWeight','tree')
             dataPlotters[-1].addCorrectionFactor('puWeight','tree')
+            if options.triggerW: 
+              dataPlotters[-1].addCorrectionFactor('triggerWeight','tree')
+              print "USING TRIGGERWEIGHTS!!!!!!"
             for w in weights_:
-	     if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
+              if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
             dataPlotters[-1].filename=fname
             dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
             dataPlottersNW[-1].addCorrectionFactor('puWeight','tree')
             dataPlottersNW[-1].addCorrectionFactor('genWeight','tree')
+            if options.triggerW: 
+              dataPlottersNW[-1].addCorrectionFactor('triggerWeight','tree')
             for w in weights_: 
              if w != '': dataPlottersNW[-1].addCorrectionFactor(w,'branch')
             dataPlottersNW[-1].filename=fname
@@ -176,7 +182,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print "Preparing nominal histogram for sampletype " ,sampleTypes[0]
    print "filename: ", plotter.filename, " preparing central values histo"
    histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
-   
+   canv = ROOT.TCanvas("c1","c1",800,600)
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
    
    histTMP=ROOT.TH1F("histoTMP","histo",options.binsx,array('f',binning)) 
@@ -188,7 +194,9 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
     histTMP.Scale(histI2.Integral()/histTMP.Integral())
     histogram_nominal.Add(histTMP)
     mvv_nominal.Add(histI2)
-    
+   
+   mvv_nominal.Draw()
+   canv.SaveAs("debug.png")  
    histI2.Delete()
    histTMP.Delete()
 
