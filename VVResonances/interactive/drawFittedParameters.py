@@ -337,8 +337,8 @@ def doResolution():
 	
 def doKernelMVV():
 	files = []
-	fLP = TFile("JJ_nonRes_MVV_HPLP.root","READ")
-	fHP = TFile("JJ_nonRes_MVV_HPHP.root","READ")
+	fLP = TFile("JJ_nonRes_MVV_LPLP_noTW.root","READ")
+	fHP = TFile("JJ_nonRes_MVV_LPLP_withTW.root","READ")
 	files.append(fLP)
 	files.append(fHP)
 	cols = [46,30]
@@ -353,8 +353,8 @@ def doKernelMVV():
 		fromSim    = f.Get("mvv_nominal")
 		beautify(fromKernel,cols[i],1,mstyle[i])
 		beautify(fromSim   ,cols[i],1,mstyle[i])
-		l.AddEntry(fromKernel,"%s,From Kernel    "%(f.GetName().replace(".root","").split("_")[3]),"L")
-		l.AddEntry(fromSim   ,"%s,From Simulation"%(f.GetName().replace(".root","").split("_")[3]),"PE")
+		l.AddEntry(fromKernel,"%s,From Kernel    "%(f.GetName().replace(".root","").split("_")[4]),"L")
+		l.AddEntry(fromSim   ,"%s,From Simulation"%(f.GetName().replace(".root","").split("_")[4]),"PE")
 		
 		hsts.append(fromSim)
 		hsts.append(fromKernel)
@@ -363,7 +363,7 @@ def doKernelMVV():
 	hists[0][0].GetYaxis().SetTitle("A.U")
 	hists[0][0].GetYaxis().SetNdivisions(9,1,0)
 	hists[0][0].GetYaxis().SetTitleOffset(1.5)	
-	hists[0][0].GetXaxis().SetRangeUser(1000.   , 5000.)
+	hists[0][0].GetXaxis().SetRangeUser(838.   , 5000.)
 	hists[0][0].DrawNormalized("histPE")
 	for h in hists:
 		h[0].DrawNormalized("samehistPE")
@@ -586,8 +586,8 @@ if __name__ == '__main__':
   # doMJFit()
   # doMVVFit()
   # doYield()
-  doResolution()
-  # doKernelMVV()
+  # doResolution()
+  doKernelMVV()
 	#compKernelMVV()
 	#doKernel2D()
 	#compSignalMVV()

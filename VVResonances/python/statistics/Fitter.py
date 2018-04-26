@@ -155,7 +155,7 @@ class Fitter(object):
 
 
     def gaus(self,name = 'model',poi='x'):
-        self.w.factory("RooGaussian::"+name+"("+poi+",c_0[50,0,10000],c_1[30,0,10000])")
+        self.w.factory("RooGaussian::"+name+"("+poi+",mean[50,0,10000],sigma[30,0,10000])")
 
 
     def pow(self,name = 'model',poi='x'):
@@ -378,7 +378,17 @@ class Fitter(object):
         peak = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
         getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name))
 
+    def jetResonanceVjets(self,name = 'model',poi='x'):
+        ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
+        self.w.factory("mean[80,50,150]")
+        self.w.factory("sigma[15,3,30]")
+        self.w.factory("alpha[1.8,0.0,5]")
+        self.w.factory("n[0.8,0.,2.]")
+        self.w.factory("alpha2[1,0.,20]")
+        self.w.factory("n2[6,0,100]")
 
+        peak = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
+        getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name+'W'))
 
 
     def jetResonance2(self,name = 'model',poi='x'):
@@ -787,6 +797,7 @@ class Fitter(object):
             self.w.factory("c_2[0]")
 
         qcd = ROOT.RooQCDPdf(name,"",self.w.var(poi),self.w.var("c_0"),self.w.var("c_1"),self.w.var("c_2"))
+        #TMath::Power(1-x/sqrt_s ,p0)/TMath::Power(x/sqrt_s, p1+p2*TMath::Log(x/sqrt_s))  ;
         getattr(self.w,'import')(qcd,ROOT.RooFit.Rename("model"))
 
 
@@ -953,15 +964,21 @@ class Fitter(object):
 
     def fit(self,model = "model",data="data",options=[]):
         if len(options)==0:
-            self.w.pdf(model).fitTo(self.w.data("data"))
+            fitresults = self.w.pdf(model).fitTo(self.w.data("data"))
         if len(options)==1:
-            self.w.pdf(model).fitTo(self.w.data("data"),options[0])
+            fitresults = self.w.pdf(model).fitTo(self.w.data("data"),options[0])	    
         if len(options)==2:
-            self.w.pdf(model).fitTo(self.w.data("data"),options[0],options[1])
+            fitresults = self.w.pdf(model).fitTo(self.w.data("data"),options[0],options[1])
         if len(options)==3:
-            self.w.pdf(model).fitTo(self.w.data("data"),options[0],options[1],options[2])
+            fitresults = self.w.pdf(model).fitTo(self.w.data("data"),options[0],options[1],options[2])
         if len(options)==4:
-            self.w.pdf(model).fitTo(self.w.data("data"),options[0],options[1],options[2],options[3])
+            fitresults = self.w.pdf(model).fitTo(self.w.data("data"),options[0],options[1],options[2],options[3])
+	 
+	if fitresults:
+	 fitresults.Print() 
+	 f = ROOT.TFile.Open('fitresults.root','RECREATE')
+	 fitresults.Write()
+	 f.Close()
 
     def getLegend(self):
         self.legend = ROOT.TLegend(0.7510112,0.7183362,0.8502143,0.919833)
@@ -981,18 +998,30 @@ class Fitter(object):
         print "Fetching error " ,self.w.var(var).getError()
         return (self.w.var(var).getVal(), self.w.var(var).getError())
 
-    def projection(self,model = "model",data="data",poi="x",filename="fit.root",xtitle='x',mass=1000):
+    def projection(self,model = "model",data="data",poi="x",filename="fit.root",binning=0,logy=False,xtitle='x',mass=1000):
+	    
         self.frame=self.w.var(poi).frame()
-        a = self.w.var(poi).getBinning()
-	# self.w.var(poi).setRange("signal",1000,8000)
-	# self.w.pdf(model).setNormRange("NormalizationRangeForfit")
-        # gx_Int = self.w.pdf(model).createIntegral(ROOT.RooArgSet(self.w.var(poi)),ROOT.RooFit.NormSet(ROOT.RooArgSet(self.w.var(poi))),ROOT.RooFit.Range("NormalizationRangeForfit"))
-	# integral = float (gx_Int.getVal())
-	# print "integral = " ,integral
-	print "Prinintg workspace: "
+	
+	print "Prining workspace: "
 	self.w.Print()
-        self.w.data(data).plotOn(self.frame)
-        self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+	
+	try:
+                f = ROOT.TFile.Open("fitresults.root",'READ')
+                fr = f.Get('fitresult_model_data')
+                
+	except:
+                fr = 0
+                print "No fit result found (fitresults.root), plotting model only"
+	
+        if binning:
+	 self.w.data(data).plotOn(self.frame,ROOT.RooFit.Binning(binning))
+         if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning),ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
+	 else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+	else: 
+	 self.w.data(data).plotOn(self.frame)
+	 if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
+         else: self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+
         self.legend = self.getLegend()
 	self.legend.AddEntry( self.w.pdf(model)," Full PDF","l")
 	
@@ -1014,6 +1043,10 @@ class Fitter(object):
 	
 	self.w.pdf(model).plotOn(self.frame)
         self.c=ROOT.TCanvas("c","c")
+	if logy:
+	 self.frame.SetMinimum(0.00001)
+	 self.frame.SetMaximum(1.0)
+	 self.c.SetLogy()
         self.c.cd()
         self.frame.Draw()
         self.frame.GetYaxis().SetTitle('')
@@ -1053,4 +1086,3 @@ class Fitter(object):
         pullDist = self.frame.pullHist()
         return [self.frame, self.legend, pullDist, self.frame.chiSquare()]   
                                 
-

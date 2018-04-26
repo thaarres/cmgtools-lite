@@ -9,7 +9,7 @@ ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
 #python runFitPlots.py -n workspace.root -l LPLP -i JJ_LPLP.root
 
 parser = optparse.OptionParser()
-parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
+parser.add_option("-o","--output",dest="output",help="Output folder name",default='postfit_plots/')
 parser.add_option("-n","--name",dest="name",help="Input workspace",default='workspace.root')
 parser.add_option("-i","--input",dest="input",help="Input nonRes histo",default='JJ_HPHP.root')
 parser.add_option("-x","--xrange",dest="xrange",help="set range for x bins in projection",default="0,-1")
@@ -27,6 +27,9 @@ parser.add_option("--pdfy",dest="pdfy",help="name of pdfs lie PTYUp etc",default
 ROOT.gStyle.SetOptStat(0)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 colors = [ROOT.kBlack,ROOT.kPink-1,ROOT.kAzure+1,ROOT.kAzure+1,210,210,ROOT.kMagenta,ROOT.kMagenta,ROOT.kOrange,ROOT.kOrange,ROOT.kViolet,ROOT.kViolet]
+
+try: os.stat(options.output)
+except: os.mkdir(options.output)
 
 def getListFromRange(xyzrange):
     r=[]
