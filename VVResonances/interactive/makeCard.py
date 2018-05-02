@@ -41,26 +41,28 @@ for sig in signals:
     card.importBinnedData("JJ_"+p+".root","data",["MJ1","MJ2","MJJ"])
 
     #SYSTEMATICS
-
     #luminosity
-    card.addSystematic("CMS_lumi","lnN",{'%s':1.026})
+    card.addSystematic("CMS_lumi","lnN",{'%s'%sig:1.026,"Vjet":1.026})
 
-    #kPDF uncertainty for the signal
-    card.addSystematic("CMS_pdf","lnN",{'%s':1.01})
+    #PDF uncertainty for the signal
+    card.addSystematic("CMS_pdf","lnN",{'%s'%sig:1.01})
+    
 
     #background normalization
     card.addSystematic("CMS_VV_JJ_nonRes_norm_"+p,"lnN",{'nonRes':1.5})
     card.addSystematic("CMS_VV_JJ_Vjets_norm_"+p,"lnN",{'Vjet':1.02})
 
     #tau21 
-    if p=='HPHP': card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1+0.14})
-    else: card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'BulkGWW':1-0.33})
+    if p=='HPHP': 
+      card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:1+0.14,"Vjet":1+0.14})
+    else: 
+      card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:1-0.33,"Vjet":1-0.33})
 
     #pruned mass scale    
     card.addSystematic("CMS_scale_j","param",[0.0,0.02])
     card.addSystematic("CMS_res_j","param",[0.0,0.05])
-    card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
-    card.addSystematic("CMS_res_prunedj","param",[-0.2,0.001])
+    card.addSystematic("CMS_scale_prunedj","param",[0.0,0.009])
+    card.addSystematic("CMS_res_prunedj","param",[0.0,0.2])
 
     #systematics for dijet part of V+jets background
     card.addSystematic("CMS_VV_JJ_Vjets_PT","param",[0,0.1])
