@@ -354,7 +354,8 @@ else:
 mergeKernelJobs()
 mergeBackgroundShapes("nonRes","JJ")
 
-fitVJets("JJ_VJets",resTemplate) 
+fitVJets("JJ_VJets",resTemplate)
+makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,"*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)&&(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1D",0)
 
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
 makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
