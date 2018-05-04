@@ -364,6 +364,8 @@ TH3F* hin_PTZUp = (TH3F*)fin->Get("histo_PTZUp"); hin_PTZUp->Scale(1./hin_PTZUp-
 TH3F* hin_PTZDown = (TH3F*)fin->Get("histo_PTZDown"); hin_PTZDown->Scale(1./hin_PTZDown->Integral());
 TH3F* hin_OPTZUp = (TH3F*)fin->Get("histo_OPTZUp"); hin_OPTZUp->Scale(1./hin_OPTZUp->Integral());
 TH3F* hin_OPTZDown = (TH3F*)fin->Get("histo_OPTZDown"); hin_OPTZDown->Scale(1./hin_OPTZDown->Integral());
+TH3F* hin_TRIGUp = (TH3F*)  fin->Get("histo_TRIGUp")  ; hin_TRIGUp->Scale  (1./hin_TRIGUp->Integral());
+TH3F* hin_TRIGDown = (TH3F*)fin->Get("histo_TRIGDown"); hin_TRIGDown->Scale(1./hin_TRIGDown->Integral());
 
 TH1F* hz_PTZUp = (TH1F*)hin_PTZUp->ProjectionZ("pz_PTZUp",xbinMin[0],xbinMax[0],xbinMin[0],xbinMax[0]);
 hz_PTZUp->SetLineColor(kMagenta);
@@ -374,12 +376,17 @@ hz_OPTZUp->SetLineColor(210);
 TH1F* hz_OPTZDown = (TH1F*)hin_OPTZDown->ProjectionZ("pz_OPTZDown",xbinMin[0],xbinMax[0],xbinMin[0],xbinMax[0]);
 hz_OPTZDown->SetLineColor(210);
 
+TH1F* hz_TRIGUp = (TH1F*)hin_TRIGUp->ProjectionZ("pz_TRIGUp",xbinMin[0],xbinMax[0],xbinMin[0],xbinMax[0]);
+hz_TRIGUp->SetLineColor(kBlue);
+TH1F* hz_TRIGDown = (TH1F*)hin_TRIGDown->ProjectionZ("pz_TRIGDown",xbinMin[0],xbinMax[0],xbinMin[0],xbinMax[0]);
+hz_TRIGDown->SetLineColor(kBlue);
+
 TLegend* leg3 = new TLegend(0.6,0.55,0.95,0.8);
 leg3->AddEntry(hzMC[0],"Simulation (Pythia8)","LP");
 leg3->AddEntry(hz[0],"Template","L");
 leg3->AddEntry(hz_PTZUp,"p_{T} syst. up/down","L");
 leg3->AddEntry(hz_OPTZUp,"1/p_{T} syst. up/down","L");
-
+leg3->AddEntry(hz_TRIGUp,"Trigger syst. up/down","L");
 
 TCanvas* czSyst = new TCanvas("czSyst","czSyst");
 czSyst->cd();
@@ -391,6 +398,8 @@ hz_PTZUp->Draw("HISTsame");
 hz_PTZDown->Draw("HISTsame"); 
 hz_OPTZUp->Draw("HISTsame");
 hz_OPTZDown->Draw("HISTsame");
+hz_TRIGUp->Draw("HISTsame");
+hz_TRIGDown->Draw("HISTsame");
 hzMC[0]->Draw("same");
 leg3->Draw();
 czSyst->SaveAs(TString(outDirName)+TString("/")+TString("czSyst.png"),"png");
@@ -400,6 +409,8 @@ TH3F* hin_PTXDown = (TH3F*)fin->Get("histo_PTXYDown"); hin_PTXDown->Scale(1./hin
 TH3F* hin_OPTXUp = (TH3F*)fin->Get("histo_OPTXYUp"); hin_OPTXUp->Scale(1./hin_OPTXUp->Integral());
 TH3F* hin_OPTXDown = (TH3F*)fin->Get("histo_OPTXYDown"); hin_OPTXDown->Scale(1./hin_OPTXDown->Integral());
 
+TH3F* hin_TRIGXUp = (TH3F*)fin->Get("histo_TRIGUp"); hin_TRIGXUp->Scale(1./hin_TRIGXUp->Integral());
+TH3F* hin_TRIGXDown = (TH3F*)fin->Get("histo_TRIGDown"); hin_TRIGXDown->Scale(1./hin_TRIGXDown->Integral());
 
 TH1F* hx_PTXUp = (TH1F*)hin_PTXUp->ProjectionX("px_PTXUp",1,binsy,zbinMin[0],zbinMax[0]);
 hx_PTXUp->SetLineColor(kMagenta);
@@ -410,6 +421,11 @@ hx_OPTXUp->SetLineColor(210);
 TH1F* hx_OPTXDown = (TH1F*)hin_OPTXDown->ProjectionX("px_OPTXDown",1,binsy,zbinMin[0],zbinMax[0]);
 hx_OPTXDown->SetLineColor(210);
 
+TH1F* hx_TRIGXUp = (TH1F*)hin_TRIGXUp->ProjectionX("px_TRIGUp",1,binsy,zbinMin[0],zbinMax[0]);
+hx_TRIGXUp->SetLineColor(kBlue);
+TH1F* hx_TRIGXDown = (TH1F*)hin_TRIGXDown->ProjectionX("px_TRIGDown",1,binsy,zbinMin[0],zbinMax[0]);
+hx_TRIGXDown->SetLineColor(kBlue);
+
 TCanvas* cxSyst = new TCanvas("cxSyst","cxSyst");
 cxSyst->cd();
 hx[0]->Draw("HIST");
@@ -417,6 +433,8 @@ hx_PTXUp->Draw("HISTsame");
 hx_PTXDown->Draw("HISTsame"); 
 hx_OPTXUp->Draw("HISTsame");
 hx_OPTXDown->Draw("HISTsame");
+hx_TRIGXUp->Draw("HISTsame");
+hx_TRIGXDown->Draw("HISTsame");
 hxMC[0]->Draw("same");
 leg3->Draw();
 
@@ -427,6 +445,9 @@ TH3F* hin_PTYDown = (TH3F*)fin->Get("histo_PTXYDown"); hin_PTYDown->Scale(1./hin
 TH3F* hin_OPTYUp = (TH3F*)fin->Get("histo_OPTXYUp"); hin_OPTYUp->Scale(1./hin_OPTYUp->Integral());
 TH3F* hin_OPTYDown = (TH3F*)fin->Get("histo_OPTXYDown"); hin_OPTYDown->Scale(1./hin_OPTYDown->Integral());
 
+TH3F* hin_TRIGYUp = (TH3F*)fin->Get("histo_TRIGUp"); hin_TRIGYUp->Scale(1./hin_TRIGYUp->Integral());
+TH3F* hin_TRIGYDown = (TH3F*)fin->Get("histo_TRIGDown"); hin_TRIGYDown->Scale(1./hin_TRIGYDown->Integral());
+
 TH1F* hy_PTYUp = (TH1F*)hin_PTYUp->ProjectionY("py_PTYUp",1,binsy,zbinMin[0],zbinMax[0]);
 hy_PTYUp->SetLineColor(kMagenta);
 TH1F* hy_PTYDown = (TH1F*)hin_PTYDown->ProjectionY("py_PTYDown",1,binsy,zbinMin[0],zbinMax[0]);
@@ -435,6 +456,10 @@ TH1F* hy_OPTYUp = (TH1F*)hin_OPTYUp->ProjectionY("py_OPTYUp",1,binsy,zbinMin[0],
 hy_OPTYUp->SetLineColor(210);
 TH1F* hy_OPTYDown = (TH1F*)hin_OPTYDown->ProjectionY("py_OPTYDown",1,binsy,zbinMin[0],zbinMax[0]);
 hy_OPTYDown->SetLineColor(210);
+TH1F* hy_TRIGYUp = (TH1F*)hin_TRIGYUp->ProjectionY("py_TRIGYUp",1,binsy,zbinMin[0],zbinMax[0]);
+hy_TRIGYUp->SetLineColor(kBlue);
+TH1F* hy_TRIGYDown = (TH1F*)hin_TRIGYDown->ProjectionY("py_TRIGYDown",1,binsy,zbinMin[0],zbinMax[0]);
+hy_TRIGYDown->SetLineColor(kBlue);
 
 TCanvas* cySyst = new TCanvas("cySyst","cySyst");
 cySyst->cd();
@@ -443,6 +468,8 @@ hy_PTYUp->Draw("HISTsame");
 hy_PTYDown->Draw("HISTsame"); 
 hy_OPTYUp->Draw("HISTsame");
 hy_OPTYDown->Draw("HISTsame");
+hy_TRIGYUp->Draw("HISTsame");
+hy_TRIGYDown->Draw("HISTsame");
 hyMC[0]->Draw("same");
 leg3->Draw();
 

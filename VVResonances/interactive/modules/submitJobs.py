@@ -106,7 +106,7 @@ def getEvents(template,samples):
 	maxEv = {}
 
 	for f in files:
-	 inf = ROOT.TFile('./samples/'+f,'READ')
+	 inf = ROOT.TFile('%s/'%samples+f,'READ')
 	 minEv[f] = []
 	 maxEv[f] = []
 	 intree = inf.Get('tree')
@@ -229,7 +229,7 @@ def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,ma
 	print "Submitting %i number of jobs "  ,NumberOfJobs
 	print
 
-	cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -c "{cut}"  -v "jj_gen_partialMass" {binning} -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {infolder} '.format(rootFile=rootFile,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,infolder=samples,binning=binning)
+	cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -c "{cut}"  -v "jj_gen_partialMass" {binning} -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} -t  {infolder} '.format(rootFile=rootFile,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,infolder=samples,binning=binning)
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
@@ -283,7 +283,7 @@ def Make2DTemplateWithKernels(rootFile,template,cut,leg,binsMVV,minMVV,maxMVV,re
 	print "Submitting %i number of jobs "  ,NumberOfJobs
 	print
 
-	cmd='vvMake2DTemplateWithKernels.py -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass" {binning}  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res}  {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ,infolder=samples,binning=binning)
+	cmd='vvMake2DTemplateWithKernels.py -c "{cut}"  -v "jj_{leg}_gen_softDrop_mass,jj_gen_partialMass" {binning}  -b {binsMJ} -B {binsMVV} -x {minMJ} -X {maxMJ} -y {minMVV} -Y {maxMVV}  -r {res} -t   {infolder}'.format(rootFile=rootFile,samples=template,cut=cut,leg=leg,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,res=resFile,binsMJ=binsMJ,minMJ=minMJ,maxMJ=maxMJ,infolder=samples,binning=binning)
 	OutputFileNames = rootFile.replace(".root","") # base of the output file name, they will be saved in res directory
 	queue = "8nh" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
@@ -1293,7 +1293,7 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
  
 	NumberOfJobs= len(files) 
 	OutputFileNames = rootFile.replace(".root","")
-	cmd='vvMakeData.py -d {data} -c "{cut}"  -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" {binning} -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factors} -n "{name}" {infolder} '.format(cut=cut,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factors=factors,name=name,data=data,infolder=samples,binning=binning)	
+	cmd='vvMakeData.py -d {data} -c "{cut}"  -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" {binning} -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factors} -n "{name}" -t  {infolder} '.format(cut=cut,BINS=binsMVV,bins=binsMJ,MINI=minMVV,MAXI=maxMVV,mini=minMJ,maxi=maxMJ,factors=factors,name=name,data=data,infolder=samples,binning=binning)	
 	queue = "1nd" # give bsub queue -- 8nm (8 minutes), 1nh (1 hour), 8nh, 1nd (1day), 2nd, 1nw (1 week), 2nw 
 	
         path = os.getcwd()
@@ -1430,41 +1430,39 @@ def getListOfBinsLowEdge(hist,dim):
         r.append(axis.GetBinLowEdge(i))
     return r
 
-def makePseudodata(infile,purity):
-	print "Making pseudodata from infile " ,infile
-	fin = ROOT.TFile.Open(infile,'READ')
-	hmcin = fin.Get('nonRes')
-	
-	xbins = array("f",getListOfBinsLowEdge(hmcin,"x"))
-	zbins = array("f",getListOfBinsLowEdge(hmcin,"z"))
-	print xbins
-	#print zbins
-	#print xbins
-	fout = ROOT.TFile.Open('JJ_%s.root'%purity,'RECREATE')
-	hout = ROOT.TH3F('data','data',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
-	hmcout = ROOT.TH3F('nonRes','nonRes',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
-	xbins2 = array("f",getListOfBinsLowEdge(hmcout,"x"))
-	zbins2 = array("f",getListOfBinsLowEdge(hmcout,"z"))
-	print xbins2
-	hmcout.Add(hmcin)
-	
-	
-	
-	for k in range(1,hmcin.GetNbinsZ()+1):
-	 for j in range(1,hmcin.GetNbinsY()+1):
-	  for i in range(1,hmcin.GetNbinsX()+1):
-	   evs = hmcin.GetBinContent(i,j,k)*35900.
-	   #if evs >= 1:
-	   err = math.sqrt(evs)
-	   hout.SetBinContent(i,j,k,evs)
-	   hout.SetBinError(i,j,k,err)
-	
-	hout.Write()
-	hmcout.Write()
-	
-	fin.Close()
-        fout.Close()
-        print "made pseudo-data : JJ_"+purity+".root"
+def makePseudoData(input="JJ_nonRes_LPLP.root",kernel="JJ_nonRes_3D_LPLP.root",mc="pythia",output="JJ_LPLP.root",lumi=35900):
+
+ pwd = os.getcwd()
+ 
+ ROOT.gRandom.SetSeed(0)
+ 
+ finmc = ROOT.TFile.Open(pwd+'/'+input,'READ')
+ hmcin = finmc.Get('nonRes')
+
+ findata = ROOT.TFile.Open(pwd+'/'+kernel,'READ')
+ #findata.ls()
+ hdata = ROOT.TH3F()
+ 
+ if   mc == 'pythia': hdata = findata.Get('histo')
+ elif mc == 'herwig': hdata = findata.Get('histo_altshapeUp')
+ elif mc == 'madgraph': hdata = findata.Get('histo_altshape2')
+ elif mc == 'powheg': hdata = findata.Get('histo_NLO')
+ 
+ fout = ROOT.TFile.Open(output,'RECREATE')
+ #hmcin.Scale(10.)
+ hmcin.Write('nonRes')
+
+ xbins = array("f",getListOfBinsLowEdge(hmcin,"x"))
+ zbins = array("f",getListOfBinsLowEdge(hmcin,"z"))
+ hout = ROOT.TH3F('data','data',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+ hout.FillRandom(hdata,int(hmcin.Integral()*lumi))
+ hout.Write('data')
+ print "Writing histograms nonRes and data to file ", output
+
+ finmc.Close()
+ findata.Close()
+ fout.Close()
+ 
 
 def submitCPs(samples,template,wait,jobname="CPs",rootFile="controlplots_2017.root"):
   print 

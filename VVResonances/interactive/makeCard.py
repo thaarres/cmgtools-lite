@@ -22,20 +22,20 @@ for sig in signals:
     card.addParametricYieldWithUncertainty("%s"%sig,0,"JJ_%s_"%sig+p+"_yield.json",1,'CMS_tau21_PtDependence','log(MH/600)',0.041)
     card.product3D("%s"%sig,"Wqq1","Wqq2","%s_MVV"%sig)
 
-    #Vjets
-    if p=='HPHP': from JJ_VJets_HPHP import JJ_VJets__MVV, JJ_VJets__Res_l1, JJ_VJets__ratio_l1, JJ_VJets__Res_l2, JJ_VJets__ratio_l2
-    if p=='HPLP': from JJ_VJets_HPLP import JJ_VJets__MVV, JJ_VJets__Res_l1, JJ_VJets__ratio_l1, JJ_VJets__Res_l2, JJ_VJets__ratio_l2
-    if p=='LPLP': from JJ_VJets_LPLP import JJ_VJets__MVV, JJ_VJets__Res_l1, JJ_VJets__ratio_l1, JJ_VJets__Res_l2, JJ_VJets__ratio_l2
-
-    card.addMVVBackgroundShapeQCD("Vjets_mjj","MJJ",True,"",JJ_VJets__MVV)
-    card.addMjetBackgroundShapeVJetsGaus("Vjets_mjetRes_l1","MJ1","",JJ_VJets__Res_l1,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
-    card.addMjetBackgroundShapeVJetsGaus("Vjets_mjetRes_l2","MJ2","",JJ_VJets__Res_l2,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
-    card.product3D("Vjet","Vjets_mjetRes_l1","Vjets_mjetRes_l2","Vjets_mjj")
-    card.addFixedYieldFromFile("Vjet",1,"JJ_VJets_%s.root"%p,"VJets",1.0)
+    # #Vjets
+#     if p=='HPHP': from JJ_VJets_HPHP import JJ_VJets__MVV, JJ_VJets__Res_l1, JJ_VJets__ratio_l1, JJ_VJets__Res_l2, JJ_VJets__ratio_l2
+#     if p=='HPLP': from JJ_VJets_HPLP import JJ_VJets__MVV, JJ_VJets__Res_l1, JJ_VJets__ratio_l1, JJ_VJets__Res_l2, JJ_VJets__ratio_l2
+#     if p=='LPLP': from JJ_VJets_LPLP import JJ_VJets__MVV, JJ_VJets__Res_l1, JJ_VJets__ratio_l1, JJ_VJets__Res_l2, JJ_VJets__ratio_l2
+#
+#     card.addMVVBackgroundShapeQCD("Vjets_mjj","MJJ",True,"",JJ_VJets__MVV)
+#     card.addMjetBackgroundShapeVJetsGaus("Vjets_mjetRes_l1","MJ1","",JJ_VJets__Res_l1,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+#     card.addMjetBackgroundShapeVJetsGaus("Vjets_mjetRes_l2","MJ2","",JJ_VJets__Res_l2,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+#     card.product3D("Vjet","Vjets_mjetRes_l1","Vjets_mjetRes_l2","Vjets_mjj")
+#     card.addFixedYieldFromFile("Vjet",1,"JJ_VJets_%s.root"%p,"VJets",1.0)
 
     #QCD
     rootFile="JJ_nonRes_3D_"+p+".root"
-    card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ'],False,0)    
+    card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ','TRIG:CMS_VV_JJ_nonRes_TRIG','PTZ2:CMS_VV_JJ_nonRes_PTZ2','OPTZ2:CMS_VV_JJ_nonRes_OPTZ2'],False,0)    
     card.addFixedYieldFromFile("nonRes",2,"JJ_nonRes_"+p+".root","nonRes")
 
     #DATA
@@ -63,16 +63,19 @@ for sig in signals:
     card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
     card.addSystematic("CMS_res_prunedj","param",[-0.2,0.001])
 
-    #dijet function parameters for V+jets
-    card.addSystematic("CMS_VV_JJ_p0_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p0']['val'],1.0])
-    card.addSystematic("CMS_VV_JJ_p1_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p1']['val'],1.0])
-    card.addSystematic("CMS_VV_JJ_p2_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p2']['val'],1.0])
+    # #dijet function parameters for V+jets
+ #    card.addSystematic("CMS_VV_JJ_p0_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p0']['val'],1.0])
+ #    card.addSystematic("CMS_VV_JJ_p1_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p1']['val'],1.0])
+ #    card.addSystematic("CMS_VV_JJ_p2_Vjets_mjj_JJ_"+p+"_13TeV","param",[JJ_VJets__MVV['CMS_p2']['val'],1.0])
     
     #alternative shapes for QCD background
     card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
-    card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.333])
+    card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,1.0])
     card.addSystematic("CMS_VV_JJ_nonRes_OPTXY","param",[0.0,0.333])
-    card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,0.333])
+    card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,1.0])
+    card.addSystematic("CMS_VV_JJ_nonRes_OPTZ2","param",[0.0,1.0])
+    card.addSystematic("CMS_VV_JJ_nonRes_PTZ2","param",[0.0,1.0])
+    card.addSystematic("CMS_VV_JJ_nonRes_TRIG","param",[0.0,1.0])
 
     card.makeCard()
 
