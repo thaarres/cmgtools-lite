@@ -263,7 +263,7 @@ histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms["histo_nominal"],
 histogram_pt_down.Write()
 histogram_pt_up.Write()
 
-alpha=1.5*1000
+alpha=1.5*800.
 histogram_opt_down,histogram_opt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT",alpha,-1)
 histogram_opt_down.Write()
 histogram_opt_up.Write()
@@ -273,7 +273,7 @@ histogram_pt2_down,histogram_pt2_up=unequalScale(finalHistograms["histo_nominal"
 histogram_pt2_down.Write()
 histogram_pt2_up.Write()
 
-alpha=1000.*1000.
+alpha=800.*800.
 histogram_opt2_down,histogram_opt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT2",alpha,-2)
 histogram_opt2_down.Write()
 histogram_opt2_up.Write() 
