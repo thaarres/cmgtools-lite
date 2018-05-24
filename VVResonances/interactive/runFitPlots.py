@@ -319,10 +319,11 @@ def doXprojection(pdfs,data,norm_nonres,norm_res):
     hfinals = []
     hfinals.append(h[0])
     hfinals.append(htot)
+    hfinals.append(h[2])
     for i in range(3,len(h)): hfinals.append(h[i])
     for b,e in enumerate(neventsPerBin): proj.SetBinContent(b+1,e)
     proj.SetBinErrorOption(ROOT.TH1.kPoisson)    
-    MakePlots(h,proj,'x',xBinslowedge)    
+    MakePlots(hfinals,proj,'x',xBinslowedge)    
 
 def doYprojection(pdfs,data,norm_nonres,norm_res):
     h=[]
@@ -358,10 +359,11 @@ def doYprojection(pdfs,data,norm_nonres,norm_res):
     hfinals = []
     hfinals.append(h[0])
     hfinals.append(htot)
+    hfinals.append(h[2])
     for i in range(3,len(h)): hfinals.append(h[i])
     for b,e in enumerate(neventsPerBin): proj.SetBinContent(b+1,e)
     proj.SetBinErrorOption(ROOT.TH1.kPoisson)    
-    MakePlots(h,proj,'y',yBinslowedge)  
+    MakePlots(hfinals,proj,'y',yBinslowedge)  
  
 
 def addPullPlot(hdata,hprefit,hpostfit,nBins):

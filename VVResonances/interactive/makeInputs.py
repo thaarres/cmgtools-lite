@@ -62,7 +62,8 @@ cuts['nonres'] = '1'
 cuts['res'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>60&&jj_l1_softDrop_mass<110)'
 
 purities=['HPHP','HPLP','LPLP','NP']
-purities=['LPLP']
+purities=['HPHP','HPLP']
+# purities=['LPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -75,7 +76,7 @@ BRWZ=1.*0.001*0.6991*0.676
 
 dataTemplate="JetHT"
 nonResTemplate="QCD_HT" #high stat
-nonResTemplate="QCD_Pt_" #low stat --> use this for tests
+nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 
 #nonResTemplate="Dijet" #to compare shapes
 
@@ -292,7 +293,7 @@ def mergeBackgroundShapes(name,filename):
   print "Reading " ,inputz
   print "Saving to ",rootFile 
   cmd='vvMergeHistosToPDF3D.py -i "{inputx}" -I "{inputy}" -z "{inputz}" -o "{rootFile}"'.format(rootFile=rootFile,inputx=inputx,inputy=inputy,inputz=inputz)
-  # os.system(cmd)
+  os.system(cmd)
   print "Adding trigger shape uncertainties"
   cmd='vvMakeTriggerShapes.py -i "{rootFile}"'.format(rootFile=rootFile)
   os.system(cmd)
@@ -318,28 +319,28 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',jobName="nR",fac
   
   
 
-	
-# makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
-# makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
-# makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
-# makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
 
-# makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-# makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-# makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
-# makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-# makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-# makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
-# makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
-# makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
-#
-# makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
+makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
+makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
+makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
 
 # ------ do not use these ------
@@ -350,29 +351,33 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',jobName="nR",fac
 # ------------------------------
 
 
-# if runParallel and submitToBatch:
-#   wait = False
-#   makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-#   print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
-#   sys.exit()
-#   mergeKernelJobs()
-# else:
-#   wait = True
-#   makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+if runParallel and submitToBatch:
+  wait = False
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+  print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
+  sys.exit()
+  mergeKernelJobs()
+else:
+  wait = True
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 
-# mergeBackgroundShapes("nonRes","JJ")
+mergeBackgroundShapes("nonRes","JJ")
+makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
 
-# fitVJets("JJ_VJets",resTemplate)
-# makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
+#Vjets
 if period == 2017:
     makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.3425,WJetsToQQ:0.3425")
 else:
     makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
-    # makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
-# from modules.submitJobs import makePseudoData
-# for p in purities: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PD_%s.root"%p,lumi)
+fitVJets("JJ_VJets",resTemplate)
+makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,cuts['nonres'],"1D",0)
+
+makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
+from modules.submitJobs import makePseudoData
+for p in purities: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PD_%s.root"%p,lumi)
+
 
