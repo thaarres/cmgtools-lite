@@ -47,9 +47,9 @@ scaleDOWN = ROOT.TH3F("histo_TRIGDown","histo_TRIGDown",len(binningx)-1,binningx
 for i in range(1,histo.GetNbinsX()+1):
         for j in range(1,histo.GetNbinsY()+1):
                 for k in range(1,histo.GetNbinsZ()+1):
-                        mj1 = histo.GetXaxis().GetBinLowEdge(i)
-                        mj2 = histo.GetYaxis().GetBinLowEdge(j)
-                        mjj = histo.GetZaxis().GetBinLowEdge(k)
+                        mj1 = histo.GetXaxis().GetBinCenter(i)
+                        mj2 = histo.GetYaxis().GetBinCenter(j)
+                        mjj = histo.GetZaxis().GetBinCenter(k)
                         # print "mj1 = " ,mj1; print "mj2 = " ,mj2; print "mjj = " ,mjj
                         tw = weights.GetBinContent(weights.GetXaxis().FindBin(mj1), weights.GetYaxis().FindBin(mj2), weights.GetZaxis().FindBin(mjj))
                         c = histo.GetBinContent(i,j,k)
