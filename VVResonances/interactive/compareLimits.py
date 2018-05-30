@@ -8,17 +8,17 @@ from time import sleep
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",default='limit_compare.root',help="Limit plot")
 
-parser.add_option("-x","--minX",dest="minX",type=float,help="minimum x",default=1200.0)
-parser.add_option("-X","--maxX",dest="maxX",type=float,help="maximum x",default=4200.0)
+parser.add_option("-x","--minX",dest="minX",type=float,help="minimum x",default=838.0)
+parser.add_option("-X","--maxX",dest="maxX",type=float,help="maximum x",default=5200.)
 parser.add_option("-y","--minY",dest="minY",type=float,help="minimum y",default=0.0001)
 parser.add_option("-Y","--maxY",dest="maxY",type=float,help="maximum y",default=1.4)
 parser.add_option("-b","--blind",dest="blind",type=int,help="Not do observed ",default=1)
 parser.add_option("-l","--log",dest="log",type=int,help="Log plot",default=1)
 
 parser.add_option("-t","--titleX",dest="titleX",default='M_{X} (GeV)',help="title of x axis")
-parser.add_option("-T","--titleY",dest="titleY",default='#sigma x BR(X #rightarrow WW) (pb)  ',help="title of y axis")
+parser.add_option("-T","--titleY",dest="titleY",default="#sigma x BR(W' #rightarrow WZ) (pb)  ",help="title of y axis")
 
-parser.add_option("-p","--period",dest="period",default='2016',help="period")
+parser.add_option("-p","--period",dest="period",default='2017',help="period")
 parser.add_option("-f","--final",dest="final",type=int, default=1,help="Preliminary or not")
 
 
@@ -56,11 +56,11 @@ files = ["Limits_BulkGWW_HPLP_13TeV.root","Limits_BulkGWW_HPLP_13TeV_ddt.root","
 title = ["3D HPHP","3D HPHP DDT"]
 files = ["Limits_BulkGWW_HPHP_13TeV.root","Limits_BulkGWW_HPHP_13TeV_ddt.root"]
 
-title = ["HPLP","HPHP","HPHP+HPLP","B2G-17-001"]
-files = ["HPLPlimits/Limits_BulkGWW_HPLP_13TeV.root","HPHPlimits/Limits_BulkGWW_HPHP_13TeV.root","COMBINEDlimits/Limits_BulkGWW_13TeV.root","limits_b2g17001/Limits_b2g17001_BulkGWW_13TeV.root"]
+title = ["Expected 2017","B2G-17-001"]
+files = ["HPLP_noOPTPT2/Limits2.root","limits_b2g17001/Limits_b2g17001_WZ_13TeV.root"]
 
-title = ["Nominal","p_{T}/m_{VV}>0.4"]
-files = ["LIMITS_NOM/Limits_BulkGWW_HPHP_13TeV.root","LIMITS_VCUT/Limits_BulkGWW_HPHP_13TeV.root"]
+# title = ["Nominal","p_{T}/m_{VV}>0.4"]
+# files = ["LIMITS_NOM/Limits_BulkGWW_HPHP_13TeV.root","LIMITS_VCUT/Limits_BulkGWW_HPHP_13TeV.root"]
 
 leg = getLegend()
 leg.AddEntry(0,"Exp. limits","")
@@ -78,7 +78,7 @@ for t,fname in zip(title,files):
 		    data[event.mh]={}
 		
 		lim = event.limit*0.001
-		if fname.find("b2g17001")!=-1:lim = event.limit*0.01
+		if fname.find("b2g17001")!=-1:lim = event.limit*0.01/(0.6991*0.6760)
 		if event.quantileExpected>0.49 and event.quantileExpected<0.51:            
 		    data[event.mh]['exp']=lim
 		
@@ -167,7 +167,7 @@ cmslabel_prelim(c,options.period,11)
 c.Update()
 c.RedrawAxis()
 
-c.SaveAs("atlas_ptVcut.png")
+c.SaveAs("Limits_HPHPHPHL_trigW.png")
 # c.SaveAs(options.output.replace(".root","")+".pdf")
 # c.SaveAs(options.output.replace(".root","")+".C")
 sleep(100)

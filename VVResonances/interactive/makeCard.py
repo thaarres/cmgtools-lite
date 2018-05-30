@@ -39,13 +39,11 @@ for sig in signals:
 
     #QCD
     rootFile="JJ_nonRes_3D_"+p+".root"
-    # card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['altshape:CMS_VV_JJ_nonRes_altshape','altshape2:CMS_VV_JJ_nonRes_altshape2','PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ','TRIG:CMS_VV_JJ_nonRes_TRIG','PTZ2:CMS_VV_JJ_nonRes_PTZ2','OPTZ2:CMS_VV_JJ_nonRes_OPTZ2'],False,0)
     card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['altshape:CMS_VV_JJ_nonRes_altshape','altshape2:CMS_VV_JJ_nonRes_altshape2','PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ','TRIG:CMS_VV_JJ_nonRes_TRIG'],False,0)
-    # card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ','TRIG:CMS_VV_JJ_nonRes_TRIG'],False,0)
     card.addFixedYieldFromFile("nonRes",2,"JJ_nonRes_"+p+".root","nonRes")
 
     #DATA
-    card.importBinnedData("JJ_data_"+p+"_reduced.root","data",["MJ1","MJ2","MJJ"])
+    card.importBinnedData("JJ_data_"+p+".root","data",["MJ1","MJ2","MJJ"])
 
     #SYSTEMATICS
     #luminosity
@@ -80,17 +78,15 @@ for sig in signals:
     card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.33])
     card.addSystematic("CMS_VV_JJ_nonRes_OPTXY","param",[0.0,0.333])
     card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,0.33])
-    # card.addSystematic("CMS_VV_JJ_nonRes_OPTZ2","param",[0.0,1.0])
-    # card.addSystematic("CMS_VV_JJ_nonRes_PTZ2","param",[0.0,1.0])
     card.addSystematic("CMS_VV_JJ_nonRes_TRIG","param",[0.0,0.33])
-    # card.addSystematic("CMS_VV_JJ_nonRes_altshape","param",[0.0,0.33])
-    # card.addSystematic("CMS_VV_JJ_nonRes_altshape2","param",[0.0,0.33])
+    card.addSystematic("CMS_VV_JJ_nonRes_altshape","param",[0.0,0.33])
+    card.addSystematic("CMS_VV_JJ_nonRes_altshape2","param",[0.0,0.33])
     card.makeCard()
 
     #make combined cards
   cmd=cmd + ' >> datacard_'+cat.replace("_HPHP","").replace("_HPLP","")+'.txt '
   print "Combine cards: "
   print cmd
-  cmd='text2workspace.py datacard_JJ_WprimeWZ_HPHP_13TeV.txt -o workspace.root'
+  cmd='text2workspace.py '+'datacard_'+cat+'.txt '+' -o workspace.root'
   print "Text to workspace: "
   print cmd

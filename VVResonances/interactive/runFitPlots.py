@@ -132,7 +132,7 @@ def MakePlots(histos,hdata,axis,nBins):
     zrange = options.zrange
     if options.xrange == '0,-1': xrange = '55,215'
     if options.yrange == '0,-1': yrange = '55,215'
-    if options.zrange == '0,-1': zrange = '1000,5000'
+    if options.zrange == '0,-1': zrange = '838,5000'
     if axis=='z':
      htitle = "Z-Proj. x : "+options.xrange+" y : "+options.yrange
      xtitle = "m_{jj} [GeV]"
@@ -651,10 +651,10 @@ if __name__=="__main__":
      #make projections onto MJ2 axis
      if options.projection =="y": doYprojection(allpdfsy,data,norm_nonres,norm_res)
          
-     if options.projection =="xyz":
+     if options.projection =="xyz": #TODO: THIS DOES NOT WORK PROPERLY! Uses pdfs from previous fit!!
         doZprojection(allpdfsz,data,norm_nonres,norm_res)
-	doXprojection(allpdfsx,data,norm_nonres,norm_res)
-	doYprojection(allpdfsy,data,norm_nonres,norm_res)
+        doXprojection(allpdfsx,data,norm_nonres,norm_res)
+        doYprojection(allpdfsy,data,norm_nonres,norm_res)
      
      #################################################   
      #calculate chi2  

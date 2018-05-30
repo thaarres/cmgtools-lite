@@ -6,7 +6,7 @@ from CMGTools.VVResonances.plotting.CMS_lumi import *
 from CMGTools.VVResonances.plotting.tdrstyle import *
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",default='limitPlot',help="Limit plot")
-parser.add_option("-s","--signal",dest="sig",type=str,help="Signal sample",default='BulkGWW')
+parser.add_option("-s","--signal",dest="sig",type=str,help="Signal sample",default='Wprime')
 parser.add_option("--sigscale",dest="sigscale",type=float,help="maximum y",default=0.001)
 parser.add_option("-x","--minX",dest="minX",type=float,help="minimum x",default=1000.0)
 parser.add_option("-X","--maxX",dest="maxX",type=float,help="maximum x",default=5000.0)
