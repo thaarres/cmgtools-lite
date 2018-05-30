@@ -106,7 +106,7 @@ if useTriggerWeights:
 else:
     minMVV=1000.0
     maxMVV=5000.0
-    minMX=1000.0
+    minMX=1200.0
     maxMX=7000.0
     if dijetBinning:
         binsMVV = 36
