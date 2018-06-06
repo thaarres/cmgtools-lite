@@ -1,7 +1,7 @@
 // Run from command line with
-// root .x 'Projections3DHisto.C("JJ_nonRes_HPHP.root","nonRes","JJ_nonRes_3D_HPHP.root","histo","control-plots-HPHP")' --> HPHP
-// root .x 'Projections3DHisto.C("JJ_nonRes_HPLP.root","nonRes","JJ_nonRes_3D_HPLP.root","histo","control-plots-HPLP")' --> HPLP 
-// root .x 'Projections3DHisto.C("JJ_nonRes_LPLP.root","nonRes","JJ_nonRes_3D_LPLP.root","histo","control-plots-LPLP")' --> LPLP 
+// root .x 'Projections3DHisto.C("JJ_nonRes_HPHP.root","nonRes","JJ_nonRes_3D_HPHP.root","histo","3Dkernels_HPHP")' --> HPHP
+// root .x 'Projections3DHisto.C("JJ_nonRes_HPLP.root","nonRes","JJ_nonRes_3D_HPLP.root","histo","3Dkernels_HPLP")' --> HPLP 
+// root .x 'Projections3DHisto.C("JJ_nonRes_LPLP.root","nonRes","JJ_nonRes_3D_LPLP.root","histo","3Dkernels_LPLP")' --> LPLP 
 void Projections3DHisto(std::string dataFile, std::string hdataName, std::string fitFile, std::string hfitName, std::string outDirName){
 
 std::stringstream ss; ss.str(""); ss << "mkdir " << outDirName << std::endl;

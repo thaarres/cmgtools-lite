@@ -846,7 +846,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_pt_up.Write('histo_nominal_PTUp')
 
                 print "Now OPT"
-		alpha=1.5*1000 #1.5*1000
+		alpha=1.5*800 #1.5*800
 		histogram_opt_up,histogram_opt_down=unequalScale(histo_nominal,"histo_nominal_OPT",alpha,-1)
 		histogram_opt_down.SetName('histo_nominal_OPTDown')
 		histogram_opt_down.SetTitle('histo_nominal_OPTDown')
@@ -868,7 +868,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 
 
                 print "Now logpT + 1/pT"
-		alpha=1.5*1000.
+		alpha=1.5*800.
 		histogram_logptopt_up,histogram_logptopt_down=unequalScale(histo_nominal,"histo_nominal_LOGPTOPT",alpha,-100)
 		histogram_logptopt_down.SetName('histo_nominal_LOGPTOPTDown')
 		histogram_logptopt_down.SetTitle('histo_nominal_LOGPTOPTDown')

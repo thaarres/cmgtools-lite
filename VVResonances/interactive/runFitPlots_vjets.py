@@ -13,9 +13,9 @@ ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
 #python runFitPlots_vjets.py -n workspace.root -l LPLP -i JJ_LPLP.root -p z
 
 parser = optparse.OptionParser()
-parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
+parser.add_option("-o","--output",dest="output",help="Output folder name",default='POSTFIT/')
 parser.add_option("-n","--name",dest="name",help="Input workspace",default='workspace.root')
-parser.add_option("-i","--input",dest="input",help="Input nonRes histo",default='JJ_HPHP.root')
+parser.add_option("-i","--input",dest="input",help="Input nonRes histo",default='JJ_nonRes_LPLP.root')
 parser.add_option("-x","--xrange",dest="xrange",help="set range for x bins in projection",default="0,-1")
 parser.add_option("-y","--yrange",dest="yrange",help="set range for y bins in projection",default="0,-1")
 parser.add_option("-z","--zrange",dest="zrange",help="set range for z bins in projection",default="0,-1")
@@ -239,9 +239,9 @@ def MakePlots(histos,hdata,axis,nBins,errors):
     pt.SetFillColor(0)
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
-    # pt.AddText("Chi2/ndf = %.2f/%i = %.2f"%(chi2[0],chi2[1],chi2[0]/chi2[1]))
+    pt.AddText("#chi^{2}/dof = %.2f/%i = %.2f"%(chi2[0],chi2[1],chi2[0]/chi2[1]))
     # pt.AddText("Prob = %.3f"%ROOT.TMath.Prob(chi2[0],chi2[1]))
-    # pt.Draw()
+    pt.Draw()
 
     pt2 = ROOT.TPaveText(0.18,0.80,0.53,0.93,"NDC")
     pt2.SetTextFont(62)
@@ -285,9 +285,9 @@ def MakePlots(histos,hdata,axis,nBins,errors):
     c.Update()
     c.cd()
     c.SetSelected(c)
-
-    c.SaveAs(options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_')+".png")
-    c.SaveAs(options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_')+".root")
+    outname = options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_').replace(',','').replace(':','_').replace('.','')
+    c.SaveAs(outname+".png")
+    c.SaveAs(outname+".root")
     
     
 def doZprojection(pdfs,data,norm_nonres,norm_res):

@@ -8,6 +8,14 @@ runParallel   = True #Set to true if you want to run all kernels in parallel! Th
 dijetBinning = True
 useTriggerWeights = True
 
+
+HPSF = 0.995
+LPSF = 1.005
+if period == 2017:
+    HPSF = 0.948
+    LPSF = 1.057
+    
+
 addOption = ""
 if useTriggerWeights: 
     addOption = "-t"
@@ -19,7 +27,7 @@ if dijetBinning:
         HCALbinsMVV=" --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5000"
         # HCALbinsMVV=" --binsMVV 1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5000"
     HCALbinsMVVSignal=" --binsMVV 1,3,6,10,16,23,31,40,50,61,74,88,103,119,137,156,176,197,220,244,270,296,325,354,386,419,453,489,526,565,606,649,693,740,788,838,890,944,1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058,5253,5455,5663,5877,6099,6328,6564,6808"
-    
+    HCALbinsMVVSignal = HCALbinsMVV
 else:
     HCALbinsMVV=""
     HCALbinsMVVSignal=""
@@ -70,7 +78,6 @@ cuts['res'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>60&&jj_l1_softDrop_ma
 
 purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP','HPLP']
-purities=['HPLP']
 
 BulkGravWWTemplate="BulkGravToWW_narrow"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_narrow"
@@ -84,7 +91,6 @@ BRWZ=1.*0.001*0.6991*0.676
 dataTemplate="JetHT"
 nonResTemplate="QCD_Pt_" #high stat
 # nonResTemplate="QCD_Pt-" #low stat --> use this for tests
-
 #nonResTemplate="Dijet" #to compare shapes
 
 resTemplate= "JetsToQQ"
@@ -115,7 +121,7 @@ else:
 
 
 cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMVV=minMVV,maxMVV=maxMVV,minMJ=minMJ,maxMJ=maxMJ)
-cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>20&&jj_l2_gen_softDrop_mass>20&&jj_l1_gen_softDrop_mass<300&&jj_l2_gen_softDrop_mass<300&&jj_gen_partialMass>600&&jj_gen_partialMass<6000)'
+cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>20&&jj_l2_gen_softDrop_mass>20&&jj_l1_gen_softDrop_mass<300&&jj_l2_gen_softDrop_mass<300&&jj_gen_partialMass>400)'
 
 cuts['acceptanceMJ']= "(jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMJ=minMJ,maxMJ=maxMJ) 
 
@@ -134,7 +140,7 @@ def makeSignalShapesMVV(filename,template):
  os.system(cmd)
  jsonFile=filename+"_MVV.json"
  print 'Making JSON'
- cmd='vvMakeJSON.py  -o "{jsonFile}" -g "MEAN:pol1,SIGMA:pol2,ALPHA:pol3,N:pol0,SCALESIGMA:pol2,f:pol2" -m {minMVV} -M {maxMVV}  {rootFile}  '.format(jsonFile=jsonFile,rootFile=rootFile,minMVV=minMVV,maxMVV=maxMVV)
+ cmd='vvMakeJSON.py  -o "{jsonFile}" -g "MEAN:pol1,SIGMA:pol2,ALPHA:pol3,N:pol0,SCALESIGMA:pol2,f:pol3" -m {minMVV} -M {maxMVV}  {rootFile}  '.format(jsonFile=jsonFile,rootFile=rootFile,minMVV=minMVV,maxMVV=maxMVV)
  os.system(cmd)
 
 def makeSignalShapesMJ(filename,template,leg):
@@ -163,7 +169,7 @@ def makeSignalShapesMJ(filename,template,leg):
   os.system(cmdjson)
 
 def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP':1.0,'LPLP':1.0}):
- 	 
+ print "using the following scalfactors:" ,sfP
  for p in purities:
   cut = "*".join([cuts[p],cuts['common'],cuts['metfilters'],cuts['acceptance'],str(sfP[p])])
   #Signal yields
@@ -190,9 +196,8 @@ def makeDetectorResponse(name,filename,template,addCut="1",jobName="DetPar"):
 		print "Saving detector resolution to file: " ,resFile
 		bins = "200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,5000"
 		if submitToBatch:
-		        # template += ",QCD_Pt-,QCD_HT"
 			from modules.submitJobs import Make2DDetectorParam,merge2DDetectorParam	
-                        jobList, files = Make2DDetectorParam(resFile,template,cut,samples,jobName,bins)
+			jobList, files = Make2DDetectorParam(resFile,template,cut,samples,jobName,bins)
 			jobList = []
 			files = []
 			merge2DDetectorParam(jobList,files,bins,jobName)
@@ -281,22 +286,22 @@ def mergeKernelJobs():
 				for job in line.split("[")[1].split("]")[0].split(","):
 					files.append(job.replace("'","").replace(" ",""))	
 		from modules.submitJobs import merge1DMVVTemplate
-        # merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
+        merge1DMVVTemplate(jobList,files,"1D"+"_"+p,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
 		
-		jobList = []
-		files   = []
-		with open("tmp2Dl1_%s_joblist.txt"%p,'r') as infile:
-			for line in infile:
-				if line.startswith("job"):
-					for job in line.split("[")[1].split("]")[0].split(","):
-						jobList.append(job.replace("'","").replace(" ",""))
-			if line.startswith("file"):
-				for job in line.split("[")[1].split("]")[0].split(","):
-					files.append(job.replace("'","").replace(" ",""))	
-		
-		from modules.submitJobs import merge2DTemplate
-		merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
-		merge2DTemplate(jobList,files,"2Dl2"+"_"+p,p,"l2",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
+        jobList = []
+        files   = []
+        with open("tmp2Dl1_%s_joblist.txt"%p,'r') as infile:
+            for line in infile:
+                if line.startswith("job"):
+                    for job in line.split("[")[1].split("]")[0].split(","):
+                        jobList.append(job.replace("'","").replace(" ",""))
+            if line.startswith("file"):
+                for job in line.split("[")[1].split("]")[0].split(","):
+                    files.append(job.replace("'","").replace(" ",""))
+
+        from modules.submitJobs import merge2DTemplate
+        merge2DTemplate(jobList,files,"2Dl1"+"_"+p,p,"l1",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
+        merge2DTemplate(jobList,files,"2Dl2"+"_"+p,p,"l2",binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
 
 def mergeBackgroundShapes(name,filename):
 
@@ -340,22 +345,22 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',jobName="nR",fac
 makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
 makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
 makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
-makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
 makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
 makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
 makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
 makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
 makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
 makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
 makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
 makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
 makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
-makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':0.99*0.99,'HPLP':0.99*1.03,'LPLP':1.03*1.03})
+makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
 makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
@@ -367,7 +372,7 @@ makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 # makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
 # ------------------------------
 
-#  Make nonres kernel
+#Make nonres kernel
 if runParallel and submitToBatch:
   wait = False
   makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
@@ -378,9 +383,11 @@ if runParallel and submitToBatch:
   mergeKernelJobs()
 else:
   wait = True
-  # makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+
+if runParallel and submitToBatch: mergeKernelJobs()
 mergeBackgroundShapes("nonRes","JJ")
 
 #  Do QCD normalisation
