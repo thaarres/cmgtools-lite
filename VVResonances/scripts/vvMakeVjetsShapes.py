@@ -94,13 +94,13 @@ for leg in legs:
 
  fitter=Fitter(['x'])
  #fitter.jetResonanceVjets('model','x')
- fitter.gaus('model','x')
+ fitter.jetResonanceNOEXP('model','x')
+ #fitter.gaus('model','x')
 
- if options.fixPars!="1":
+ if options.fixPars!="":
      fixedPars =options.fixPars.split(',')
-     if len(fixedPars) > 1:
-      print "   - Fix parameters: ", fixedPars
-      for par in fixedPars:
+     print "   - Fix parameters: ", fixedPars
+     for par in fixedPars:
        if par=="c_0" or par =="c_1" or par=="c_2": continue
        parVal = par.split(':')
        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
@@ -117,8 +117,8 @@ for leg in legs:
  fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1)])
  #fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
  fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_Res.png")
- #params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}, "alpha":{ "val": fitter.w.var("alpha").getVal(), "err": fitter.w.var("alpha")},"alpha2":{"val": fitter.w.var("alpha2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()},"n2": {"val": fitter.w.var("n2").getVal(), "err": fitter.w.var("n2").getError()}}
- params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}}
+ params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}, "alpha":{ "val": fitter.w.var("alpha").getVal(), "err": fitter.w.var("alpha")},"alpha2":{"val": fitter.w.var("alpha2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()},"n2": {"val": fitter.w.var("n2").getVal(), "err": fitter.w.var("n2").getError()}}
+ #params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}}
 
  #histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)","1",80,options.mini,options.maxi)
  histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<110)","1",25,60,110)
@@ -132,18 +132,19 @@ print 'fitting MJJ: '
 fitter=Fitter(['MVV'])
 fitter.qcd('model','MVV',True)
 
-if options.fixPars!="":
-    fixedPars =options.fixPars.split(',')
-    for par in fixedPars:
-     if len(fixedPars) > 1:
-        if par!="c_0" and par!="c_1" and par!="c_2": continue
-        parVal = par.split(':')
-        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
-        fitter.w.var(parVal[0]).setConstant(1)
+#if options.fixPars!="":
+#    fixedPars =options.fixPars.split(',')
+#    for par in fixedPars:
+#        if par!="c_0" and par!="c_1" and par!="c_2": continue
+#        parVal = par.split(':')
+#        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
+#        fitter.w.var(parVal[0]).setConstant(1)
 
 #histo = plotter.drawTH1("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",36,options.minMVV,options.maxMVV)
+
 binning=getBinning(options.binsMVV,options.minMVV,options.maxMVV,1000)
 roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
+
 histo = plotter.drawTH1Binned("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",binning)
 
 fitter.importBinnedData(histo,['MVV'],'data')
@@ -163,4 +164,3 @@ if options.store!="":
     print NnonRes
     f.write(label+"_ratio_l1 = "+str(NRes[0]/(NRes[0]+NnonRes[0]))+"\n")
     f.write(label+"_ratio_l2 = "+str(NRes[1]/(NRes[1]+NnonRes[1]))+"\n")
-
