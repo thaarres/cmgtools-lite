@@ -81,7 +81,7 @@ for name in samples.keys():
     plotters[-1].addCorrectionFactor('xsec','tree')
     plotters[-1].addCorrectionFactor('genWeight','tree')
     plotters[-1].addCorrectionFactor('puWeight','tree')
-    if options.triggerW: plotters[-1].addCorrectionFactor('triggerWeight','tree')    
+    if options.triggerW: plotters[-1].addCorrectionFactor('triggerWeight','tree')	
 
     corrFactor = options.corrFactorW
     if samples[name].find('Z') != -1:
@@ -98,7 +98,6 @@ for leg in legs:
  tmp_nonres=[]
  fitter=Fitter(['x'])
  fitter.jetResonanceVjets('model','x')
- #fitter.gaus('model','x')
 
  if options.fixPars!="1":
      fixedPars =options.fixPars.split(',')
@@ -137,5 +136,3 @@ if options.store!="":
     f=open(options.store,"w")
     for par in params:
         f.write(str(par)+ " = " +str(params[par])+"\n")
-
-

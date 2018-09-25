@@ -4,14 +4,19 @@ ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
 from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
+period = 2017 #2016
 purities=['HPHP','HPLP']
-signals = ["BulkGWW"]
+purities=['LPLP']
+signals = ["WprimeWZ"]
 
 for sig in signals:
   for p in purities:
 
     cat='_'.join(['JJ',sig,p,'13TeV'])
-    card=DataCardMaker('',p,'13TeV',35900,'JJ',cat)
+    if period == 2016:
+        card=DataCardMaker('',p,'13TeV',35900,'JJ',cat)
+    else:
+        card=DataCardMaker('',p,'13TeV',41367,'JJ',cat)
     cmd=cmd+" "+cat+'=datacard_'+cat+'.txt '
 
     #SIGNAL
@@ -36,11 +41,11 @@ for sig in signals:
 
     #QCD
     rootFile="JJ_nonRes_3D_"+p+".root"
-    card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ'],False,0)    
-    card.addFixedYieldFromFile("nonRes",2,"JJ_"+p+".root","nonRes")
+    card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['altshape:CMS_VV_JJ_nonRes_altshape','altshape2:CMS_VV_JJ_nonRes_altshape2','PTXY:CMS_VV_JJ_nonRes_PTXY','OPTXY:CMS_VV_JJ_nonRes_OPTXY','PTZ:CMS_VV_JJ_nonRes_PTZ','OPTZ:CMS_VV_JJ_nonRes_OPTZ','TRIG:CMS_VV_JJ_nonRes_TRIG'],False,0)
+    card.addFixedYieldFromFile("nonRes",2,"JJ_nonRes_"+p+".root","nonRes")
 
     #DATA
-    card.importBinnedData("JJ_"+p+".root","data",["MJ1","MJ2","MJJ"])
+    card.importBinnedData("JJ_data_"+p+".root","data",["MJ1","MJ2","MJJ"])
 
     #SYSTEMATICS
     #luminosity
@@ -72,12 +77,18 @@ for sig in signals:
     
     #alternative shapes for QCD background
     card.addSystematic("CMS_VV_JJ_nonRes_PTXY","param",[0.0,0.333])
-    card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.333])
+    card.addSystematic("CMS_VV_JJ_nonRes_PTZ","param",[0.0,0.33])
     card.addSystematic("CMS_VV_JJ_nonRes_OPTXY","param",[0.0,0.333])
-    card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,0.333])
-
+    card.addSystematic("CMS_VV_JJ_nonRes_OPTZ","param",[0.0,0.33])
+    card.addSystematic("CMS_VV_JJ_nonRes_TRIG","param",[0.0,0.33])
+    card.addSystematic("CMS_VV_JJ_nonRes_altshape","param",[0.0,0.33])
+    card.addSystematic("CMS_VV_JJ_nonRes_altshape2","param",[0.0,0.33])
     card.makeCard()
 
     #make combined cards
-    cmd=cmd + ' >> datacard_'+cat.replace("_HPHP","").replace("_HPLP","")+'.txt '
-    print cmd
+  cmd=cmd + ' >> datacard_'+cat.replace("_HPHP","").replace("_HPLP","")+'.txt '
+  print "Combine cards: "
+  print cmd
+  cmd='text2workspace.py '+'datacard_'+cat+'.txt '+' -o workspace.root'
+  print "Text to workspace: "
+  print cmd
