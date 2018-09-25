@@ -378,7 +378,7 @@ class Fitter(object):
         peak = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
         getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name))
 
-     def jetResonanceVjets(self,name = 'model',poi='x'):
+    def jetResonanceVjets(self,name = 'model',poi='x'):
         ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
         self.w.factory("mean[80,50,150]")
         self.w.factory("sigma[15,3,30]")

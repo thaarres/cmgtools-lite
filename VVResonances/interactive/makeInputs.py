@@ -1,7 +1,7 @@
 import ROOT
 import os,sys
 
-period = 2017 #2016
+period = 2016 #2016
 
 submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
@@ -372,12 +372,12 @@ makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':H
 makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
 
-# ------ do not use these ------
-# makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
-# makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
-# makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
-# makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
-# ------------------------------
+#------ do not use these ------
+#makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
+#makeBackgroundShapesMJKernel("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
+#makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'])
+#makeBackgroundShapesMJSpline("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'])
+#------------------------------
 
 #Make nonres kernel
 if runParallel and submitToBatch:
@@ -401,16 +401,16 @@ mergeBackgroundShapes("nonRes","JJ")
 #  Do QCD normalisation
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
 
-# Do Vjets
+## Do Vjets
 submitToBatch = False #Do not need batch for the following
 if period == 2017:
     fitVJets("JJ_VJets",resTemplate,0.3425,0.3425)
     makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,"*(jj_l1_softDrop_mass>60&&jj_l1_softDrop_mass<120)&&(jj_l2_softDrop_mass>60&&jj_l2_softDrop_mass<120)","1D",0,0.3425,0.3425)
     makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.3425,WJetsToQQ:0.3425")
 else:
-    fitVJets("JJ_VJets",resTemplate,1,41.34/581.8)
-    makeBackgroundShapesMVVKernel("VJets","JJ",VJetsTemplate17,"*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)&&(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1D",0)
-    makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
+    #fitVJets("JJ_VJets",resTemplate,1,41.34/581.8)
+    makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,"*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)&&(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1D",0)
+    #makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
 
 
 # Do data
