@@ -73,7 +73,7 @@ def mirror(histo,histoNominal,name):
         newHisto.SetBinContent(i,histoNominal.GetBinContent(i)*nominal/up)
     return newHisto      
 	
-def smoothTail1D(proj):
+def smoothTail1D(proj,period):
     if proj.Integral() == 0:
         print "histogram has zero integral "+proj.GetName()
         return 0
@@ -82,6 +82,10 @@ def smoothTail1D(proj):
     
     
     beginFitX = 2500#1500
+    endX = 3500
+    if period == "2016":
+        beginFitX=1400
+        endX = 2100
     expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000)
     expo.SetParameters(0,16.,2.)
     expo.SetParLimits(2,1.,20.)
@@ -92,7 +96,7 @@ def smoothTail1D(proj):
         x=proj.GetXaxis().GetBinCenter(j)
         if x>beginFitX:
             if beginsmooth==False:
-                if x< 3500: #2100:
+                if x< endX:
                    if abs(proj.GetBinContent(j) - expo.Eval(x)) < 0.00009:
                     print beginFitX
                     print "begin smoothing at " +str(x)
@@ -108,6 +112,9 @@ weights_ = options.weights.split(',')
 random=ROOT.TRandom3(101082)
 
 sampleTypes=options.samples.split(',')
+period = "2016"
+if options.samples.find("HT800")!=-1:
+    period = "2017"
 
 print "Creating datasets for samples: " ,sampleTypes
 dataPlotters=[]
@@ -266,20 +273,28 @@ print " ********** ALL DONE, now save in output file ", options.output
 f=ROOT.TFile(options.output,"RECREATE")
 f.cd()
 finalHistograms={}
-if (options.output).find("VJets")!=-1 and len(histograms)>=6:
-    histograms[0].Add(histograms[1])
-    histograms[0].Add(histograms[2])
-    histograms[3].Add(histograms[4])
-    histograms[3].Add(histograms[5])
-    print "add the histograms for W+jets, Z+jets and ttbar before smoothing the tails"
 for hist in histograms:
+    finalHistograms[hist.GetName()]=hist
+
+if (options.output).find("VJets")!=-1:
+    if "histo_altshapeUp" in finalHistograms.keys():    
+        finalHistograms["histo_nominal"].Add(finalHistograms["histo_altshapeUp"])
+    if "histo_altshape2" in finalHistograms.keys():    
+        finalHistograms["histo_nominal"].Add(finalHistograms["histo_altshape2"])
+        
+    if "mvv_altshapeUp" in finalHistograms.keys():    
+        finalHistograms["mvv_nominal"].Add(finalHistograms["mvv_altshapeUp"])
+    if "mvv_altshape2" in finalHistograms.keys():    
+        finalHistograms["mvv_nominal"].Add(finalHistograms["mvv_altshape2"])
+    print "add the histograms for W+jets, Z+jets and ttbar before smoothing the tails"
+for hist in finalHistograms.itervalues():
  # hist.Write(hist.GetName()+"_raw")
- if (options.output).find("VJets")!=-1 and hist.GetName()!="mvv_nominal":
+ if (options.output).find("VJets")!=-1 and hist.GetName()=="histo_nominal":
      print "smooth tails of 1D histogram for vjets background"
      if hist.Integral() > 0:
-        smoothTail1D(hist)
+        smoothTail1D(hist,period)
  hist.Write(hist.GetName())
- finalHistograms[hist.GetName()]=hist
+ 
 
 
 alpha=1.5/5000

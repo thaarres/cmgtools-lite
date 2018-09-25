@@ -1,7 +1,7 @@
 import ROOT
 import os,sys
 
-period = 2016 #2016
+period = 2017 #2016
 
 submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
@@ -234,7 +234,7 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
   os.system(cmd)
 
 
-def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DMVV",wait=True):
+def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DMVV",wait=True,corrFactorW=1,corrFactorZ=1):
  pwd = os.getcwd()
  for p in purities:
   jobname = jobName+"_"+p
@@ -254,7 +254,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DM
     jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobname,wait,HCALbinsMVV,addOption)
     if wait: merge1DMVVTemplate(jobList,files,jobname,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
   else:
-    cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {addOption} samples'.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,addOption=addOption)
+    cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {addOption} samples --corrFactorW {corrFactorW} --corrFactorZ {corrFactorZ} '.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,addOption=addOption,corrFactorW=corrFactorW,corrFactorZ=corrFactorZ)
     cmd = cmd+HCALbinsMVV
     os.system(cmd)	  
 
@@ -401,16 +401,16 @@ mergeBackgroundShapes("nonRes","JJ")
 #  Do QCD normalisation
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
 
-## Do Vjets
+# Do Vjets
 submitToBatch = False #Do not need batch for the following
 if period == 2017:
     fitVJets("JJ_VJets",resTemplate,0.3425,0.3425)
-    makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,"*(jj_l1_softDrop_mass>60&&jj_l1_softDrop_mass<120)&&(jj_l2_softDrop_mass>60&&jj_l2_softDrop_mass<120)","1D",0,0.3425,0.3425)
+    makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,cuts['res'],"1D",0,0.3425,0.3425)
     makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.3425,WJetsToQQ:0.3425")
 else:
-    #fitVJets("JJ_VJets",resTemplate,1,41.34/581.8)
-    makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,"*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)&&(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1D",0)
-    #makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
+    fitVJets("JJ_VJets",resTemplate,1,41.34/581.8)
+    makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,cuts['res'],"1D",0)
+    makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
 
 
 # Do data
