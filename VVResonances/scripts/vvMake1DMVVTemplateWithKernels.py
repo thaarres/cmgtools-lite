@@ -11,6 +11,8 @@ setTDRStyle()
 from CMGTools.VVResonances.plotting.TreePlotter import TreePlotter
 from CMGTools.VVResonances.plotting.MergedPlotter import MergedPlotter
 ROOT.gSystem.Load("libCMGToolsVVResonances")
+ROOT.gStyle.SetOptStat(0)
+ROOT.gStyle.SetOptFit(0)
 
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",help="Output",default='')
@@ -28,6 +30,9 @@ parser.add_option("-e","--firstEv",dest="firstEv",type=int,help="first event",de
 parser.add_option("-E","--lastEv",dest="lastEv",type=int,help="last event",default=-1)
 parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
 parser.add_option("-t","--triggerweight",dest="triggerW",action="store_true",help="Use trigger weights",default=False)
+parser.add_option("--corrFactorW",dest="corrFactorW",type=float,help="add correction factor xsec",default=1.)
+parser.add_option("--corrFactorZ",dest="corrFactorZ",type=float,help="add correction factor xsec",default=41.34/581.8)
+
 
 (options,args) = parser.parse_args()
 
@@ -68,16 +73,20 @@ def mirror(histo,histoNominal,name):
         newHisto.SetBinContent(i,histoNominal.GetBinContent(i)*nominal/up)
     return newHisto      
 	
-def smoothTail1D(proj):
+def smoothTail1D(proj,period):
     if proj.Integral() == 0:
         print "histogram has zero integral "+proj.GetName()
         return 0
-    scale = proj.Integral() 
+    scale = proj.Integral()
     proj.Scale(1.0/scale)
     
     
-    beginFitX = 2100
-    expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000) 
+    beginFitX = 2500#1500
+    endX = 3500
+    if period == "2016":
+        beginFitX=1400
+        endX = 2100
+    expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000)
     expo.SetParameters(0,16.,2.)
     expo.SetParLimits(2,1.,20.)
     proj.Fit(expo,"LLMR","",beginFitX,8000)
@@ -87,13 +96,15 @@ def smoothTail1D(proj):
         x=proj.GetXaxis().GetBinCenter(j)
         if x>beginFitX:
             if beginsmooth==False:
-               if x<3000: 
+                if x< endX:
                    if abs(proj.GetBinContent(j) - expo.Eval(x)) < 0.00009:
-                    beginsmooth = True 
-               if abs(proj.GetBinContent(j) - expo.Eval(x)) < 0.00001:
-                   beginsmooth = True 
+                    print beginFitX
+                    print "begin smoothing at " +str(x)
+                    beginsmooth = True
+                else: beginsmooth = True
             if beginsmooth:
                 proj.SetBinContent(j,expo.Eval(x))
+    proj.Scale(scale)
     return 1
 
 weights_ = options.weights.split(',')
@@ -101,6 +112,9 @@ weights_ = options.weights.split(',')
 random=ROOT.TRandom3(101082)
 
 sampleTypes=options.samples.split(',')
+period = "2016"
+if options.samples.find("HT800")!=-1:
+    period = "2017"
 
 print "Creating datasets for samples: " ,sampleTypes
 dataPlotters=[]
@@ -118,11 +132,20 @@ for filename in os.listdir(args[0]):
             dataPlotters[-1].addCorrectionFactor('xsec','tree')
             dataPlotters[-1].addCorrectionFactor('genWeight','tree')
             dataPlotters[-1].addCorrectionFactor('puWeight','tree')
-            if options.triggerW: 
+            if options.triggerW:
               dataPlotters[-1].addCorrectionFactor('triggerWeight','tree')
               print "Using trigger weights from tree"
             for w in weights_:
-              if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
+	     if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
+	    corrFactor = 1
+            if filename.find('Z') != -1:
+                corrFactor = options.corrFactorZ
+                print "add correction factor for Z+jets sample"
+            if filename.find('W') != -1:
+                corrFactor = options.corrFactorW
+                print "add correction factor for W+jets sample"
+            dataPlotters[-1].addCorrectionFactor(corrFactor,'flat') 
+
             dataPlotters[-1].filename=fname
             dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
             dataPlottersNW[-1].addCorrectionFactor('puWeight','tree')
@@ -130,6 +153,8 @@ for filename in os.listdir(args[0]):
             if options.triggerW: dataPlottersNW[-1].addCorrectionFactor('triggerWeight','tree')
             for w in weights_: 
              if w != '': dataPlottersNW[-1].addCorrectionFactor(w,'branch')
+             if options.triggerW: dataPlottersNW[-1].addCorrectionFactor('triggerWeight','tree')
+            dataPlottersNW[-1].addCorrectionFactor(corrFactor,'flat')
             dataPlottersNW[-1].filename=fname
 	    
 data=MergedPlotter(dataPlotters)
@@ -249,85 +274,103 @@ f=ROOT.TFile(options.output,"RECREATE")
 f.cd()
 finalHistograms={}
 for hist in histograms:
+    finalHistograms[hist.GetName()]=hist
+
+if (options.output).find("VJets")!=-1:
+    if "histo_altshapeUp" in finalHistograms.keys():    
+        finalHistograms["histo_nominal"].Add(finalHistograms["histo_altshapeUp"])
+    if "histo_altshape2" in finalHistograms.keys():    
+        finalHistograms["histo_nominal"].Add(finalHistograms["histo_altshape2"])
+        
+    if "mvv_altshapeUp" in finalHistograms.keys():    
+        finalHistograms["mvv_nominal"].Add(finalHistograms["mvv_altshapeUp"])
+    if "mvv_altshape2" in finalHistograms.keys():    
+        finalHistograms["mvv_nominal"].Add(finalHistograms["mvv_altshape2"])
+    print "add the histograms for W+jets, Z+jets and ttbar before smoothing the tails"
+for hist in finalHistograms.itervalues():
  # hist.Write(hist.GetName()+"_raw")
- if (options.output).find("VJets")!=-1 and hist.GetName()!="mvv_nominal":
+ if (options.output).find("VJets")!=-1 and hist.GetName()=="histo_nominal":
      print "smooth tails of 1D histogram for vjets background"
      if hist.Integral() > 0:
-        smoothTail1D(hist)
+        smoothTail1D(hist,period)
  hist.Write(hist.GetName())
- finalHistograms[hist.GetName()]=hist
+ 
 
- #################################
-c = ROOT.TCanvas("c","C",400,400)
-finalHistograms["histo_nominal"].Draw("hist")
-data = finalHistograms["mvv_nominal"]
-data.Scale(1./data.Integral())
-data.SetMarkerColor(ROOT.kBlack)
-data.Draw("same")
-c.SetLogy()
-c.SaveAs("debug_Vjets_mVV_kernels.png")
-print "for debugging save   debug_Vjets_mVV_kernels.png "
-########################################################
-
-#histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
-#histogram_altshapeDown.Write()
 
 alpha=1.5/5000
 histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT",alpha)
-if (options.output).find("VJets")!=-1:
-     print "smooth tails of 1D histogram for vjets background"
-     smoothTail1D(histogram_pt_down)
-     smoothTail1D(histogram_pt_up)
 histogram_pt_down.Write()
 histogram_pt_up.Write()
 
 alpha=1.5*800.
 histogram_opt_down,histogram_opt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT",alpha,-1)
-if (options.output).find("VJets")!=-1:
-     print "smooth tails of 1D histogram for vjets background"
-     smoothTail1D(histogram_opt_down)
-     smoothTail1D(histogram_opt_up)
 histogram_opt_down.Write()
 histogram_opt_up.Write()
 
 alpha=5000.*5000.
 histogram_pt2_down,histogram_pt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT2",alpha,2)
-if (options.output).find("VJets")!=-1:
-     print "smooth tails of 1D histogram for vjets background"
-     smoothTail1D(histogram_pt2_down)
-     smoothTail1D(histogram_pt2_up)
 histogram_pt2_down.Write()
 histogram_pt2_up.Write()
 
 alpha=800.*800.
 histogram_opt2_down,histogram_opt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT2",alpha,-2)
-if (options.output).find("VJets")!=-1:
-     print "smooth tails of 1D histogram for vjets background"
-     smoothTail1D(histogram_opt2_down)
-     smoothTail1D(histogram_opt2_up)
 histogram_opt2_down.Write()
 histogram_opt2_up.Write() 
 
+
+################################# make controll plot only in case of Vjets backgrounds
+if options.output.find("VJets")!=-1:
+    c = ROOT.TCanvas("c","C",600,400)
+    c.SetRightMargin(0.11)
+    c.SetTopMargin(0.11)
+    finalHistograms["histo_nominal"].SetLineColor(ROOT.kBlue)
+    finalHistograms["histo_nominal"].GetYaxis().SetTitle("arbitrary scale")
+    finalHistograms["histo_nominal"].GetXaxis().SetTitle("dijet mass")
+    sf = finalHistograms["histo_nominal"].Integral()
+    histogram_pt_up     .Scale(sf/histogram_pt_up.Integral())
+    histogram_pt_down   .Scale(sf/histogram_pt_down.Integral())
+    histogram_opt_up    .Scale(sf/histogram_opt_up.Integral())
+    histogram_opt_down  .Scale(sf/histogram_opt_down.Integral())
+    finalHistograms["histo_nominal"].Draw("hist")
+    #stack.Draw("histsame")
+    histogram_pt_up.SetLineColor(ROOT.kRed)
+    histogram_pt_up.SetLineWidth(2)
+    histogram_pt_up.Draw("histsame")
+    histogram_pt_down.SetLineColor(ROOT.kRed)
+    histogram_pt_down.SetLineWidth(2)
+    histogram_pt_down.Draw("histsame")
+    histogram_opt_up.SetLineColor(ROOT.kGreen)
+    histogram_opt_up.SetLineWidth(2)
+    histogram_opt_up.Draw("histsame")
+    histogram_opt_down.SetLineColor(ROOT.kGreen)
+    histogram_opt_down.SetLineWidth(2)
+    histogram_opt_down.Draw("histsame")
+    text = ROOT.TLatex()
+    text.DrawLatexNDC(0.13,0.92,"#font[62]{CMS} #font[52]{Simulation}")
+    data = finalHistograms["mvv_nominal"]
+    data.Scale(sf/data.Integral())
+    data.SetMarkerColor(ROOT.kBlack)
+    data.SetMarkerStyle(7)
+    data.Draw("same")
+    c.SetLogy()
+
+
+    l = ROOT.TLegend(0.17,0.2,0.6,0.33)
+    l.AddEntry(data,"simulation","lp")
+    l.AddEntry(finalHistograms["histo_nominal"],"template","l")
+    l.AddEntry(histogram_pt_up,"#propto m_{jj}","l")
+    l.AddEntry(histogram_opt_up,"#propto 1/m_{jj}","l")
+    l.Draw("same")
+
+    tmplabel="HPHP"
+    if options.output.find('HPLP')!=-1:
+        tmplabel="HPLP"
+    c.SaveAs("debug_Vjets_mVV_kernels"+tmplabel+".pdf")
+    print "for debugging save  "+"debug_Vjets_mVV_kernels"+tmplabel+".pdf"
+########################################################
+
+
 f.Close()
 
-'''
-histograms.append(histogram_altshapeDown)
-print "Drawing debugging plot ", "debug_"+options.output.replace(".root",".png") 
-canv = ROOT.TCanvas("c1","c1",800,600)
-leg = ROOT.TLegend(0.55010112,0.7183362,0.70202143,0.919833)
-canv.cd()
-for i,hist in enumerate(histograms):
- hist.SetLineWidth(3)
- hist.Rebin(2)
- hist.GetXaxis().SetTitle("Mass (GeV)")
- hist.GetXaxis().SetNdivisions(9,1,0)
- hist.GetYaxis().SetNdivisions(9,1,0)
- hist.GetYaxis().SetTitle("A.U")
- hist.GetXaxis().SetRangeUser(options.minx,options.maxx)
- hist.SetLineColor((i+1)*2)
- hist.DrawNormalized("HISTsame")
- leg.AddEntry(hist,hist.GetName(),"L")
-leg.Draw("same")
-canv.SaveAs("debug_"+options.output.replace(".root",".png") )
-'''
+
 
