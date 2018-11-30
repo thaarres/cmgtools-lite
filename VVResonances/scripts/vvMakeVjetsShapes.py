@@ -19,8 +19,8 @@ parser.add_option("-o","--output",dest="output",help="Output JSON",default='')
 parser.add_option("-m","--min",dest="mini",type=float,help="min MJJ",default=40)
 parser.add_option("-M","--max",dest="maxi",type=float,help="max MJJ",default=160)
 parser.add_option("--store",dest="store",type=str,help="store fitted parameters in this file",default="")
-parser.add_option("--corrFactorW",dest="corrFactorW",type=float,help="add correction factor xsec",default=1.)
-parser.add_option("--corrFactorZ",dest="corrFactorZ",type=float,help="add correction factor xsec",default=41.34/581.8)
+parser.add_option("--corrFactorW",dest="corrFactorW",type=float,help="add correction factor xsec",default=0.205066345)
+parser.add_option("--corrFactorZ",dest="corrFactorZ",type=float,help="add correction factor xsec",default=0.09811023622)
 parser.add_option("-f","--fix",dest="fixPars",help="Fixed parameters",default="1")
 parser.add_option("--minMVV","--minMVV",dest="minMVV",type=float,help="mVV variable",default=1)
 parser.add_option("--maxMVV","--maxMVV",dest="maxMVV",type=float, help="mVV variable",default=1)
@@ -50,22 +50,22 @@ for words in t:
     el+=words+"_"
 label = el
 
-
+sampleTypes=options.sample.split(',')
 for filename in os.listdir(args[0]):
-    if not (filename.find(options.sample)!=-1):
-        continue
+   for sampleType in sampleTypes:
+     if filename.find(sampleType) ==-1:continue
 
-    fnameParts=filename.split('.')
-    fname=fnameParts[0]
-    ext=fnameParts[1]
-    if ext.find("root") ==-1:
-        continue
-    
-    name = fname.split('_')[0]
-    
-    samples[name] = fname
-
-    print 'found',filename
+     fnameParts=filename.split('.')
+     fname=fnameParts[0]
+     ext=fnameParts[1]
+     if ext.find("root") ==-1:
+         continue
+     
+     name = fname.split('_')[0]
+     
+     samples[name] = fname
+     
+     print 'found',filename
 
 sigmas=[]
 params={}
@@ -82,7 +82,8 @@ for name in samples.keys():
     plotters[-1].addCorrectionFactor('puWeight','tree')
     if options.triggerW: plotters[-1].addCorrectionFactor('triggerWeight','tree')	
 
-    corrFactor = options.corrFactorW
+    corrFactor = 1.
+    if samples[name].find('W') != -1: corrFactor = options.corrFactorW
     if samples[name].find('Z') != -1: corrFactor = options.corrFactorZ
     plotters[-1].addCorrectionFactor(corrFactor,'flat')
     
@@ -93,21 +94,24 @@ print 'Fitting Mjet:'
 for leg in legs:
 
  fitter=Fitter(['x'])
- fitter.jetResonanceVjets('model','x')
- # fitter.gaus('model','x')
+ #fitter.jetResonanceVjets('model','x')
+ fitter.jetResonanceNOEXP('model','x')
+ #fitter.gaus('model','x')
 
- if options.fixPars!="1":
+ if options.fixPars!="":
      fixedPars =options.fixPars.split(',')
-     if len(fixedPars) > 1:
-      print "   - Fix parameters: ", fixedPars
-      for par in fixedPars:
+     print "   - Fix parameters: ", fixedPars
+     for par in fixedPars:
        if par=="c_0" or par =="c_1" or par=="c_2": continue
        parVal = par.split(':')
        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
-       fitter.w.var(parVal[0]).setConstant(1)
-
+       fitter.w.var(parVal[0]).setConstant(1) 
+ if options.output.find("TT")!=-1:
+   fitter.w.var("mean").setVal(float(170.))
+   fitter.w.var("sigma").setVal(float(16.))
  #histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",80,options.mini,options.maxi)
- histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<110)","1",25,60,110)
+ if options.output.find("TT")!=-1: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>140&&jj_"+leg+"_softDrop_mass<200)","1",30,140,200)
+ else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<120)","1",30,60,120)
  if leg.find("l1")!=-1:
      NRes[0] += histo.Integral()
  else:
@@ -117,11 +121,12 @@ for leg in legs:
  fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1)])
  #fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
  fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_Res.png")
- #params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}, "alpha":{ "val": fitter.w.var("alpha").getVal(), "err": fitter.w.var("alpha")},"alpha2":{"val": fitter.w.var("alpha2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()},"n2": {"val": fitter.w.var("n2").getVal(), "err": fitter.w.var("n2").getError()}}
- params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}}
+ params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}, "alpha":{ "val": fitter.w.var("alpha").getVal(), "err": fitter.w.var("alpha")},"alpha2":{"val": fitter.w.var("alpha2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()},"n2": {"val": fitter.w.var("n2").getVal(), "err": fitter.w.var("n2").getError()}}
+ #params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}}
 
  #histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)","1",80,options.mini,options.maxi)
- histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<110)","1",25,60,110)
+ if options.output.find("TT")!=-1: plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>140&&jj_"+leg+"_softDrop_mass<200)","1",30,140,200)
+ else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<120)","1",30,60,120)
  if leg.find("l1")!=-1:
      NnonRes[0] += histo.Integral()
  else:
@@ -132,18 +137,19 @@ print 'fitting MJJ: '
 fitter=Fitter(['MVV'])
 fitter.qcd('model','MVV',True)
 
-if options.fixPars!="":
-    fixedPars =options.fixPars.split(',')
-    for par in fixedPars:
-     if len(fixedPars) > 1:
-        if par!="c_0" and par!="c_1" and par!="c_2": continue
-        parVal = par.split(':')
-        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
-        fitter.w.var(parVal[0]).setConstant(1)
+#if options.fixPars!="":
+#    fixedPars =options.fixPars.split(',')
+#    for par in fixedPars:
+#        if par!="c_0" and par!="c_1" and par!="c_2": continue
+#        parVal = par.split(':')
+#        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
+#        fitter.w.var(parVal[0]).setConstant(1)
 
 #histo = plotter.drawTH1("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",36,options.minMVV,options.maxMVV)
+
 binning=getBinning(options.binsMVV,options.minMVV,options.maxMVV,1000)
 roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
+
 histo = plotter.drawTH1Binned("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",binning)
 
 fitter.importBinnedData(histo,['MVV'],'data')
