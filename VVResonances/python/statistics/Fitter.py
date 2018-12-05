@@ -2,10 +2,11 @@ import ROOT
 import json
 from numpy import random
 from array import array
+import sys,commands
 
 class Fitter(object):
     def __init__(self,poi = ['x']):
-        self.cache=ROOT.TFile("cache%i.root"%(random.randint(0, 1e+6)),"RECREATE")
+        self.cache=ROOT.TFile("/tmp/%s/cache%i.root"%(commands.getoutput("whoami"),random.randint(0, 1e+6)),"RECREATE")
         self.cache.cd()
 
         self.w=ROOT.RooWorkspace("w","w")
@@ -475,19 +476,21 @@ class Fitter(object):
 
 
 
-    def signalResonance(self,name = 'model',poi="MVV",singleSided=False):
+    def signalResonance(self,name = 'model',poi="MVV",mass=0,singleSided=False):
         ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
         self.w.factory("MH[1000]")
-        self.w.factory("MEAN[400,13000]")
-        self.w.factory("SIGMA[1,5000]")
-        self.w.factory("ALPHA1[1,0.5,3]")
-        self.w.factory("N1[5]")
+        #self.w.factory("MEAN[400,13000]")
+        self.w.factory("MEAN[%.1f,%.1f,%.1f]"%(mass,0.8*mass,1.2*mass))
+        #self.w.factory("SIGMA[1,5000]")
+        self.w.factory("SIGMA[%.1f,%.1f,%.1f]"%(mass*0.05,mass*0.02,mass*0.10))
+        self.w.factory("ALPHA1[1.2,0.0,1.8]")
+        self.w.factory("N1[5,0,10]")
         if singleSided:
             self.w.factory("ALPHA2[1000000.0]")
             self.w.factory("N2[0]")
         else:
-            self.w.factory("ALPHA2[1,0.5,3]")
-            self.w.factory("N2[5]")
+            self.w.factory("ALPHA2[1.2,0.0,1.8]")
+            self.w.factory("N2[5,0,10]")
         peak_vv = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('MEAN'),self.w.function('SIGMA'),self.w.var('ALPHA1'),self.w.var('N1'),self.w.var('ALPHA2'),self.w.var('N2'))
         getattr(self.w,'import')(peak_vv,ROOT.RooFit.Rename(name))
 
@@ -497,14 +500,14 @@ class Fitter(object):
         self.w.factory("MH[1000]")
         self.w.factory("MEAN[%.1f,%.1f,%.1f]"%(mass,0.8*mass,1.2*mass))
 	self.w.factory("SIGMA[%.1f,%.1f,%.1f]"%(mass*0.05,mass*0.02,mass*0.10))
-	self.w.factory("SCALESIGMA[2.0,1.2,3.]")
+	self.w.factory("SCALESIGMA[2.0,1.2,3.6]")
 	gsigma = ROOT.RooFormulaVar("gsigma","gsigma","@0*@1", ROOT.RooArgList(self.w.var('SIGMA'),self.w.var('SCALESIGMA')))
 	getattr(self.w,'import')(gsigma,ROOT.RooFit.Rename('gsigma'))
         self.w.factory("ALPHA[0.85,0.60,1.20]")
         self.w.factory("N[6,0.1,150]") #From @dani: N=126 from thea 126.9
 	self.w.factory("Gaussian::signalResonanceGaus(%s,MEAN,gsigma)"%poi)
 	self.w.factory("CBShape::signalResonanceCB(%s,MEAN,SIGMA,ALPHA,N)"%poi)
-	self.w.factory('SUM::'+name+'(f[0.00,0.00,0.85]*signalResonanceGaus,signalResonanceCB)')
+	self.w.factory('SUM::'+name+'(f[0.0,0.0,0.850]*signalResonanceGaus,signalResonanceCB)')
     
     def signal2D(self,name,poi):
         ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
@@ -1002,66 +1005,66 @@ class Fitter(object):
 	    
         self.frame=self.w.var(poi).frame()
 	
-	print "Prining workspace: "
-	self.w.Print()
+        print "Prining workspace: "
+        self.w.Print()
 	
-	try:
+        try:
                 f = ROOT.TFile.Open("fitresults.root",'READ')
                 fr = f.Get('fitresult_model_data')
                 
-	except:
+        except:
                 fr = 0
                 print "No fit result found (fitresults.root), plotting model only"
 	
         if binning:
-	 self.w.data(data).plotOn(self.frame,ROOT.RooFit.Binning(binning))
-         if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning),ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
-	 else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
-	else: 
-	 self.w.data(data).plotOn(self.frame)
-	 if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
-         else: self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+          self.w.data(data).plotOn(self.frame,ROOT.RooFit.Binning(binning))
+          # if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning),ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
+          # else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+          self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))
+        else: 
+          self.w.data(data).plotOn(self.frame)
+          self.w.pdf(model).plotOn(self.frame)
+          # if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
+            # else: self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
 
         self.legend = self.getLegend()
-	self.legend.AddEntry( self.w.pdf(model)," Full PDF","l")
-	
-	self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "signalResonanceGaus" ),ROOT.RooFit.Components("signalResonanceGaus"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kRed))#  ,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
-	if self.frame.findObject( "signalResonanceGaus"):self.legend.AddEntry( self.frame.findObject( "signalResonanceGaus" ),"Gaussian","l")
-	else: print "No model Gaussian in WS"
-	
-	self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "signalResonanceCB" ),ROOT.RooFit.Components("signalResonanceCB"  ),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kGreen))#,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
-	if self.frame.findObject( "signalResonanceCB"):self.legend.AddEntry( self.frame.findObject( "signalResonanceCB" ),"CB comp.","l")
-	else: print "No model CB in WS"
-	
-	self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "modelS" ),ROOT.RooFit.Components("modelS"  ),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kRed))#,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
-	if self.frame.findObject( "modelS"):self.legend.AddEntry( self.frame.findObject( "modelS" ),"Signal comp.","l")
-	else: print "No modelS in WS"
-	
-	self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "modelB" ),ROOT.RooFit.Components("modelB"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kGreen))#,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
-	if self.frame.findObject( "modelB"):self.legend.AddEntry( self.frame.findObject( "modelB" ),"BG comp.","l")
-	else: print "No modelB in WS"
-	
-	self.w.pdf(model).plotOn(self.frame)
+        self.legend.AddEntry( self.w.pdf(model)," Full PDF","l")
+        
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "signalResonanceGaus" ),ROOT.RooFit.Components("signalResonanceGaus"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kRed))#  ,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
+        if self.frame.findObject( "signalResonanceGaus"):self.legend.AddEntry( self.frame.findObject( "signalResonanceGaus" ),"Gaussian","l")
+        else: print "No model Gaussian in WS"
+        
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "signalResonanceCB" ),ROOT.RooFit.Components("signalResonanceCB"  ),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kGreen))#,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
+        if self.frame.findObject( "signalResonanceCB"):self.legend.AddEntry( self.frame.findObject( "signalResonanceCB" ),"CB comp.","l")
+        else: print "No model CB in WS"
+        
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "modelS" ),ROOT.RooFit.Components("modelS"  ),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kRed))#,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
+        if self.frame.findObject( "modelS"):self.legend.AddEntry( self.frame.findObject( "modelS" ),"Signal comp.","l")
+        else: print "No modelS in WS"
+        
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "modelB" ),ROOT.RooFit.Components("modelB"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kGreen))#,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
+        if self.frame.findObject( "modelB"):self.legend.AddEntry( self.frame.findObject( "modelB" ),"BG comp.","l")
+        else: print "No modelB in WS"
+        
+        self.w.pdf(model).plotOn(self.frame)
         self.c=ROOT.TCanvas("c","c")
-	if logy:
-	 self.frame.SetMinimum(0.00001)
-	 self.frame.SetMaximum(1.0)
-	 self.c.SetLogy()
+        if logy:
+          self.frame.SetMinimum(0.00001)
+          self.frame.SetMaximum(1.0)
+          self.c.SetLogy()
         self.c.cd()
         self.frame.Draw()
         self.frame.GetYaxis().SetTitle('')
         self.frame.GetXaxis().SetTitle(xtitle)
         self.frame.SetTitle('')
         self.c.Draw()
-                        
-        
-       
+
         self.legend.Draw("same")	    
         self.c.SaveAs(filename)
         pullDist = self.frame.pullHist()
         return self.frame.chiSquare()
-
-
+        
+        
     def projectionCond(self,model = "model",data="data",poi="y",otherpoi="x",filename="fit.root"):
         
         self.frame=self.w.var(poi).frame()

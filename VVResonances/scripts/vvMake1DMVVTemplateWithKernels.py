@@ -72,8 +72,9 @@ def mirror(histo,histoNominal,name):
         nominal=histoNominal.GetBinContent(i)/intNominal
         newHisto.SetBinContent(i,histoNominal.GetBinContent(i)*nominal/up)
     return newHisto      
-	
-def smoothTail1D(proj,period):
+
+  
+def smoothTail1D(proj):
     if proj.Integral() == 0:
         print "histogram has zero integral "+proj.GetName()
         return 0
@@ -156,7 +157,7 @@ for filename in os.listdir(args[0]):
              if options.triggerW: dataPlottersNW[-1].addCorrectionFactor('triggerWeight','tree')
             dataPlottersNW[-1].addCorrectionFactor(corrFactor,'flat')
             dataPlottersNW[-1].filename=fname
-	    
+      
 data=MergedPlotter(dataPlotters)
 
 fcorr=ROOT.TFile(options.res)
@@ -194,7 +195,7 @@ histograms=[
     mvv_nominal,
     mvv_altshapeUp,
     mvv_altshape2
-	]
+  ]
 
 maxEvents = -1
 #ok lets populate!
@@ -244,7 +245,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
     
    histI2.Delete()
    histTMP.Delete()
-		          	      
+                      
  if len(sampleTypes)<3: continue
  elif plotter.filename.find(sampleTypes[2].replace('.root','')) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
    print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
@@ -294,7 +295,17 @@ for hist in finalHistograms.itervalues():
      if hist.Integral() > 0:
         smoothTail1D(hist,period)
  hist.Write(hist.GetName())
- 
+ finalHistograms[hist.GetName()]=hist
+ # if (options.output).find("VJets")!=-1 and hist.GetName()!="mvv_nominal":
+#   c = ROOT.TCanvas("c","C",400,400)
+#   finalHistograms["histo_nominal"].Draw("hist")
+#   data = finalHistograms["mvv_nominal"]
+#   data.SetMarkerColor(ROOT.kBlack)
+#   data.Draw("same")
+#   c.SetLogy()
+#   c.SaveAs("debug_Vjets_mVV_kernels.png")
+#   print "for debugging save   debug_Vjets_mVV_kernels.png "
+  ########################################################
 
 
 alpha=1.5/5000
