@@ -11,13 +11,10 @@ ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
 #ROOT.gSystem.Load("Util_cxx.so")
 #from ROOT import draw_error_band
 
-#python runFitPlots_vjets_signal_bigcombo.py -n workspace_combo_BulkGWW.root  -l comboHPHP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPHP.root -M 1200
-#python runFitPlots_vjets_signal_bigcombo.py -n workspace_combo_BulkGWW.root  -l comboHPLP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPLP.root -M 1200
-#python runFitPlots_vjets_signal_combo.py -n workspace_JJ_combo_13TeV.root -l combo -i 2016/JJ_HPLP.root -s -M 1200
-#python runFitPlots_vjets_signal_combo.py -n workspace_JJ_combo_13TeV.root -l combo -i 2016/JJ_HPLP.root -s -M 1200 -p x --zrange 1126,1455
-#python runFitPlots_vjets_signal_combo.py -n workspace_JJ_combo_13TeV.root -l combo -i 2016/JJ_HPLP.root -s -M 1200 -p y --zrange 1126,1455
-#python runFitPlots_vjets_signal_combo.py -n workspace_JJ_combo_13TeV.root -l combo -i 2016/JJ_HPLP.root -s -M 1200 -p z --xrange 65,85 --yrange 65,85
+#python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_BulkGWW.root  -l comboHPHP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPHP.root -M 1200
+#python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_BulkGWW.root  -l comboHPLP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPLP.root -M 1200
 
+addTT = False 
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
 parser.add_option("-n","--name",dest="name",help="Input workspace",default='workspace.root')
@@ -33,6 +30,7 @@ parser.add_option("--pdfz",dest="pdfz",help="name of pdfs lie PTZUp etc",default
 parser.add_option("--pdfx",dest="pdfx",help="name of pdfs lie PTXUp etc",default="")
 parser.add_option("--pdfy",dest="pdfy",help="name of pdfs lie PTYUp etc",default="")
 parser.add_option("-s","--signal",dest="fitSignal",action="store_true",help="do S+B fit",default=False)
+parser.add_option("-t","--addTop",dest="addTop",action="store_true",help="Fit top",default=False)
 parser.add_option("-M","--mass",dest="signalMass",type=float,help="signal mass",default=1560.)
 
 (options,args) = parser.parse_args()
@@ -47,8 +45,8 @@ def get_canvas(cname):
  CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
  CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
  CMS_lumi.writeExtraText = 1
- CMS_lumi.extraText = "Simulation"
- CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+ CMS_lumi.extraText = "Preliminary"
+ CMS_lumi.lumi_sqrtS = "77.3 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
  iPos = 11
  if( iPos==0 ): CMS_lumi.relPosX = 0.30
@@ -87,7 +85,7 @@ def get_pad(name):
  CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
  CMS_lumi.lumi_13TeV = "77.3 fb^{-1}"
  CMS_lumi.writeExtraText = 1
- CMS_lumi.extraText = "Simulation"
+ CMS_lumi.extraText = "Preliminary"
  CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
  iPos = 0
@@ -99,7 +97,7 @@ def get_pad(name):
  H  = H_ref
 
  iPeriod = 0
-
+ iPeriod = 4
  # references for T, B, L, R
  T = 0.08*H_ref
  B = 0.12*H_ref 
@@ -232,14 +230,14 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
      extra2 = yrange.split(',')[0]+' < m_{jet2} < '+ yrange.split(',')[1]+' GeV'
     elif axis=='x':
      htitle = "X-Proj. y : "+options.yrange+" z : "+options.zrange
-     xtitle = "m_{jet1} [GeV]"
+     xtitle = "Softdrop m_{jet1} [GeV]"
      ymin = 0.02
      ymax = hdata.GetMaximum()*1.3
      extra1 = yrange.split(',')[0]+' < m_{jet2} < '+ yrange.split(',')[1]+' GeV'
      extra2 = zrange.split(',')[0]+' < m_{jj} < '+ zrange.split(',')[1]+' GeV'
     elif axis=='y':
      htitle = "Y-Proj. x : "+options.xrange+" z : "+options.zrange
-     xtitle = "m_{jet2} [GeV]"
+     xtitle = "Softdrop m_{jet2} [GeV]"
      ymin = 0.02
      ymax = hdata.GetMaximum()*1.3
      extra1 = xrange.split(',')[0]+' < m_{jet1} < '+ xrange.split(',')[1]+' GeV'
@@ -262,9 +260,9 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
     histos[0].SetLineWidth(2)
     histos[0].GetXaxis().SetTitle(xtitle)
     histos[0].GetYaxis().SetTitleOffset(1.3)
-    histos[0].GetYaxis().SetTitle("events")
+    histos[0].GetYaxis().SetTitle("Events")
     histos[0].GetYaxis().SetTitleOffset(1.3)
-    histos[0].GetYaxis().SetTitle("events")
+    histos[0].GetYaxis().SetTitle("Events")
     histos[0].GetYaxis().SetTitleSize(0.06)
     histos[0].GetYaxis().SetLabelSize(0.06)
     histos[0].Draw('HIST')
@@ -272,15 +270,16 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
  
     histos[1].SetLineColor(colors[1])
     histos[1].SetLineWidth(2)
-    leg.AddEntry(histos[1],"W","l")
+    leg.AddEntry(histos[1],"W(qq)+jets","l")
     
     histos[2].SetLineColor(colors[2])
     histos[2].SetLineWidth(2)
-    leg.AddEntry(histos[2],"Z","l")
+    leg.AddEntry(histos[2],"Z(qq)+jets","l")
     
-    histos[3].SetLineColor(colors[3])
-    histos[3].SetLineWidth(2)
-    leg.AddEntry(histos[3],"t","l")
+    if options.addTop:
+      histos[3].SetLineColor(colors[3])
+      histos[3].SetLineWidth(2)
+      leg.AddEntry(histos[3],"t","l")
 	   
     for i in range(4,len(histos)):
         histos[i].SetLineColor(colors[i])
@@ -298,25 +297,26 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
     errors[0].SetLineColor(colors[0])
     errors[0].SetLineWidth(0)
     errors[0].SetMarkerSize(0)
-    errors[0].Draw("E2same")
-    histos[0].Draw("samehist")
-    histos[3].Draw("histsame") 
-    histos[1].Draw("histsame") 
-    histos[2].Draw("histsame") 
     
-    hdata.Draw("samePE0")
     leg.AddEntry(hdata,"Data","lp")
     leg.AddEntry(errors[0],"#pm 1#sigma unc.","f")
 
     if hsig:
-     hsig.Scale(10000)
-     # hsig.SetFillColor(ROOT.kOrange+1)
-     hsig.SetLineColor(ROOT.kGreen-6)
-     hsig.SetLineStyle(5)
+     hsig.Scale(1/hsig.Integral())
+     hsig.Scale(histos[2].Integral()*0.4)
+     hsig.SetFillColor(ROOT.kGreen-6)
+     hsig.SetLineColor(ROOT.kBlack)
+     # hsig.SetLineStyle(5)
      hsig.Draw("HISTsame")
      #leg.AddEntry(hsig,"Signal pdf","F")
-     leg.AddEntry(hsig,"G_{bulk} (%.1f TeV) #rightarrow WW"%(options.signalMass/1000.),"L")
-             
+     leg.AddEntry(hsig,"G_{bulk} (%.1f TeV) #rightarrow WW"%(options.signalMass/1000.),"F")
+    
+    errors[0].Draw("E2same")
+    histos[0].Draw("samehist")
+    if options.addTop: histos[3].Draw("histsame") 
+    histos[1].Draw("histsame") 
+    histos[2].Draw("histsame")
+    hdata.Draw("samePE0")         
     leg.SetLineColor(0)
     leg.Draw("same")
     
@@ -356,7 +356,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
     pt3.AddText("%s category"%purity)
     pt3.Draw()
 
-    CMS_lumi.CMS_lumi(pad1, 0, 0)
+    CMS_lumi.CMS_lumi(pad1, 4, 0)
         
     pad1.Modified()
     pad1.Update()
@@ -378,6 +378,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
     
     #for pulls
     graphs = addPullPlot(hdata,histos[0],nBins,errors[0])
+    # graphs = addRatioPlot(hdata,histos[0],nBins,errors[0])
     graphs[0].Draw("HIST")
 
     pad2.Modified()
@@ -487,14 +488,14 @@ def doZprojection(pdfs,data1,data2,norm1_nonres,norm2_nonres,norm1_Wres,norm2_Wr
     htot.Add(htot_nonres)
     htot.Add(htot_Wres)
     htot.Add(htot_Zres)
-    htot.Add(htot_TThad)
+    if options.addTop: htot.Add(htot_TThad)
     htot.Add(htot_sig)
 
     hfinals = []
     hfinals.append(htot)
     hfinals.append(htot_Wres)
     hfinals.append(htot_Zres)
-    hfinals.append(htot_TThad)
+    if options.addTop: hfinals.append(htot_TThad)
     for i in range(10,len(h)): hfinals.append(h[i])    
     for b in range(len(neventsPerBin_2)): dh.SetBinContent(b+1,neventsPerBin_1[b]+neventsPerBin_2[b])
     dh.SetBinErrorOption(ROOT.TH1.kPoisson)
@@ -589,14 +590,14 @@ def doXprojection(pdfs,data1,data2,norm1_nonres,norm2_nonres,norm1_Wres,norm2_Wr
     htot.Add(htot_nonres)
     htot.Add(htot_Wres)
     htot.Add(htot_Zres)
-    htot.Add(htot_TThad)
+    if options.addTop: htot.Add(htot_TThad)
     htot.Add(htot_sig)
 
     hfinals = []
     hfinals.append(htot)
     hfinals.append(htot_Wres)
     hfinals.append(htot_Zres)
-    hfinals.append(htot_TThad)
+    if options.addTop: hfinals.append(htot_TThad)
     for i in range(10,len(h)): hfinals.append(h[i])    
     for b in range(len(neventsPerBin_2)): dh.SetBinContent(b+1,neventsPerBin_1[b]+neventsPerBin_2[b])
     dh.SetBinErrorOption(ROOT.TH1.kPoisson)
@@ -690,13 +691,14 @@ def doYprojection(pdfs,data1,data2,norm1_nonres,norm2_nonres,norm1_Wres,norm2_Wr
     htot.Add(htot_nonres)
     htot.Add(htot_Wres)
     htot.Add(htot_Zres)
+    if options.addTop:htot.Add(htot_TThad)
     htot.Add(htot_sig)
 
     hfinals = []
     hfinals.append(htot)
     hfinals.append(htot_Wres)
     hfinals.append(htot_Zres)
-    hfinals.append(htot_TThad)
+    if options.addTop:hfinals.append(htot_TThad)
     for i in range(10,len(h)): hfinals.append(h[i])    
     for b in range(len(neventsPerBin_2)): dh.SetBinContent(b+1,neventsPerBin_1[b]+neventsPerBin_2[b])
     dh.SetBinErrorOption(ROOT.TH1.kPoisson)
@@ -720,11 +722,11 @@ def addPullPlot(hdata,hpostfit,nBins,error_band):
 		
     gpost.SetLineColor(colors[1])
     gpost.SetMarkerColor(colors[1])
-    gpost.SetFillColor(ROOT.kBlue)
+    gpost.SetFillColor(ROOT.kGray+3)
     gpost.SetMarkerSize(1)
     gpost.SetMarkerStyle(20)
-    gt.SetFillColor(ROOT.kBlue)
-    gt.SetLineColor(ROOT.kBlue)
+    gt.SetFillColor(ROOT.kGray+3)
+    gt.SetLineColor(ROOT.kGray+3)
     
     #gt = ROOT.TH1F("gt","gt",hdata.GetNbinsX(),hdata.GetXaxis().GetXmin(),hdata.GetXaxis().GetXmax())
     #gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
@@ -744,7 +746,7 @@ def addPullPlot(hdata,hpostfit,nBins,error_band):
     gt.GetXaxis().SetTitleSize(0.15);
     gt.GetXaxis().SetTitleOffset(1);
     gt.GetXaxis().SetTitleFont(42);
-    gt.GetYaxis().SetTitle("#frac{data-fit}{#sigma}");
+    gt.GetYaxis().SetTitle("#frac{Data-fit}{#sigma}");
     gt.GetYaxis().CenterTitle(True);
     gt.GetYaxis().SetNdivisions(205);
     gt.GetYaxis().SetLabelFont(42);
@@ -760,60 +762,55 @@ def addPullPlot(hdata,hpostfit,nBins,error_band):
     
 def addRatioPlot(hdata,hpostfit,nBins,error_band):
     #print "make pull plots: (data-fit)/sigma_data"
-    N = hdata.GetNbinsX()
-    gpost = ROOT.TGraphErrors(0)
-    gfiterr = ROOT.TGraphErrors(0)
-    for i in range(1,N+1):
-        m = hdata.GetXaxis().GetBinCenter(i)
-	err_fit = error_band.GetBinError(i)/hpostfit.GetBinContent(i)
-	gfiterr.SetPoint(i-1,hdata.GetXaxis().GetBinLowEdge(i),1)
-	gfiterr.SetPointError(i-1,0.,err_fit)
-        ypostfit = hdata.GetBinContent(i)/hpostfit.GetBinContent(i)
-	err_fit = error_band.GetBinError(i)/hpostfit.GetBinContent(i)
-	if hdata.GetBinContent(i) != 0: err_data = hdata.GetBinErrorUp(i)/hdata.GetBinContent(i)
-	else: err_data = 1.0
-	print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"pull postfit",ypostfit,"err data",err_data,"err fit",err_fit,"err",ypostfit*math.sqrt(err_data*err_data+err_fit*err_fit)
-        gpost.SetPoint(i-1,m,ypostfit)
-	gpost.SetPointError(i-1,0.,ypostfit*math.sqrt(err_data*err_data+err_fit*err_fit))
-
-    gfiterr.SetPoint(N,hdata.GetXaxis().GetBinLowEdge(N)+hdata.GetXaxis().GetBinWidth(N),1)
-    gfiterr.SetPointError(N,0.,err_fit)
-	
-    gpost.SetLineColor(colors[0])
-    gpost.SetMarkerColor(colors[0])
-    gpost.SetFillColor(ROOT.kBlue)
-    gpost.SetMarkerSize(1)
-    gpost.SetMarkerStyle(20)
-    gfiterr.SetFillColor(ROOT.kOrange)
-    gfiterr.SetFillStyle(3001)
+      N = hdata.GetNbinsX()
+      gpost = ROOT.TGraphErrors(0)
+      gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
+      for i in range(1,N+1):
+          m = hdata.GetXaxis().GetBinCenter(i)
+          ypostfit = (hdata.GetBinContent(i)/hpostfit.GetBinContent(i))
+          gpost.SetPoint(i-1,m,ypostfit)
+          gt.SetBinContent(i,ypostfit)
+          print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"err data",hdata.GetBinErrorUp(i),"err fit",error_band.GetBinError(i),"pull postfit",ypostfit
+		
+      gpost.SetLineColor(colors[1])
+      gpost.SetMarkerColor(colors[1])
+      gpost.SetFillColor(ROOT.kBlue)
+      gpost.SetMarkerSize(1)
+      gpost.SetMarkerStyle(20)
+      gt.SetFillColor(ROOT.kBlue)
+      gt.SetLineColor(ROOT.kBlue)
     
-    gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
-    gt.SetTitle("")
-    gt.SetMinimum(0.5);
-    gt.SetMaximum(1.5);
-    gt.SetDirectory(0);
-    gt.SetStats(0);
-    gt.SetLineStyle(0);
-    gt.SetMarkerStyle(20);
-    gt.GetXaxis().SetTitle(hpostfit.GetXaxis().GetTitle());
-    gt.GetXaxis().SetLabelFont(42);
-    gt.GetXaxis().SetLabelOffset(0.02);
-    gt.GetXaxis().SetLabelSize(0.15);
-    gt.GetXaxis().SetTitleSize(0.15);
-    gt.GetXaxis().SetTitleOffset(1);
-    gt.GetXaxis().SetTitleFont(42);
-    gt.GetYaxis().SetTitle("data/fit");
-    gt.GetYaxis().CenterTitle(True);
-    gt.GetYaxis().SetNdivisions(205);
-    gt.GetYaxis().SetLabelFont(42);
-    gt.GetYaxis().SetLabelOffset(0.007);
-    gt.GetYaxis().SetLabelSize(0.15);
-    gt.GetYaxis().SetTitleSize(0.15);
-    gt.GetYaxis().SetTitleOffset(0.4);
-    gt.GetYaxis().SetTitleFont(42);
-    gt.GetXaxis().SetNdivisions(505)
-    gpost.SetHistogram(gt);       
-    return [gfiterr,gpost] 
+      #gt = ROOT.TH1F("gt","gt",hdata.GetNbinsX(),hdata.GetXaxis().GetXmin(),hdata.GetXaxis().GetXmax())
+      #gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
+      gt.SetTitle("")
+      #gt.SetMinimum(0.5);
+      #gt.SetMaximum(1.5);
+      gt.SetMinimum(0.001);
+      gt.SetMaximum(1.999);
+      gt.SetDirectory(0);
+      gt.SetStats(0);
+      gt.SetLineStyle(0);
+      gt.SetMarkerStyle(20);
+      gt.GetXaxis().SetTitle(hpostfit.GetXaxis().GetTitle());
+      gt.GetXaxis().SetLabelFont(42);
+      gt.GetXaxis().SetLabelOffset(0.02);
+      gt.GetXaxis().SetLabelSize(0.15);
+      gt.GetXaxis().SetTitleSize(0.15);
+      gt.GetXaxis().SetTitleOffset(1);
+      gt.GetXaxis().SetTitleFont(42);
+      gt.GetYaxis().SetTitle("#frac{data}{fit}");
+      gt.GetYaxis().CenterTitle(True);
+      gt.GetYaxis().SetNdivisions(205);
+      gt.GetYaxis().SetLabelFont(42);
+      gt.GetYaxis().SetLabelOffset(0.007);
+      gt.GetYaxis().SetLabelSize(0.15);
+      gt.GetYaxis().SetTitleSize(0.15);
+      gt.GetYaxis().SetTitleOffset(0.4);
+      gt.GetYaxis().SetTitleFont(42);
+      gt.GetXaxis().SetNdivisions(505)
+      #gpre.SetHistogram(gt);
+      #gpost.SetHistogram(gt);       
+      return [gt]
 
 
 def draw_error_band(histo_central,norm1,err_norm1,norm2,err_norm2,rpdf1,rpdf2,x_min,proj):
@@ -1012,7 +1009,8 @@ if __name__=="__main__":
      print "Expected number of QCD events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_nonRes"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_nonRes"].getVal(),"(2017)"
      print "Expected number of W+jets events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjet"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjet"].getVal(),"(2017)"
      print "Expected number of Z+jets events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjet"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].getVal(),"(2017)"
-     print "Expected number of tt events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getVal(),"(2017)"
+     if options.addTop:
+       print "Expected number of tt events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getVal(),"(2017)"
      if options.fitSignal:
       workspace.var("MH").setVal(options.signalMass)
       workspace.var("MH").setConstant(1)
@@ -1087,13 +1085,14 @@ if __name__=="__main__":
      pdf2_Zres_shape_postfit.Print()
      print
      
-     print "2016 Postfit tt res pdf:"
-     pdf1_TThad_shape_postfit  = args["shapeBkg_TThad_JJ_"+purity+"_13TeV_2016"]
-     pdf1_TThad_shape_postfit.Print()
-     print "2017 Postfit tt res pdf:"
-     pdf2_TThad_shape_postfit  = args["shapeBkg_TThad_JJ_"+purity+"_13TeV_2017"]
-     pdf2_TThad_shape_postfit.Print()
-     print
+     if options.addTop:
+        print "2016 Postfit tt res pdf:"
+        pdf1_TThad_shape_postfit  = args["shapeBkg_TThad_JJ_"+purity+"_13TeV_2016"]
+        pdf1_TThad_shape_postfit.Print()
+        print "2017 Postfit tt res pdf:"
+        pdf2_TThad_shape_postfit  = args["shapeBkg_TThad_JJ_"+purity+"_13TeV_2017"]
+        pdf2_TThad_shape_postfit.Print()
+        print
      
 
      pdf1_signal_postfit = 0
@@ -1122,14 +1121,21 @@ if __name__=="__main__":
      allpdfsz.append(pdf2_Wres_shape_postfit)
      allpdfsz.append(pdf1_Zres_shape_postfit)
      allpdfsz.append(pdf2_Zres_shape_postfit)
-     allpdfsz.append(pdf1_TThad_shape_postfit)
-     allpdfsz.append(pdf2_TThad_shape_postfit)
+     print "DO i crash here?"
+     if options.addTop:
+      print "add top"
+      allpdfsz.append(pdf1_TThad_shape_postfit)
+      allpdfsz.append(pdf2_TThad_shape_postfit)
+     else:
+       print "eeelse"
+       allpdfsz.append(pdf1_Zres_shape_postfit)
+       allpdfsz.append(pdf2_Zres_shape_postfit)
      allpdfsz.append(pdf1_shape_postfit)
      allpdfsz.append(pdf2_shape_postfit)
      for p in options.pdfz.split(","):
          if p == '': continue
-	 print "add pdf:",p
-	 args[p].Print()
+         print "add pdf:",p
+         args[p].Print()
          allpdfsz.append(args[p])
 
      allpdfsx = [] #let's have always pre-fit and post-fit as firt elements here, and add the optional shapes if you want with options.pdf
@@ -1139,8 +1145,12 @@ if __name__=="__main__":
      allpdfsx.append(pdf2_Wres_shape_postfit)
      allpdfsx.append(pdf1_Zres_shape_postfit)
      allpdfsx.append(pdf2_Zres_shape_postfit)
-     allpdfsx.append(pdf1_TThad_shape_postfit)
-     allpdfsx.append(pdf2_TThad_shape_postfit)
+     if options.addTop:
+      allpdfsx.append(pdf1_TThad_shape_postfit)
+      allpdfsx.append(pdf2_TThad_shape_postfit)
+     else:
+       allpdfsx.append(pdf1_Zres_shape_postfit) #dummy, not used
+       allpdfsx.append(pdf2_Zres_shape_postfit) #dummy, not used
      allpdfsx.append(pdf1_shape_postfit)
      allpdfsx.append(pdf2_shape_postfit)
      for p in options.pdfx.split(","):
@@ -1156,14 +1166,18 @@ if __name__=="__main__":
      allpdfsy.append(pdf2_Wres_shape_postfit)
      allpdfsy.append(pdf1_Zres_shape_postfit)
      allpdfsy.append(pdf2_Zres_shape_postfit)
-     allpdfsy.append(pdf1_TThad_shape_postfit)
-     allpdfsy.append(pdf2_TThad_shape_postfit)
+     if options.addTop:
+      allpdfsy.append(pdf1_TThad_shape_postfit)
+      allpdfsy.append(pdf2_TThad_shape_postfit)
+     else:
+      allpdfsy.append(pdf1_Zres_shape_postfit)
+      allpdfsy.append(pdf2_Zres_shape_postfit)
      allpdfsy.append(pdf1_shape_postfit)
      allpdfsy.append(pdf2_shape_postfit)
      for p in options.pdfy.split(","):
          if p == '': continue
-	 print "add pdf:",p
-	 args[p].Print()
+         print "add pdf:",p
+         args[p].Print()
          allpdfsy.append(args[p])
           	 	 	
      print
@@ -1199,17 +1213,24 @@ if __name__=="__main__":
      norm2_Zres[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].getVal()
      norm2_Zres[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].getPropagatedError(fitresult)
      
-     print
-     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].dump()
-     norm1_TThad = [0,0]
-     norm1_TThad[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getVal()
-     norm1_TThad[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getPropagatedError(fitresult)
-     print
-     (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].dump()
-     norm2_TThad = [0,0]
-     norm2_TThad[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getVal()
-     norm2_TThad[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getPropagatedError(fitresult)
-     
+     if options.addTop:
+      print
+      (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].dump()
+      norm1_TThad = [0,0]
+      norm1_TThad[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getVal()
+      norm1_TThad[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getPropagatedError(fitresult)
+      print
+      (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].dump()
+      norm2_TThad    = [0,0]
+      norm2_TThad[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getVal()
+      norm2_TThad[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getPropagatedError(fitresult)
+     else:
+       norm1_TThad    = [0,0]
+       norm1_TThad[0] = 1.
+       norm1_TThad[1] = 1.
+       norm2_TThad    = [0,0]
+       norm2_TThad[0] = 1.
+       norm2_TThad[1] = 1.
      
      norm1_sig = 0
      norm2_sig = 0
@@ -1229,7 +1250,7 @@ if __name__=="__main__":
      print "QCD normalization after fit: ",norm1_nonres[0],"+/-",norm1_nonres[1],"(2016)",norm2_nonres[0],"+/-",norm2_nonres[1],"(2017)"
      print "W+jets normalization after fit: ",norm1_Wres[0],"+/-",norm1_Wres[1],"(2016)",norm2_Wres[0],"+/-",norm2_Wres[1],"(2017)"
      print "Z+jets normalization after fit: ",norm1_Zres[0],"+/-",norm1_Zres[1],"(2016)",norm2_Zres[0],"+/-",norm2_Zres[1],"(2017)"
-     print "tt normalization after fit: ",norm1_TThad[0],"+/-",norm1_TThad[1],"(2016)",norm2_TThad[0],"+/-",norm2_TThad[1],"(2017)"
+     if options.addTop: print "tt normalization after fit: ",norm1_TThad[0],"+/-",norm1_TThad[1],"(2016)",norm2_TThad[0],"+/-",norm2_TThad[1],"(2017)"
      if options.fitSignal: print "Signal yields after fit: ",norm1_sig[0],"+/-",norm1_sig[1],"(2016)",norm2_sig[0],"+/-",norm2_sig[1],"(2017)"
      print
 

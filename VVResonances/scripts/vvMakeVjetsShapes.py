@@ -95,9 +95,12 @@ for leg in legs:
 
  fitter=Fitter(['x'])
  #fitter.jetResonanceVjets('model','x')
- fitter.jetResonanceNOEXP('model','x')
- #fitter.gaus('model','x')
-
+ 
+ # fitter.gaus('model','x')
+ if options.output.find("TT")!=-1:
+   fitter.jetDoublePeak('model','x')
+ else:
+   fitter.jetResonanceNOEXP('model','x')
  if options.fixPars!="":
      fixedPars =options.fixPars.split(',')
      print "   - Fix parameters: ", fixedPars
@@ -107,11 +110,18 @@ for leg in legs:
        fitter.w.var(parVal[0]).setVal(float(parVal[1]))
        fitter.w.var(parVal[0]).setConstant(1) 
  if options.output.find("TT")!=-1:
-   fitter.w.var("mean").setVal(float(170.))
-   fitter.w.var("sigma").setVal(float(16.))
- #histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",80,options.mini,options.maxi)
- if options.output.find("TT")!=-1: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>140&&jj_"+leg+"_softDrop_mass<200)","1",30,140,200)
- else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<120)","1",30,60,120)
+   fitter.w.var("meanTop").setVal(float(170.))
+   fitter.w.var("sigmaTop").setVal(float(16.))
+ else:
+   fitter.w.var("mean").setVal(float(80.))
+   fitter.w.var("sigma").setVal(float(7.))
+   
+
+   #histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",80,options.mini,options.maxi)
+ # if options.output.find("TT")!=-1: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>140&&jj_"+leg+"_softDrop_mass<200)","1",80,55,215)
+ if options.output.find("TT")!=-1: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(1.)","1",80,55,215)
+ # else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<120)","1",30,60,120)
+ else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(1.)","1",80,55,215)
  if leg.find("l1")!=-1:
      NRes[0] += histo.Integral()
  else:
@@ -121,12 +131,18 @@ for leg in legs:
  fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1)])
  #fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
  fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_Res.png")
- params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}, "alpha":{ "val": fitter.w.var("alpha").getVal(), "err": fitter.w.var("alpha")},"alpha2":{"val": fitter.w.var("alpha2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()},"n2": {"val": fitter.w.var("n2").getVal(), "err": fitter.w.var("n2").getError()}}
- #params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}}
+ fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_Res.root")
+ if options.output.find("TT")!=-1: 
+   params[label+"_Res_"+leg]={"meanW": {"val": fitter.w.var("meanW").getVal(), "err": fitter.w.var("meanW").getError()},"meanW": {"val": fitter.w.var("meanTop").getVal(), "err": fitter.w.var("meanTop").getError()}, "sigmaW": {"val": fitter.w.var("sigmaW").getVal(), "err": fitter.w.var("sigmaW").getError()}, "sigmaTop": {"val": fitter.w.var("sigmaTop").getVal(), "err": fitter.w.var("sigmaTop").getError()}, "alphaW":{ "val": fitter.w.var("alphaW").getVal(), "err": fitter.w.var("alphaW").getError()},"alphaW2":{"val": fitter.w.var("alphaW2").getVal(), "err": fitter.w.var("alphaW2").getError()},"alphaTop":{ "val": fitter.w.var("alphaTop").getVal(), "err": fitter.w.var("alphaTop")},"alphaTop2":{"val": fitter.w.var("alphaTop2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()}}
+ else:
+   params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}, "alpha":{ "val": fitter.w.var("alpha").getVal(), "err": fitter.w.var("alpha")},"alpha2":{"val": fitter.w.var("alpha2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()},"n2": {"val": fitter.w.var("n2").getVal(), "err": fitter.w.var("n2").getError()}}
+   #params[label+"_Res_"+leg]={"mean": {"val": fitter.w.var("mean").getVal(), "err": fitter.w.var("mean").getError()}, "sigma": {"val": fitter.w.var("sigma").getVal(), "err": fitter.w.var("sigma").getError()}}
 
  #histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)","1",80,options.mini,options.maxi)
- if options.output.find("TT")!=-1: plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>140&&jj_"+leg+"_softDrop_mass<200)","1",30,140,200)
- else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<120)","1",30,60,120)
+ # if options.output.find("TT")!=-1: plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>140&&jj_"+leg+"_softDrop_mass<200)","1",80,55,215)
+ if options.output.find("TT")!=-1: plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(1.)","1",80,55,215)
+ # else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==0)*(jj_"+leg+"_softDrop_mass>60&&jj_"+leg+"_softDrop_mass<120)","1",30,60,120)
+ else: histo = plotter.drawTH1("jj_"+leg+"_softDrop_mass",options.cut+"*(1.)","1",80,55,215)
  if leg.find("l1")!=-1:
      NnonRes[0] += histo.Integral()
  else:

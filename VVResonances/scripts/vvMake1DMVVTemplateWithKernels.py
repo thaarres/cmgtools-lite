@@ -67,7 +67,7 @@ def mirror(histo,histoNominal,name):
         nominal=histoNominal.GetBinContent(i)/intNominal
         newHisto.SetBinContent(i,histoNominal.GetBinContent(i)*nominal/up)
     return newHisto      
-	
+  
 def smoothTail1D(proj):
     if proj.Integral() == 0:
         print "histogram has zero integral "+proj.GetName()
@@ -131,7 +131,7 @@ for filename in os.listdir(args[0]):
             for w in weights_: 
              if w != '': dataPlottersNW[-1].addCorrectionFactor(w,'branch')
             dataPlottersNW[-1].filename=fname
-	    
+      
 data=MergedPlotter(dataPlotters)
 
 fcorr=ROOT.TFile(options.res)
@@ -169,7 +169,7 @@ histograms=[
     mvv_nominal,
     mvv_altshapeUp,
     mvv_altshape2
-	]
+  ]
 
 maxEvents = -1
 #ok lets populate!
@@ -219,7 +219,7 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
     
    histI2.Delete()
    histTMP.Delete()
-		          	      
+                      
  if len(sampleTypes)<3: continue
  elif plotter.filename.find(sampleTypes[2].replace('.root','')) != -1: #alternative shape Pythia8+Madgraph (not used for syst but only for cross checks)
    print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
@@ -256,18 +256,16 @@ for hist in histograms:
         smoothTail1D(hist)
  hist.Write(hist.GetName())
  finalHistograms[hist.GetName()]=hist
-
- #################################
-c = ROOT.TCanvas("c","C",400,400)
-finalHistograms["histo_nominal"].Draw("hist")
-data = finalHistograms["mvv_nominal"]
-data.Scale(1./data.Integral())
-data.SetMarkerColor(ROOT.kBlack)
-data.Draw("same")
-c.SetLogy()
-c.SaveAs("debug_Vjets_mVV_kernels.png")
-print "for debugging save   debug_Vjets_mVV_kernels.png "
-########################################################
+ # if (options.output).find("VJets")!=-1 and hist.GetName()!="mvv_nominal":
+#   c = ROOT.TCanvas("c","C",400,400)
+#   finalHistograms["histo_nominal"].Draw("hist")
+#   data = finalHistograms["mvv_nominal"]
+#   data.SetMarkerColor(ROOT.kBlack)
+#   data.Draw("same")
+#   c.SetLogy()
+#   c.SaveAs("debug_Vjets_mVV_kernels.png")
+#   print "for debugging save   debug_Vjets_mVV_kernels.png "
+  ########################################################
 
 #histogram_altshapeDown=mirror(finalHistograms['histo_altshapeUp'],finalHistograms['histo_nominal'],"histo_altshapeDown")
 #histogram_altshapeDown.Write()

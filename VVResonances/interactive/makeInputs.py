@@ -11,8 +11,8 @@ useTriggerWeights = False
 HPSF = 0.995
 LPSF = 1.005
 if period == 2017:
-    HPSF = 0.999#0.948
-    LPSF = 1.000#1.057
+    HPSF = 0.941#0.948
+    LPSF = 1.004#1.057
     
 addOption = ""
 if useTriggerWeights: 
@@ -114,7 +114,6 @@ cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop
 purities=['HPHP','HPLP','LPLP','NP']
 purities=['HPHP','HPLP','LPLP']
 purities=['HPHP','HPLP','LPLP']
-purities=['HPHP','HPLP']
 
 BulkGravWWTemplate="BulkGravToWW"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad"
@@ -130,8 +129,9 @@ nonResTemplate="QCD_Pt_" #high stat
 # nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 #nonResTemplate="Dijet" #to compare shapes
 
-WresTemplate= "WJetsToQQ_HT800toInf,TTHad_pow"
-ZresTemplate= "ZJetsToQQ_HT800toInf"
+# WresTemplate= "WJetsToQQ_HT800,TTHad_pow"
+WresTemplate= "WJetsToQQ_HT800"
+ZresTemplate= "ZJetsToQQ_HT800"
 TTresTemplate= "TTHad_pow"
     
 minMJ=55.0
@@ -214,7 +214,7 @@ def fitVJets(filename,template):
     cut='*'.join([cuts['common'],cuts[p],cuts['acceptance']])
     rootFile=filename+"_"+p+".root"
     fixPars=""
-    if p == "HPLP": fixPars="alpha:1.505,n:2,n2:2"
+    # if p == "HPLP": fixPars="alpha:1.505,n:2,n2:2"
     cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} -f "{fixPars}" --store "{filename}_{purity}.py" --minMVV {minMVV} --maxMVV {maxMVV} {addOption} samples_jer '.format(template=template,cut=cut,rootFile=rootFile,minMJ=minMJ,maxMJ=maxMJ,fixPars=fixPars,filename=filename,purity=p,minMVV=minMVV,maxMVV=maxMVV,addOption=addOption)
     cmd+=HCALbinsMVV
     os.system(cmd)
@@ -440,27 +440,27 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',jobName="nR",fac
   
 
 
-# makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
-# makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
-# makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
-# makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
-#
-# makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
-# makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
-#
-# makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
-# makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
-# makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l2')
-# makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
-#
-# makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
-# makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
-# makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
-# makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
+makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
-# makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+
+makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
+makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
+makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l2')
+makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+
+makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
+makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 # makeDetectorResponsePerCat("nonRes","JJ",nonResTemplate,cuts['nonres'])
 # makeDetectorResponsePerLeg("nonRes","JJ",nonResTemplate,cuts['nonres'],"DRl1","l1")
 # makeDetectorResponsePerLeg("nonRes","JJ",nonResTemplate,cuts['nonres'],"DRl2","l2")
@@ -472,46 +472,46 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',jobName="nR",fac
 # ------------------------------
 
 # # Make nonres kernel
-# if runParallel and submitToBatch:
-#   wait = False
-#   makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
-#   print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
-#   sys.exit()
-#   mergeKernelJobs()
-# else:
-#   wait = True
-#   makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-#   makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+if runParallel and submitToBatch:
+  wait = False
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+  print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
+  sys.exit()
+  mergeKernelJobs()
+else:
+  wait = True
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 
-# if runParallel and submitToBatch: mergeKernelJobs()
-# mergeBackgroundShapes("nonRes","JJ")
+if runParallel and submitToBatch: mergeKernelJobs()
+mergeBackgroundShapes("nonRes","JJ")
 
-#Do QCD normalisation
-# makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
-#
+# Do QCD normalisation
+makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
+
 # Do Vjets
 submitToBatch = False #Do not need batch for the following
-# if period == 2017:
-    # makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.3425,WJetsToQQ:0.3425")
-    # makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","WJetsToQQ_HT400to600:0.2156336088,WJetsToQQ_HT600to800:0.2148589342,WJetsToQQ_HT800toInf:0.205066345,ZJetsToQQ_HT400to600:0.1144200627,ZJetsToQQ_HT600to800:0.2524056255,ZJetsToQQ_HT800toInf:0.09811023622")
-    # makeNormalizations("WJets","JJ",WresTemplate,0,cuts['res'],"nRes","WJetsToQQ_HT800toInf:0.205066345")
-    # makeNormalizations("ZJets","JJ",ZresTemplate,0,cuts['res'],"nRes","ZJetsToQQ_HT800toInf:0.09811023622")
-    # makeNormalizations("TThad","JJ",TTresTemplate,0,cuts['resTT'],"nRes")
-# else:
-#     makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
-# fitVJets("JJ_WJets",WresTemplate)
-# fitVJets("JJ_ZJets",ZresTemplate)
+if period == 2017:
+#     # makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.3425,WJetsToQQ:0.3425")
+#     # makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","WJetsToQQ_HT400to600:0.2156336088,WJetsToQQ_HT600to800:0.2148589342,WJetsToQQ_HT800toInf:0.205066345,ZJetsToQQ_HT400to600:0.1144200627,ZJetsToQQ_HT600to800:0.2524056255,ZJetsToQQ_HT800toInf:0.09811023622")
+    makeNormalizations("WJets","JJ",WresTemplate,0,cuts['nonres'],"nRes","WJetsToQQ_HT800toInf:0.205066345")
+    makeNormalizations("ZJets","JJ",ZresTemplate,0,cuts['nonres'],"nRes","ZJetsToQQ_HT800toInf:0.09811023622")
+    # makeNormalizations("TThad","JJ",TTresTemplate,0,cuts['nonres'],"nRes")
+else:
+    makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
+fitVJets("JJ_WJets",WresTemplate)
+fitVJets("JJ_ZJets",ZresTemplate)
 # fitVJets("JJ_TThad",TTresTemplate)
 
-# makeBackgroundShapesMVVKernel("WJets","JJ",WresTemplate,cuts['nonres'],"1D",0)
-# makeBackgroundShapesMVVKernel("ZJets","JJ",ZresTemplate,cuts['nonres'],"1D",0)
+makeBackgroundShapesMVVKernel("WJets","JJ",WresTemplate,cuts['nonres'],"1D",0)
+makeBackgroundShapesMVVKernel("ZJets","JJ",ZresTemplate,cuts['nonres'],"1D",0)
 makeBackgroundShapesMVVKernel("TThad","JJ",TTresTemplate,cuts['resTT'],"1D",0)
-# # Do data
-# makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
-# from modules.submitJobs import makePseudoData
-# for p in purities: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PDnoVjets_%s.root"%p,lumi)
-# from modules.submitJobs import makePseudoDataVjets
-# for p in purities: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)
+# Do data
+makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
+from modules.submitJobs import makePseudoData
+for p in purities: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PDnoVjets_%s.root"%p,lumi)
+from modules.submitJobs import makePseudoDataVjets
+for p in purities: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)

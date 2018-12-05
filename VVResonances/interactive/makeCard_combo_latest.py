@@ -5,6 +5,8 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 datasets=['2017','2016']
+
+addTT = True
 for dataset in datasets:
   lumi = {'2016':35900,'2017':41367}
   lumi_unc = {'2016':1.025,'2017':1.023}
@@ -66,15 +68,15 @@ for dataset in datasets:
       if p=='HPHP': 
         from JJ_WJets_HPHP import JJ_WJets__Res_l1, JJ_WJets__Res_l2
         from JJ_ZJets_HPHP import JJ_ZJets__Res_l1, JJ_ZJets__Res_l2
-        from JJ_TThad_HPHP import JJ_TThad__Res_l1, JJ_TThad__Res_l2
+        if addTT: from JJ_TThad_HPHP import JJ_TThad__Res_l1, JJ_TThad__Res_l2
       if p=='HPLP': 
         from JJ_WJets_HPLP import JJ_WJets__Res_l1, JJ_WJets__Res_l2
         from JJ_ZJets_HPLP import JJ_ZJets__Res_l1, JJ_ZJets__Res_l2
-        from JJ_TThad_HPLP import JJ_TThad__Res_l1, JJ_TThad__Res_l2
+        if addTT: from JJ_TThad_HPLP import JJ_TThad__Res_l1, JJ_TThad__Res_l2
       if p=='LPLP': 
         from JJ_WJets_LPLP import JJ_WJets__Res_l1, JJ_WJets__Res_l2
         from JJ_ZJets_LPLP import JJ_ZJets__Res_l1, JJ_ZJets__Res_l2
-        from JJ_TThad_LPLP import JJ_TThad__Res_l1, JJ_TThad__Res_l2
+        if addTT: from JJ_TThad_LPLP import JJ_TThad__Res_l1, JJ_TThad__Res_l2
          
       rootFile = 'JJ_WJets_MVV_'+p+'.root' #jen
       card.addHistoShapeFromFile("Wjets_mjj",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+p,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+p],False,0)
@@ -90,23 +92,29 @@ for dataset in datasets:
       card.product3D("Zjet","Zjets_mjetRes_l1","Zjets_mjetRes_l2","Zjets_mjj")
       card.addFixedYieldFromFile("Zjet",1,"JJ_ZJets_%s.root"%p,"ZJets",1.0)
       
-      rootFile = 'JJ_TThad_MVV_'+p+'.root' #jen
-      card.addHistoShapeFromFile("TThad_mjj",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_TThad_PTZ_'+p,'OPT:CMS_VV_JJ_TThad_OPTZ_'+p],False,0)
-      card.addMJJSignalShapeNOEXP("TThad_mjetRes_l1","MJ1","",JJ_TThad__Res_l1,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
-      card.addMJJSignalShapeNOEXP("TThad_mjetRes_l2","MJ2","",JJ_TThad__Res_l2,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0}) 
-      card.product3D("TThad","TThad_mjetRes_l1","TThad_mjetRes_l2","TThad_mjj")
-      card.addFixedYieldFromFile("TThad",1,"JJ_TThad_%s.root"%p,"TThad",1.0)
-      
+      if addTT: 
+        rootFile = 'JJ_TThad_MVV_'+p+'.root' #jen
+        card.addHistoShapeFromFile("TThad_mjj",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_TThad_PTZ_'+p,'OPT:CMS_VV_JJ_TThad_OPTZ_'+p],False,0)
+        card.addMJJSignalShapeNOEXP("TThad_mjetRes_l1","MJ1","",JJ_TThad__Res_l1,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0})
+        card.addMJJSignalShapeNOEXP("TThad_mjetRes_l2","MJ2","",JJ_TThad__Res_l2,{'CMS_scale_prunedj':1},{'CMS_res_prunedj':1.0}) 
+        card.product3D("TThad","TThad_mjetRes_l1","TThad_mjetRes_l2","TThad_mjj")
+        card.addFixedYieldFromFile("TThad",1,"JJ_TThad_%s.root"%p,"TThad",1.0)
+        
+        card.addSystematic("CMS_VV_JJ_TThad_PTZ_"+p,"param",[0,0.333]) #0.333
+        card.addSystematic("CMS_VV_JJ_TThad_OPTZ_"+p,"param",[0,0.333]) #0.333
+        
+        card.addSystematic("CMS_VV_JJ_TThad_norm","lnN",{'TThad':1.2})
 
       #---------------------------------------------------------------------------------
       
       
       #QCD
       rootFile="/afs/cern.ch/user/j/jngadiub/public/"+dataset+"/save_new_shapes_pythia_"+p+"_3D.root"
-      #card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY_'+p,'OPTXY:CMS_VV_JJ_nonRes_OPTXY_'+p,'PTZ:CMS_VV_JJ_nonRes_PTZ_'+p,'OPTZ:CMS_VV_JJ_nonRes_OPTZ_'+p,'altshape:CMS_VV_JJ_nonRes_altshape_'+p,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+p],False,0)    
-      card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PT:CMS_VV_JJ_nonRes_PT_'+p,'OPT:CMS_VV_JJ_nonRes_OPT_'+p,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+p,'altshape:CMS_VV_JJ_nonRes_altshape_'+p,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+p],False,0)    
+      # card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PTXY:CMS_VV_JJ_nonRes_PTXY_'+p,'OPTXY:CMS_VV_JJ_nonRes_OPTXY_'+p,'PTZ:CMS_VV_JJ_nonRes_PTZ_'+p,'OPTZ:CMS_VV_JJ_nonRes_OPTZ_'+p,'altshape:CMS_VV_JJ_nonRes_altshape_'+p,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+p],False,0)
+      card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile,"histo",['PT:CMS_VV_JJ_nonRes_PT_'+p,'OPT:CMS_VV_JJ_nonRes_OPT_'+p,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+p,'altshape:CMS_VV_JJ_nonRes_altshape_'+p,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+p],False,0)
 
-      card.addFixedYieldFromFile("nonRes",2,"/afs/cern.ch/user/j/jngadiub/public/"+dataset+"/JJ_nonRes_"+p+".root","nonRes",1.0)
+      # card.addFixedYieldFromFile("nonRes",2,"/afs/cern.ch/user/j/jngadiub/public/"+dataset+"/JJ_nonRes_"+p+".root","nonRes",1.0)
+      card.addFixedYieldFromFile("nonRes",2,"/afs/cern.ch/user/j/jngadiub/public/"+dataset+"/JJ_nonRes_"+p+".root","nonRes",0.8)
 
       #DATA
       card.importBinnedData("/afs/cern.ch/user/j/jngadiub/public/"+dataset+"/JJ_"+p+".root","data",["MJ1","MJ2","MJJ"]) #jen
@@ -122,14 +130,29 @@ for dataset in datasets:
     
 
       #background normalization
-      card.addSystematic("CMS_VV_JJ_nonRes_norm_"+p,"lnN",{'nonRes':1.5})
-      card.addSystematic("CMS_VV_JJ_Vjets_norm_"+p,"lnN",{'Vjet':1.2})
-      # card.addSystematic("CMS_VV_JJ_Wjets_norm_"+p,"lnN",{'Wjet':1.02})
-#       card.addSystematic("CMS_VV_JJ_Zjets_norm_"+p,"lnN",{'Zjet':1.02})
-#       card.addSystematic("CMS_VV_JJ_TThad_norm_"+p,"lnN",{'TThad':1.02})
+      card.addSystematic("CMS_VV_JJ_nonRes_norm","lnN",{'nonRes':1.5})
+      # card.addSystematic("CMS_VV_JJ_Vjets_norm_"+p,"lnN",{'Vjet':1.2})
+      card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjet':1.5})
+      card.addSystematic("CMS_VV_JJ_Zjets_norm","lnN",{'Zjet':1.5})
       
-      card.addSystematic("CMS_VV_JJ_TThad_norm_"+p,"lnN",{'TThad':1.02})
       
+      
+      # card.addSystematic("CMS_VV_JJ_Wjets_norm_","lnN",{'Wjet':1.2})
+      # card.addSystematic("Vjet_ratio"          ,"param",[0.5,0.012])
+      # card.addSystematic("CMS_VV_JJ_Zjets_norm","rateParam",{'Zjet':'(@0*@1) CMS_VV_JJ_Wjets_norm_,Vjet_ratio'})
+      
+      # card.addSystematic("CMS_VV_JJ_Wjets_norm","rateParam",{'Wjet':'(@0*@1) Vjet_ratio,Vjets_norm'})
+      # card.addSystematic("CMS_VV_JJ_Zjets_norm","rateParam",{'Zjet':'(@0*@1) Vjet_ratio,Vjets_norm'})
+      # card.addSystematic("Vjet_ratio"          ,"rateParam",{'Wjet':0.66,'Zjet':0.66})
+      # card.addSystematic("Vjets_norm"          ,"rateParam",{'Wjet':1.2 ,'Zjet':1.2} )
+      
+      #Something like this?
+      # CMS_VV_JJ_Wjets_norm rateParam  JJ_HPHP_13TeV_2016   Wjet (@0*@1)     rate,Vjets_norm
+      # CMS_VV_JJ_Zjets_norm rateParam  JJ_HPHP_13TeV_2016   Zjet (@0*(1-@1)) rate,Vjets_norm
+      # rate                 rateParam  JJ_HPHP_13TeV_2016   Wjet 0.66
+      # Vjets_norm           rateParam  JJ_HPHP_13TeV_2016   Wjet 1.2
+#       rate                 rateParam  JJ_HPHP_13TeV_2016   Zjet 0.66
+#       Vjets_norm           rateParam  JJ_HPHP_13TeV_2016   Zjet 1.2
       #Example
       # alpha rateParam A bkg (@0*@1) beta,gamma
       # beta  rateParam B bkg 50
@@ -139,13 +162,17 @@ for dataset in datasets:
       # card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:vtag_unc[p][dataset],"Vjet":vtag_unc[p][dataset]})
       card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:vtag_unc[p][dataset],"Wjet":vtag_unc[p][dataset],"Zjet":vtag_unc[p][dataset]})
 
-      #pruned mass scale    
+        
       card.addSystematic("CMS_scale_j","param",[0.0,0.012])
       card.addSystematic("CMS_res_j","param",[0.0,0.08])
       
-      #old
-      card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
-      card.addSystematic("CMS_res_prunedj","param",[0.0,0.03])
+      #pruned mass scale  
+      card.addSystematic("CMS_scale_prunedj","param",[0.0,0.04])
+      card.addSystematic("CMS_res_prunedj","param",[0.0,0.04])
+      # card.addSystematic("CMS_scale_prunedj_l1","param",[-0.02,0.08])
+      # card.addSystematic("CMS_res_prunedj_l1","param",[0.14,0.08])
+      # card.addSystematic("CMS_scale_prunedj_l2","param",[-0.02,0.08])
+      # card.addSystematic("CMS_res_prunedj_l2","param",[0.14,0.08])
 
     
       #systematics for dijet part of V+jets background
@@ -153,15 +180,14 @@ for dataset in datasets:
       card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+p,"param",[0,0.333]) #0.333
       card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+p,"param",[0,0.333]) #0.333
       card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+p,"param",[0,0.333]) #0.333
-      card.addSystematic("CMS_VV_JJ_TThad_PTZ_"+p,"param",[0,0.333]) #0.333
-      card.addSystematic("CMS_VV_JJ_TThad_OPTZ_"+p,"param",[0,0.333]) #0.333
+      
     
       #alternative shapes for QCD background
       card.addSystematic("CMS_VV_JJ_nonRes_PT_"+p,"param",[0.0,0.333])
       card.addSystematic("CMS_VV_JJ_nonRes_OPT_"+p,"param",[0.0,0.333])
       # card.addSystematic("CMS_VV_JJ_nonRes_PTZ_"+p,"param",[0.0,0.333])
       # card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+p,"param",[0.0,0.333])
-      card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+p,"param",[0.0,0.333])
+      # card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+p,"param",[0.0,0.333])
       card.addSystematic('CMS_VV_JJ_nonRes_altshape_'+p,"param",[0.0,0.333])  
       card.addSystematic('CMS_VV_JJ_nonRes_altshape2_'+p,"param",[0.0,0.333]) 
       #card.addSystematic('CMS_VV_JJ_nonRes_altshape3_'+p,"param",[0.0,1.0])

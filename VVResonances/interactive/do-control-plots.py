@@ -39,6 +39,7 @@ c.GetWindowWidth()
 ROOT.gROOT.SetBatch(True)
 
 HCALbinsMVV= [838,890,944,1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037]#,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058,5253,5455,5663,5877,6099,6328,6564,6808]
+HCALbinsMVV= [1126,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058,5253,5455,5663,5877,6099,6328,6564,6808]
 xbins = array('d',HCALbinsMVV)
 
 # if __name__ == '__main__':
@@ -211,29 +212,22 @@ def plot(dir,data,qcd,herwig,madgraph,mcs,sigs,legDat,legqcd,legMCs,legSigs,post
       hmc.Sumw2()
       hmc .SetName(fmc .GetName()+"_"+histname+"_hmc") ; 
       hmc .Scale(luminosity)
-      if luminosity==35900.:
-        if fmc .GetName().find("ZJets")!=-1: 
-          print "Sample is ZJets!! Scale by " ,float(0.071)
-          hmc .Scale( float(0.071))
-      else:
-          if fmc .GetName().find("WJets")!=-1: 
-            print "Sample is WJets!! Scale by " ,float(33.7/98.4) #clemens 10.2/98.4
-            hmc .Scale(float(33.7/98.4))
-          if fmc .GetName().find("ZJets")!=-1: 
-            print "Sample is ZJets!! Scale by " ,float(14.16/41.34) #clemens:18.54/41.34
-            hmc .Scale( float(14.16/41.34))
+      if fmc .GetName().find("WJetsToQQ_HT800toInf")!=-1: 
+        print "Sample is WJets!! Scale by " ,float(0.205066345) #clemens 10.2/98.4
+        hmc .Scale(float(0.205066345))
+      if fmc .GetName().find("ZJetsToQQ_HT800toInf")!=-1: 
+        print "Sample is ZJets!! Scale by " ,float(0.09811023622) #clemens:18.54/41.34
+        hmc .Scale( float(0.09811023622))
       hmcs.append(hmc)
-      
+
     for i,fsig in enumerate(fsigs ): 
       htmp = fsig.Get(histname);
       hsig = copy.deepcopy(htmp)
       hsig.Sumw2()
-      print "For " ,fsig.GetName()+"_"+histname+"_hsig"
       hsig.SetName(fsig.GetName()+"_"+histname+"_hsig"); 
       hsig.Scale(float(lumi)) ; 
       hsigs.append(hsig);
-      
-   
+
     fdata = ROOT.TFile.Open ( dir + data ,'READ')
     hdata = copy.deepcopy(fdata.Get(h))
     hdata .SetName(histname+"hdata")
@@ -262,15 +256,16 @@ def plot(dir,data,qcd,herwig,madgraph,mcs,sigs,legDat,legqcd,legMCs,legSigs,post
     
     hqcd.SetFillColor(36)
     c = [ROOT.kMagenta+2,ROOT.kOrange+7,ROOT.kGreen+2]
-    s = [1,2,9]*3
+    s = [1,2,4]
     for i,h in enumerate (hsigs):
-      h.Scale(0.4*(hdata.Integral()/h.Integral()))
+      h.Scale(0.3*(hdata.Integral()/h.Integral()))
       h.SetLineColor(c[i]);
       h.SetLineStyle(s[i]);
       h.SetFillColor(0)
 
-    c = [629,21,47]*3
-    for i,h in enumerate(hmcs): h.SetFillColor(c[i])
+    c = [629,21,47]
+    for i,h in enumerate(hmcs): 
+        h.SetFillColor(c[i])
     
     canvas, legend = getCanvas(histname)
     canvas.Range(0,0,1,1)
@@ -350,9 +345,10 @@ def plot(dir,data,qcd,herwig,madgraph,mcs,sigs,legDat,legqcd,legMCs,legSigs,post
     htotmg.SetFillColorAlpha(0, 0.00)
     
     legend.AddEntry(hdata ,legDat,"LEP")
-    legend.AddEntry(hqcd  ,legqcd,"F")
-    legend.AddEntry(htotherwig ,"QCD Herwig ++","L")
-    legend.AddEntry(htotmg    ,"QCD MadGraph+Pythia8","L")
+    legend.AddEntry(hqcd	      ,"QCD Pythia8","F")   
+    legend.AddEntry(htotherwig    ,"         Herwig++","L")
+    legend.AddEntry(htotmg        ,"         MadGraph+Pythia8","L")
+    
     for h,leg in zip(hmcs,legMCs)  : legend.AddEntry(h,leg,"F")
     for h,leg in zip(hsigs,legSigs): legend.AddEntry(h,leg,"L")
     
@@ -434,9 +430,9 @@ def plot(dir,data,qcd,herwig,madgraph,mcs,sigs,legDat,legqcd,legMCs,legSigs,post
     f = ROOT.TFile(oname+".root","RECREATE")
     f.cd()
     for h in hsigs:
-      h.Write(h.GetName().split("_")[2])
+      h.Write(h.GetName().split("/")[1].split("_")[2])
     for h in hmcs:
-      h.Write(h.GetName().split("_")[2])
+      h.Write(h.GetName().split("/")[1].split("_")[2])
     hqcd.Write("hqcd")
     hdata.Write("hdata")
     htotherwig.Write("hherwig")
@@ -488,12 +484,12 @@ def plotMC(dir,qcd,mcs,sigs,legqcd,legMCs,legSigs,postfix):
       hmc.Sumw2()
       hmc .SetName(fmc .GetName()+"_"+histname+"_hmc") ; 
       hmc .Scale(lumi)
-      if fmc .GetName().find("WJets")!=-1: 
-        print "Sample is WJets!! Scale by " ,float(33.7/98.4) #clemens 10.2/98.4
-        hmc .Scale(float(33.7/98.4))
-      if fmc .GetName().find("ZJets")!=-1: 
-        print "Sample is ZJets!! Scale by " ,float(14.16/41.34) #clemens:18.54/41.34
-        hmc .Scale( float(14.16/41.34))
+      if fmc .GetName().find("WJetsToQQ_HT800toInf")!=-1: 
+        print "Sample is WJets!! Scale by " ,float(0.205066345) #clemens 10.2/98.4
+        hmc .Scale(float(0.205066345))
+      if fmc .GetName().find("ZJetsToQQ_HT800toInf")!=-1: 
+        print "Sample is ZJets!! Scale by " ,float(0.09811023622) #clemens:18.54/41.34
+        hmc .Scale( float(0.09811023622))
       hmcs.append(hmc)
       
     for i,fsig in enumerate(fsigs ): 
@@ -814,9 +810,9 @@ def plotTrigWeight(dir,datafile,qcdfiles,signalfiles, qcdleg,signallegs):
        
 def plotCombo(file,postfix="TOTAL"):
     f = ROOT.TFile.Open (directory+file ,'READ')
-    hWprime       = f.Get("WprimeToWZToWhadZhad")  ;hWprime       .Scale(0.9)
-    hBulkGravToWW = f.Get("BulkGravToWW")          ;hBulkGravToWW .Scale(0.9)
-    hBulkGravToZZ = f.Get("BulkGravToZZToZhadZhad");hBulkGravToZZ .Scale(0.9)
+    hWprime       = f.Get("WprimeToWZToWhadZhad")  ; hWprime       .Scale(0.7); 
+    hBulkGravToWW = f.Get("BulkGravToWW")          ; hBulkGravToWW .Scale(0.7); 
+    hBulkGravToZZ = f.Get("BulkGravToZZ")          ; hBulkGravToZZ .Scale(0.7); 
     hZJets        = f.Get("ZJetsToQQ")
     hWJets        = f.Get("WJetsToQQ")
     hTT           = f.Get("TTHad")
@@ -845,8 +841,8 @@ def plotCombo(file,postfix="TOTAL"):
         hBulkGravToZZ .Scale(0.5)
     legend.AddEntry(hdata	      ,"Data","LEP")   
     legend.AddEntry(hqcd	      ,"QCD Pythia8","F")   
-    legend.AddEntry(hherwig       ,"QCD Herwig ++","L")
-    legend.AddEntry(hmg           ,"QCD MadGraph+Pythia8","L")
+    legend.AddEntry(hherwig       ,"         Herwig++","L")
+    legend.AddEntry(hmg           ,"         MadGraph+Pythia8","L")
     legend.AddEntry(hWJets        ,"W+jets","F")
     legend.AddEntry(hZJets        ,"Z+jets","F")
     legend.AddEntry(hTT           ,"t#bar{t}","F")
@@ -960,28 +956,30 @@ if __name__ == '__main__':
   nonResTemplate    ="QCD"
   WJetsTemplate     ="WJetsToQQ"
   ZJetsTemplate     ="ZJetsToQQ"
-  ttTemplate        ="TTHad_pow"
+  ttTemplate        ="TT"
 
   wait = True
   from modules.submitJobs import submitCPs
   template=','.join([dataTemplate])
   template=','.join([nonResTemplate,WJetsTemplate,ZJetsTemplate,ttTemplate,BulkGravWWTemplate,BulkGravZZTemplate,WprimeTemplate,dataTemplate])
-  template=','.join([nonResTemplate,WJetsTemplate,ZJetsTemplate,ttTemplate,BulkGravWWTemplate,BulkGravZZTemplate,WprimeTemplate,dataTemplate])
-  # template=','.join([nonResTemplate,WJetsTemplate,ZJetsTemplate,dataTemplate])
+  # template=','.join([nonResTemplate,BulkGravWWTemplate,BulkGravZZTemplate,WprimeTemplate,dataTemplate])
+  # template=','.join([nonResTemplate,dataTemplate])
+  template=','.join([dataTemplate])
   pwd = os.getcwd()
-  # samples = pwd +"/samples" #For 2016 CPs
-  samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JEC_V4/' #For 2017 CPs
-  samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JEC_V6/'
-  samples = '/eos/user/t/thaarres/2017_JECV6_PURew/'
-  samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JECV6_PURew_June2018'
-  # samples = '/eos/user/t/thaarres/2016/'
-  jobname = "CP17PASallv2"
-  submitCPs(samples,template,wait,jobname)
+  # samples = pwd +"/samples16/" #For 2016 CPs
+  samples = pwd +"/samples/" #For 2017 CPs
+  # samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JEC_V4/' #For 2017 CPs
+  # samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JEC_V6/'
+  # samples = '/eos/user/t/thaarres/2017_JECV6_PURew/'
+  # samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JECV6_PURew_June2018'
+  # samples = '/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/2017_JECV6_PURew_JER/'
+  jobname = "CP17_latest"
+  # submitCPs(samples,template,wait,jobname)
   # mergeCPs(template,jobname)
   dir = "res"+jobname+"/"
   # dir = "resHPmc/"
-  # plot("resCP16PASall/","data.root" , "qcdpt.root","controlplots_2017_QCD_Pt-15to7000.root","qcdht.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT600toInf.root','controlplots_2017_ZJetsToQQ_HT600toInf.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZToZhadZhad_narrow_M_2000.root"],"Data (2016)" , "QCD Pythia8",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],"_2016",35900.)
-  # plot("resCP17PASall/","data.root" , "qcdpt.root","controlplots_2017_QCD_Pt-15to7000_TuneCUETHS1_Flat.root","qcdht.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT800toInf.root','controlplots_2017_ZJetsToQQ_HT800toInf.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZToZhadZhad_narrow_M_2000.root"],"Data (2017)" , "QCD Pythia8",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],"_2017",41367.929231882)
+  # plot("resCP16_latest/","data.root" , "qcdpt.root","controlplots_2017_QCD_Pt-15to7000.root","qcdht.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT800toInf_new.root','controlplots_2017_ZJetsToQQ_HT800toInf_new.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZ_narrow_M_2000.root"],"Data (2016)" , "QCD Pythia8",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],"_2016",35900.)
+  plot("resCP17_latest/","data.root" , "qcdpt.root","qcdherwig.root","qcdht.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT800toInf_new.root','controlplots_2017_ZJetsToQQ_HT800toInf_new.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZ_narrow_M_2000.root"],"Data (2017)" , "QCD Pythia8",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],"_2017",41367.929231882)
   # plot(dir,"data.root" , "qcdpt.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT800toInf.root','controlplots_2017_ZJetsToQQ_HT800toInf.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZ_narrow_M_2000.root"],"Data (2017)" , "QCD Pythia8",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],"_ptbinned")
   # plotMC(dir, "qcdht.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT800toInf.root','controlplots_2017_ZJetsToQQ_HT800toInf.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZ_narrow_M_2000.root"], "QCD MadGraph",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],postfix="MadGraph")
   # plotMC(dir, "qcdpt.root",["controlplots_2017_TTHad_pow.root",'controlplots_2017_WJetsToQQ_HT800toInf.root','controlplots_2017_ZJetsToQQ_HT800toInf.root'] , ["controlplots_2017_WprimeToWZToWhadZhad_narrow_M_2000.root"  , "controlplots_2017_BulkGravToWW_narrow_M_2000.root" , "controlplots_2017_BulkGravToZZ_narrow_M_2000.root"], "QCD Pythia8",["t#bar{t}","W+jets","Z+jets"] , ["W'(2 TeV)#rightarrowWZ" , "G_{Bulk}(2 TeV)#rightarrowWW" , "G_{Bulk}(2 TeV)#rightarrowZZ"],postfix="Pythia8")
@@ -989,25 +987,25 @@ if __name__ == '__main__':
   # plotTrigWeight("trigCompareSamples/","data.root",["qcdpt_noTW.root","qcdpt_tw.root"],["Wprime_noTW.root","Wprime_tw.root"], "QCD Pythia8",["W'(1 TeV)#rightarrowWZ"])
   # plotCombo("Dijet_invariant_mass.root","DijetInvMass")
   # plotCombo("Jet_1_softdrop_mass.root","SoftDropMass")
-  
+  #
   # os.system("hadd -f %slooseSel_Deltaeta.root              %slooseSel_Deltaeta_*.root            "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Dijet_invariant_mass.root  %slooseSel_Dijet_invariant_mass_*.root"%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_DDT.root             %slooseSel_Jet_1_DDT_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_eta.root             %slooseSel_Jet_1_eta_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_p_T.root             %slooseSel_Jet_1_p_T_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_phi.root             %slooseSel_Jet_1_phi_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_softdrop_mass.root   %slooseSel_Jet_1_softdrop_mass_*.root "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_tau21.root           %slooseSel_Jet_1_tau21_*.root         "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_tau_1.root           %slooseSel_Jet_1_tau_1_*.root         "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_1_tau_2.root           %slooseSel_Jet_1_tau_2_*.root         "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_DDT.root             %slooseSel_Jet_2_DDT_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_eta.root             %slooseSel_Jet_2_eta_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_p_T.root             %slooseSel_Jet_2_p_T_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_phi.root             %slooseSel_Jet_2_phi_*.root           "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_softdrop_mass.root   %slooseSel_Jet_2_softdrop_mass_*.root "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_tau21.root           %slooseSel_Jet_2_tau21_*.root         "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_tau_1.root           %slooseSel_Jet_2_tau_1_*.root         "%(directory,directory))
-  # os.system("hadd -f %slooseSel_Jet_2_tau_2.root           %slooseSel_Jet_2_tau_2_*.root         "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Dijet_invariant_mass.root  %slooseSel_Dijet_invariant_mass_*.root"%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_DDT.root             %slooseSel_Jet_1_DDT_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_eta.root             %slooseSel_Jet_1_eta_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_p_T.root             %slooseSel_Jet_1_p_T_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_phi.root             %slooseSel_Jet_1_phi_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_softdrop_mass.root   %slooseSel_Jet_1_softdrop_mass_*.root "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_tau21.root           %slooseSel_Jet_1_tau21_*.root         "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_tau_1.root           %slooseSel_Jet_1_tau_1_*.root         "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_1_tau_2.root           %slooseSel_Jet_1_tau_2_*.root         "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_DDT.root             %slooseSel_Jet_2_DDT_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_eta.root             %slooseSel_Jet_2_eta_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_p_T.root             %slooseSel_Jet_2_p_T_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_phi.root             %slooseSel_Jet_2_phi_*.root           "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_softdrop_mass.root   %slooseSel_Jet_2_softdrop_mass_*.root "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_tau21.root           %slooseSel_Jet_2_tau21_*.root         "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_tau_1.root           %slooseSel_Jet_2_tau_1_*.root         "%(directory,directory))
+ #  os.system("hadd -f %slooseSel_Jet_2_tau_2.root           %slooseSel_Jet_2_tau_2_*.root         "%(directory,directory))
   # plotCombo("looseSel_Deltaeta.root"              , "looseSel_Deltaeta"               )
   # plotCombo("looseSel_Dijet_invariant_mass.root"  , "looseSel_Dijet_invariant_mass"   )
   # plotCombo("looseSel_Jet_1_DDT.root"             , "looseSel_Jet_1_DDT"              )

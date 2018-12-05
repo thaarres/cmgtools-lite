@@ -16,6 +16,7 @@ parser.add_option("-y","--yrange",dest="yrange",help="set range for y bins in pr
 parser.add_option("-z","--zrange",dest="zrange",help="set range for z bins in projection",default="0,-1")
 parser.add_option("-p","--projection",dest="projection",help="choose which projection should be done",default="xyz")
 parser.add_option("-d","--data",dest="data",action="store_true",help="make also postfit plots",default=True)
+parser.add_option("--merge",dest="merge",action="store_true",help="Merge all kernels",default=False)
 parser.add_option("-l","--label",dest="label",help="add extra label such as pythia or herwig",default="")
 parser.add_option("--sample",dest="sample",help="pythia, madgraph or herwig",default="pythia")
 parser.add_option("--log",dest="log",help="write fit result to log file",default="fit_results.log")
@@ -29,17 +30,17 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 colors = [ROOT.kBlack,ROOT.kPink-1,ROOT.kAzure+1,ROOT.kAzure+1,210,210,ROOT.kMagenta,ROOT.kMagenta,ROOT.kOrange,ROOT.kOrange,ROOT.kViolet,ROOT.kViolet]
 
 def merge_all():
- fin_herwig_mjj = ROOT.TFile.Open('save_new_shapes_herwig_1D.root','READ') 
+ fin_herwig_mjj = ROOT.TFile.Open('save_new_shapes_herwig_%s_1D.root'%purity,'READ') 
  histo_altshapeUp_mjj = fin_herwig_mjj.histo_nominal
  histo_altshapeUp_mjj.SetName('histo_altshapeUp')
  histo_altshapeUp_mjj.SetTitle('histo_altshapeUp')
  
- fin_madgraph_mjj = ROOT.TFile.Open('save_new_shapes_madgraph_1D.root','READ')
+ fin_madgraph_mjj = ROOT.TFile.Open('save_new_shapes_madgraph_%s_1D.root'%purity,'READ')
  histo_altshape2Up_mjj = fin_madgraph_mjj.histo_nominal
  histo_altshape2Up_mjj.SetName('histo_altshape2Up')
  histo_altshape2Up_mjj.SetTitle('histo_altshape2Up')
  
- fin_pythia_mjj = ROOT.TFile.Open('save_new_shapes_pythia_1D.root','UPDATE')
+ fin_pythia_mjj = ROOT.TFile.Open('save_new_shapes_pythia_%s_1D.root'%purity,'UPDATE')
  histo_nominal = fin_pythia_mjj.histo_nominal
  histo_altshapeUp_mjj.Write('histo_altshapeUp')
  histo_altshapeDown_mjj = mirror(histo_altshapeUp_mjj,histo_nominal,"histo_altshapeDown")
@@ -57,26 +58,28 @@ def merge_all():
  fin_madgraph_mjj.Close()
  fin_herwig_mjj.Close()
  
- fin_herwig_l1 = ROOT.TFile.Open('save_new_shapes_herwig_COND2D_l1.root','READ') 
+ fin_herwig_l1 = ROOT.TFile.Open('save_new_shapes_herwig_%s_COND2D_l1.root'%purity,'READ') 
  histo_altshapeUp_l1 = fin_herwig_l1.histo_nominal
  histo_altshapeUp_l1.SetName('histo_altshapeUp')
  histo_altshapeUp_l1.SetTitle('histo_altshapeUp')
  
- fin_madgraph_l1 = ROOT.TFile.Open('save_new_shapes_madgraph_COND2D_l1.root','READ')
+ fin_madgraph_l1 = ROOT.TFile.Open('save_new_shapes_madgraph_%s_COND2D_l1.root'%purity,'READ')
  histo_altshape2Up_l1 = fin_madgraph_l1.histo_nominal
  histo_altshape2Up_l1.SetName('histo_altshape2Up')
  histo_altshape2Up_l1.SetTitle('histo_altshape2Up')
  
- fin_pythia_l1 = ROOT.TFile.Open('save_new_shapes_pythia_COND2D_l1.root','UPDATE')
+ fin_pythia_l1 = ROOT.TFile.Open('save_new_shapes_pythia_%s_COND2D_l1.root'%purity,'UPDATE')
  histo_nominal = fin_pythia_l1.histo_nominal
  histo_altshapeUp_l1.Write('histo_altshapeUp')
  histo_altshapeDown_l1 = mirror(histo_altshapeUp_l1,histo_nominal,"histo_altshapeDown",2)
+ conditional(histo_altshapeDown_l1)
  histo_altshapeDown_l1.SetName('histo_altshapeDown')
  histo_altshapeDown_l1.SetTitle('histo_altshapeDown')
  histo_altshapeDown_l1.Write('histo_altshapeDown') 
  
  histo_altshape2Up_l1.Write('histo_altshape2Up')
  histo_altshape2Down_l1 = mirror(histo_altshape2Up_l1,histo_nominal,"histo_altshape2Down",2)
+ conditional(histo_altshape2Down_l1)
  histo_altshape2Down_l1.SetName('histo_altshape2Down')
  histo_altshape2Down_l1.SetTitle('histo_altshape2Down')
  histo_altshape2Down_l1.Write('histo_altshape2Down') 
@@ -84,26 +87,28 @@ def merge_all():
  fin_pythia_l1.Close()
  fin_madgraph_l1.Close()
  fin_herwig_l1.Close()
- fin_herwig_l2 = ROOT.TFile.Open('save_new_shapes_herwig_COND2D_l2.root','READ') 
+ fin_herwig_l2 = ROOT.TFile.Open('save_new_shapes_herwig_%s_COND2D_l2.root'%purity,'READ') 
  histo_altshapeUp_l2 = fin_herwig_l2.histo_nominal
  histo_altshapeUp_l2.SetName('histo_altshapeUp')
  histo_altshapeUp_l2.SetTitle('histo_altshapeUp')
  
- fin_madgraph_l2 = ROOT.TFile.Open('save_new_shapes_madgraph_COND2D_l2.root','READ')
+ fin_madgraph_l2 = ROOT.TFile.Open('save_new_shapes_madgraph_%s_COND2D_l2.root'%purity,'READ')
  histo_altshape2Up_l2 = fin_madgraph_l2.histo_nominal
  histo_altshape2Up_l2.SetName('histo_altshape2Up')
  histo_altshape2Up_l2.SetTitle('histo_altshape2Up')
  
- fin_pythia_l2 = ROOT.TFile.Open('save_new_shapes_pythia_COND2D_l2.root','UPDATE')
+ fin_pythia_l2 = ROOT.TFile.Open('save_new_shapes_pythia_%s_COND2D_l2.root'%purity,'UPDATE')
  histo_nominal = fin_pythia_l2.histo_nominal
  histo_altshapeUp_l2.Write('histo_altshapeUp')
  histo_altshapeDown_l2 = mirror(histo_altshapeUp_l2,histo_nominal,"histo_altshapeDown",2)
+ conditional(histo_altshapeDown_l2)
  histo_altshapeDown_l2.SetName('histo_altshapeDown')
  histo_altshapeDown_l2.SetTitle('histo_altshapeDown')
  histo_altshapeDown_l2.Write('histo_altshapeDown') 
  
  histo_altshape2Up_l2.Write('histo_altshape2Up')
  histo_altshape2Down_l2 = mirror(histo_altshape2Up_l2,histo_nominal,"histo_altshape2Down",2)
+ conditional(histo_altshape2Down_l2)
  histo_altshape2Down_l2.SetName('histo_altshape2Down')
  histo_altshape2Down_l2.SetTitle('histo_altshape2Down')
  histo_altshape2Down_l2.Write('histo_altshape2Down') 
@@ -244,7 +249,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     
     for zk,zv in zBins.iteritems(): histo_z.Fill(zv,lv_z[zk-1]*norm_nonres[0])    
        
-    fout_z = ROOT.TFile.Open('save_new_shapes_%s_1D.root'%sample,'RECREATE')
+    fout_z = ROOT.TFile.Open('save_new_shapes_%s_%s_1D.root'%(sample,purity),'RECREATE')
     fout_z.cd()
     histo_z.Scale(1./histo_z.Integral())
     histo_z.SetTitle('histo_nominal')
@@ -252,8 +257,8 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histo_z.Write('histo_nominal')
 
     print "Now PT 1D",zBinslowedge[-1],zBinslowedge[0],xBinslowedge[-1],xBinslowedge[0]
-    alpha=15./(float(zBinslowedge[-1])*float(zBinslowedge[-1]))
-    histogram_pt_up,histogram_pt_down=unequalScale(histo_z,"histo_nominal_PT",alpha,2)
+    alpha=1.5/float(zBinslowedge[-1])
+    histogram_pt_up,histogram_pt_down=unequalScale(histo_z,"histo_nominal_PT",alpha,1)
     histogram_pt_down.SetName('histo_nominal_PTDown')
     histogram_pt_down.SetTitle('histo_nominal_PTDown')
     histogram_pt_down.Write('histo_nominal_PTDown')
@@ -262,8 +267,8 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histogram_pt_up.Write('histo_nominal_PTUp')
 
     print "Now OPT 1D"
-    alpha=15.*float(zBinslowedge[0])*float(zBinslowedge[0])
-    histogram_opt_up,histogram_opt_down=unequalScale(histo_z,"histo_nominal_OPT",alpha,-2)
+    alpha=1.5*float(zBinslowedge[0])
+    histogram_opt_up,histogram_opt_down=unequalScale(histo_z,"histo_nominal_OPT",alpha,-1)
     histogram_opt_down.SetName('histo_nominal_OPTDown')
     histogram_opt_down.SetTitle('histo_nominal_OPTDown')
     histogram_opt_down.Write('histo_nominal_OPTDown')
@@ -273,7 +278,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
         
     fout_z.Close()
     
-    fout_xz = ROOT.TFile.Open('save_new_shapes_%s_COND2D_l1.root'%sample,'RECREATE')
+    fout_xz = ROOT.TFile.Open('save_new_shapes_%s_%s_COND2D_l1.root'%(sample,purity),'RECREATE')
     fout_xz.cd()  
     conditional(histo_xz)
     histo_xz.SetTitle('histo_nominal')
@@ -306,7 +311,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
         
     fout_xz.Close()
     
-    fout_yz = ROOT.TFile.Open('save_new_shapes_%s_COND2D_l2.root'%sample,'RECREATE')
+    fout_yz = ROOT.TFile.Open('save_new_shapes_%s_%s_COND2D_l2.root'%(sample,purity),'RECREATE')
     fout_yz.cd()  
     conditional(histo_yz)
     histo_yz.SetTitle('histo_nominal')
@@ -339,7 +344,6 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     
     fout_yz.Close()    
     
-
 def getListFromRange(xyzrange):
     r=[]
     a,b = xyzrange.split(",")
@@ -585,8 +589,8 @@ def MakePlots(histos,hdata,axis,nBins):
     graphs = addRatioPlot(hdata,histos[0],histos[1],nBins)
     #graphs[0].Draw("AP")
     graphs[1].Draw("AP")
-    c.SaveAs(options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_')+purity+".png")
-    c.SaveAs(options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_')+purity+".root")
+    c.SaveAs(options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_')+purity+"_"+options.sample+".png")
+    c.SaveAs(options.output+"PostFit"+options.label+"_"+htitle.replace(' ','_')+purity+"_"+options.sample+".root")
     
 
 def doXprojection(pdfs,data,norm,hin=0):
@@ -765,8 +769,8 @@ def addRatioPlot(hdata,hprefit,hpostfit,nBins):
     #gt = ROOT.TH1F("gt","gt",hdata.GetNbinsX(),hdata.GetXaxis().GetXmin(),hdata.GetXaxis().GetXmax())
     gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
     gt.SetTitle("")
-    gt.SetMinimum(0.);
-    gt.SetMaximum(2.);
+    gt.SetMinimum(0.5);
+    gt.SetMaximum(1.5);
     gt.SetDirectory(0);
     gt.SetStats(0);
     gt.SetLineStyle(0);
@@ -843,8 +847,10 @@ def getChi2proj(histo_pdf,histo_data):
 if __name__=="__main__":
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
-     purity = options.input.replace('.root','').split('_')[-1]   
-                        
+     if options.input.find("HPHP")!=-1: purity = "HPHP"
+     elif options.input.find("HPLP")!=-1: purity = "HPLP"
+     else: purity = "LPLP"  
+     print "Using purity: " ,purity                
      #################################################
      xBins= getListOfBins(hinMC,"x")
      xBinslowedge = getListOfBinsLowEdge(hinMC,'x')
@@ -880,24 +886,6 @@ if __name__=="__main__":
      print "z bins width:"
      print zBinsWidth
 
-     #################################################  
-     #fdata = ROOT.TFile.Open('HPHP/workspace_dani/workspace_herwig.root')
-     #wdata = fdata.Get("w")
-     #wdata.Print()
-     
-     #mdata = wdata.pdf("model_b")
-     #nevents = int(66760.9583647)
-     #data = mdata.generate(ROOT.RooArgSet(wdata.var('MJ1'),wdata.var('MJ2'),wdata.var('MJJ')),nevents)
-     #argsdata  = mdata.getComponents()
-     #dataG = argsdata["shapeBkg_nonRes_JJ_WprimeWZ_HPHP_13TeV"].generate(ROOT.RooArgSet(wdata.var('MJ1'),wdata.var('MJ2'),wdata.var('MJJ')),nevents)
-     #data = dataG.binnedClone("obs","obs")
-     #print dataG
-     #dataG.Print()
-     #dataG.Print("v")
-     #print data
-     #data.Print()
-     #data.Print("v")
-     #sys.exit()
             
      #################################################                
      print 
@@ -911,7 +899,7 @@ if __name__=="__main__":
      data = workspace.data("data_obs")
      data.Print()
      
-     
+   
      ndata = {}
      errdata_lo = {}
      errdata_hi = {}
@@ -944,30 +932,33 @@ if __name__=="__main__":
      
      print
      print "Observed number of events:",data.sumEntries()
+     
      args  = model.getComponents()
      pdfName = "pdf_binJJ_"+purity+"_13TeV_%s_bonly"%options.year
-     print "Expected number of QCD events:",(args[pdfName].getComponents())["n_exp_binJJ_"+purity+"_13TeV_%s_proc_nonRes"%options.year].getVal()
-     print 
 
+     print "Expected number of QCD events:",(args[pdfName].getComponents())["n_exp_binJJ_"+purity+"_13TeV_%s_proc_nonRes"%options.year].getVal()
+     # print "Expected number of QCD events:",workspace.var((args[pdfName].getComponents())["n_exp_binJJ_"+purity+"_13TeV_%s_proc_nonRes"%options.year]).getVal()
+    
      #################################################
      print "Fitting:"
-     fitresult = model.fitTo(data,ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1),ROOT.RooFit.NumCPU(8))
+     fitresult = model.fitTo(data,ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1),ROOT.RooFit.NumCPU(8))#,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+     # fitresult = model.fitTo(data,ROOT.RooFit.Save(1),ROOT.RooFit.Verbose(1), ROOT.RooFit.Minos(0),ROOT.RooFit.NumCPU(8))
      # ll = ROOT.RooLinkedList()
-#      fitresult = model.chi2FitTo(data,ll)
+   #   fitresult = model.chi2FitTo(data)
 
      # chi2 = ROOT.RooChi2Var("chi2","chi2",model,data,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-     # print "done with fit, print chi2"
-     # chi2.Print("v")
-     # print "make minuit"
-     # m = ROOT.RooMinuit(chi2)
-     # print "migrad"
-     # m.migrad()
-     # print "hesse"
-     # m.hesse()
-     # print "save minuit"
-     # r_chi2_wgt = m.save()
-     # print "print wgt"
-     # r_chi2_wgt.Print("v")
+ #     print "done with fit, print chi2"
+ #     chi2.Print("v")
+ #     print "make minuit"
+ #     m = ROOT.RooMinuit(chi2)
+ #     print "migrad"
+ #     m.migrad()
+ #     print "hesse"
+ #     m.hesse()
+ #     print "save minuit"
+ #     fitresult = m.save()
+ #     print "print wgt"
+ #     fitresult.Print("v")
 
      
         #
@@ -1034,6 +1025,7 @@ if __name__=="__main__":
          allpdfsy.append(args[p])
       
      print
+    
      norm = (args["pdf_binJJ_"+purity+"_13TeV_%s_bonly"%options.year].getComponents())["n_exp_binJJ_"+purity+"_13TeV_%s_proc_nonRes"%options.year].getVal()
      #norm = (args["pdf_binJJ_"+purity+"_13TeV_bonly"].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_proc_nonRes"].getVal()
      print "norm after fit "+str(norm)
@@ -1074,6 +1066,7 @@ if __name__=="__main__":
      norm_nonres[1] = (args["pdf_binJJ_"+purity+"_13TeV_%s_bonly"%options.year].getComponents())["n_exp_binJJ_"+purity+"_13TeV_%s_proc_nonRes"%options.year].getPropagatedError(fitresult)
           
      save_shape(pdf_nonres_shape_postfit,norm_nonres,options.sample)
+     if options.merge: merge_all()
      #################################################     
      #make projections onto MJJ axis
      if options.projection =="z": doZprojection(allpdfsz,data,norm)

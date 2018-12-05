@@ -9,9 +9,7 @@ from datetime import datetime
 startTime = datetime.now()
 ROOT.gROOT.SetBatch(True)
 
-
-
-def getPlotters(indir,samples,isData=False,period,corr="1"):
+def getPlotters(indir,samples,isData,period,corr="1"):
     sampleTypes=samples.split(',')
     plotters=[]
     for filename in os.listdir(indir):
@@ -30,15 +28,15 @@ def getPlotters(indir,samples,isData=False,period,corr="1"):
                   plotters[-1].addCorrectionFactor('xsec','tree')
                   plotters[-1].addCorrectionFactor('genWeight','tree')
                   plotters[-1].addCorrectionFactor('puWeight','tree')
-                  if period == 2017:
-                      plotters[-1].addCorrectionFactor('jj_triggerWeight','tree')
-                  else:
-                      plotters[-1].addCorrectionFactor('triggerWeight','tree')
+                  # if period == 2017:
+ #                      plotters[-1].addCorrectionFactor('jj_triggerWeight','tree')
+ #                  else:
+ #                      plotters[-1].addCorrectionFactor('triggerWeight','tree')
                       
                   plotters[-1].addCorrectionFactor(corr,'flat')                  
     return  plotters
 
-def doHist(f,outname,plotter,var,postfix,cut,bins,mini,maxi,title,unit,ytitle,period=period):
+def doHist(f,outname,plotter,var,postfix,cut,bins,mini,maxi,title,unit,ytitle,period):
     name =  postfix+"_"+(title.replace("(","").replace(")","").replace("-","_").replace("/","_").replace("#","").replace(" ","_").replace("tau_{21}^{DDT}","DDT").replace("tau_{21}","tau21").replace("{","").replace("}",""))
     h =  plotter.drawTH1(var,cut,"1",bins,mini,maxi,title,unit,"HIST")
     h.SetName(name)
@@ -48,17 +46,18 @@ def doHist(f,outname,plotter,var,postfix,cut,bins,mini,maxi,title,unit,ytitle,pe
     
 
 if __name__ == "__main__":
-    period = 2017
-    if indir.find("2016")!=-1: 
-        period == 2016
+    
     infile = sys.argv[1]
     outname = sys.argv[2]
     indir  = sys.argv[3]
+    if indir.find("16")!=-1: 
+        period = 2016
+    else:
+        period = 2017   
     isData = False
     if infile.find("JetHT")!=-1: 
       isData =True
-
-    
+    print "PERIOD IS " , period
     HCALbinsMVV= [1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058,5253,5455,5663,5877,6099,6328,6564,6808]
     HCALbinsMVV= [838,890,944,1000,1058,1118,1181,1246,1313,1383,1455,1530,1607,1687,1770,1856,1945,2037,2132,2231,2332,2438,2546,2659,2775,2895,3019,3147,3279,3416,3558,3704,3854,4010,4171,4337,4509,4686,4869,5058,5253,5455,5663,5877,6099,6328,6564,6808]
     xbins = array('d',HCALbinsMVV)
@@ -98,7 +97,7 @@ if __name__ == "__main__":
     minMJ=55.0
     maxMJ=215.0
 
-    minMVV=838.
+    minMVV=1126.
     maxMVV=7038.0
 
     minMX=1000.0
@@ -129,24 +128,24 @@ if __name__ == "__main__":
 
     postfix = "looseSel"
     cut='*'.join([cuts['common'],cuts['metfilters'],cuts['acceptance']])
-    h = doHist(infile,outname,plotter,'jj_l1_softDrop_mass',postfix,cut,80,55.,215.,'Jet 1 softdrop mass',"GeV","Events / 2 GeV") ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_softDrop_mass',postfix,cut,80,55.,215.,'Jet 2 softdrop mass',"GeV","Events / 2 GeV") ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_LV_mass',postfix,cut,6200,838.,7038.,'Dijet invariant mass',"GeV","Events / 1 GeV")     ; hists.append(h);
-    h = doHist(infile,outname,plotter,'(jj_l1_tau2/jj_l1_tau1+(0.082*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))',postfix,cut,24,0.,1.2,'Jet 1 #tau_{21}^{DDT}','',"Events / 0.05"); hists.append(h);
-    h = doHist(infile,outname,plotter,'(jj_l2_tau2/jj_l2_tau1+(0.082*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))',postfix,cut,24,0.,1.2,'Jet 2 #tau_{21}^{DDT}','',"Events / 0.05"); hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l1_tau2/jj_l1_tau1',postfix,cut,20,0.,1.,'Jet 1 #tau_{21}',"","Events / 0.05")                                                                                      ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_tau2/jj_l2_tau1',postfix,cut,20,0.,1.,'Jet 2 #tau_{21}',"","Events / 0.05")                                                                                      ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l1_phi',postfix,cut,25,-2.5,2.5,'Jet 1 #phi',"","Events / 0.2")                                                                                                     ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_phi',postfix,cut,25,-2.5,2.5,'Jet 2 #phi',"","Events / 0.2")                                                                                                     ; hists.append(h);
-    h = doHist(infile,outname,plotter,'abs(jj_l1_eta-jj_l2_eta)',postfix,cut,15,0.,1.5,'#Delta#eta',"","Events / 0.1")                                                                                        ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l1_pt',postfix,cut,36,200.,2000.,'Jet 1 p_{T}',"GeV","Events / 50 GeV")                                                                                                   ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_pt',postfix,cut,36,200.,2000.,'Jet 2 p_{T}',"GeV","Events / 50 GeV")                                                                                             ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l1_eta',postfix,cut,25,-2.5,2.5,'Jet 1 #eta',"","Events / 0.2")                                                                                                            ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_eta',postfix,cut,25,-2.5,2.5,'Jet 2 #eta',"","Events / 0.2")                                                      ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l1_tau2',postfix,cut,20,0.,1.,'Jet 1 #tau_{2}',"","Events / 0.05")                                                                                                         ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_tau2',postfix,cut,20,0.,1.,'Jet 2 #tau_{2}',"","Events / 0.05")                                                                                                  ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l1_tau1',postfix,cut,20,0.,1.,'Jet 1 #tau_{1}',"","Events / 0.05")                                                                                                         ; hists.append(h);
-    h = doHist(infile,outname,plotter,'jj_l2_tau1',postfix,cut,20,0.,1.,'Jet 2 #tau_{1}',"","Events / 0.05")                                                                     ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_softDrop_mass',postfix,cut,80,55.,215.,'Jet 1 softdrop mass',"GeV","Events / 2 GeV", period) ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_softDrop_mass',postfix,cut,80,55.,215.,'Jet 2 softdrop mass',"GeV","Events / 2 GeV", period) ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_LV_mass',postfix,cut,6000,1126.,7126.,'Dijet invariant mass',"GeV","Events / 1 GeV",period)     ; hists.append(h);
+    h = doHist(infile,outname,plotter,'(jj_l1_tau2/jj_l1_tau1+(0.082*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))',postfix,cut,24,0.,1.2,'Jet 1 #tau_{21}^{DDT}','',"Events / 0.05", period); hists.append(h);
+    h = doHist(infile,outname,plotter,'(jj_l2_tau2/jj_l2_tau1+(0.082*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))',postfix,cut,24,0.,1.2,'Jet 2 #tau_{21}^{DDT}','',"Events / 0.05", period); hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_tau2/jj_l1_tau1',postfix,cut,20,0.,1.,'Jet 1 #tau_{21}',"","Events / 0.05", period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_tau2/jj_l2_tau1',postfix,cut,20,0.,1.,'Jet 2 #tau_{21}',"","Events / 0.05", period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_phi',postfix,cut,25,-2.5,2.5,'Jet 1 #phi',"","Events / 0.2", period)   ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_phi',postfix,cut,25,-2.5,2.5,'Jet 2 #phi',"","Events / 0.2", period)   ; hists.append(h);
+    h = doHist(infile,outname,plotter,'abs(jj_l1_eta-jj_l2_eta)',postfix,cut,15,0.,1.5,'#Delta#eta',"","Events / 0.1",period)   ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_pt',postfix,cut,36,200.,2000.,'Jet 1 p_{T}',"GeV","Events / 50 GeV",period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_pt',postfix,cut,36,200.,2000.,'Jet 2 p_{T}',"GeV","Events / 50 GeV",period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_eta',postfix,cut,25,-2.5,2.5,'Jet 1 #eta',"","Events / 0.2",period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_eta',postfix,cut,25,-2.5,2.5,'Jet 2 #eta',"","Events / 0.2",period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_tau2',postfix,cut,20,0.,1.,'Jet 1 #tau_{2}',"","Events / 0.05", period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_tau2',postfix,cut,20,0.,1.,'Jet 2 #tau_{2}',"","Events / 0.05", period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l1_tau1',postfix,cut,20,0.,1.,'Jet 1 #tau_{1}',"","Events / 0.05", period)    ; hists.append(h);
+    h = doHist(infile,outname,plotter,'jj_l2_tau1',postfix,cut,20,0.,1.,'Jet 2 #tau_{1}',"","Events / 0.05", period)    ; hists.append(h);
 
     f = ROOT.TFile(outname,"RECREATE")
     f.cd()
