@@ -687,28 +687,25 @@ class DataCardMaker:
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             resolutionSysts.append(syst)
 
-        if newTag !="":
-            tag=newTag
-        else:
-            tag=name+"_"+self.tag
+        if newTag !="": tag=newTag
+        else: tag=name+"_"+self.tag
 
         mean="_".join(["mean",tag])
-        if "mean" in preconstrains.keys():
-            val = preconstrains['mean']['val']
-            err = 0
-        self.w.factory("expr::{name}('{param}*(1+{vv_syst})',{vv_systs})".format(name=mean,param=val,vv_syst=scaleStr,vv_systs=','.join(scaleSysts)))
-        
-        
-        sigma="_".join(["sigma",tag])
-        if "sigma" in preconstrains.keys():
-            val = preconstrains['sigma']['val']
-            err = 0
+        if len(scaleSysts)>=1:
+            self.w.factory("expr::{name}('{param}*(1+{vv_syst})',{vv_systs})".format(name=mean,param=preconstrains['mean']['val'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)))
         else:
-            val = 15.0
-            print "attention set value to default in addMjetBackgroundShapeVJetsRes"
-        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',{vv_systs})".format(name=sigma,param=val,vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)))
+            self.w.factory("{name}[{val},-{err},{err}]".format(name=mean,val=preconstrains['mean']['val'],err=0))
+            self.w.var(mean).setConstant(1)
+                
+        sigma="_".join(["sigma",tag])
+        if len(resolutionSysts)>=1:
+            self.w.factory("expr::{name}('({param})*(1+{vv_syst})',{vv_systs})".format(name=sigma,param=preconstrains['sigma']['val'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)))
+        else:
+            self.w.factory("{name}[{val},-{err},{err}]".format(name=sigma,val=preconstrains['sigma']['val'],err=0))
+            self.w.var(sigma).setConstant(1)
         
         alpha="_".join(["alpha",tag])
+
         if "alpha" in preconstrains.keys():
             val = preconstrains['alpha']['val']
             err = 0
@@ -716,10 +713,11 @@ class DataCardMaker:
             val = 15.0
             print "attention set value to default in addMjetBackgroundShapeVJets"
         self.w.factory("{name}[{val},-{err},{err}]".format(name=alpha,val=val,err=err))
+
         self.w.var(alpha).setConstant(1)
         
-       
         n="_".join(["n",tag])
+
         if "n" in preconstrains.keys():
             val = preconstrains['n']['val']
             err = 0
@@ -750,7 +748,11 @@ class DataCardMaker:
         self.w.var(n2).setConstant(1)
 
         pdfName="_".join([name,self.tag])
-        wjet = ROOT.RooDoubleCB(pdfName,pdfName,self.w.var(Mjet),self.w.function(mean),self.w.function(sigma),self.w.var(alpha),self.w.var(n),self.w.var(alpha2),self.w.var(n2))
+        if len(resolutionSysts)>=1:
+            wjet = ROOT.RooDoubleCB(pdfName,pdfName,self.w.var(Mjet),self.w.function(mean),self.w.function(sigma),self.w.var(alpha),self.w.var(n),self.w.var(alpha2),self.w.var(n2))
+        #getattr(self.w,'import')(vvMass,ROOT.RooFit.Rename(pdfName))
+        else:
+            wjet = ROOT.RooDoubleCB(pdfName,pdfName,self.w.var(Mjet),self.w.var(mean),self.w.var(sigma),self.w.var(alpha),self.w.var(n),self.w.var(alpha2),self.w.var(n2))
         getattr(self.w,'import')(wjet,ROOT.RooFit.Rename(pdfName))
 
     def addMVVBackgroundShapePow(self,name,variable,newTag="",preconstrains={}):

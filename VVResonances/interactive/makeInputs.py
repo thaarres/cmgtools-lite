@@ -87,6 +87,7 @@ cat['genLP2'] = '(jj_l2_gen_tau2/jj_l2_gen_tau1+(0.080*TMath::Log((jj_l2_gen_sof
 
 
 
+
 cuts={}
 
 cuts['genHPHP'] = '('+cat['genHP1']+'&&'+cat['genHP2']+')'
@@ -102,6 +103,7 @@ else:
     cuts['metfilters'] =("Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_eeBadScFilter")
 
 cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(njj>0&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.&&TMath::Log(jj_l1_softDrop_mass**2/jj_l1_pt**2)<-1.8&&TMath::Log(jj_l2_softDrop_mass**2/jj_l2_pt**2)<-1.8)' #with rho
+
 cuts['HPHP'] = '('+cat['HP1']+'&&'+cat['HP2']+')'
 cuts['LPLP'] = '('+cat['LP1']+'&&'+cat['LP2']+')'
 cuts['HPLP'] = '(('+cat['HP1']+'&&'+cat['LP2']+')||('+cat['LP1']+'&&'+cat['HP2']+'))'
@@ -129,6 +131,7 @@ nonResTemplate="QCD_Pt_" #high stat
 # nonResTemplate="QCD_Pt-" #low stat --> use this for tests
 #nonResTemplate="Dijet" #to compare shapes
 
+
 # WresTemplate= "WJetsToQQ_HT800,TTHad_pow"
 WresTemplate= "WJetsToQQ_HT800"
 ZresTemplate= "ZJetsToQQ_HT800"
@@ -136,6 +139,7 @@ TTresTemplate= "TTHad_pow"
     
 minMJ=55.0
 maxMJ=215.0
+
 binsMJ=80
 
 minMVV=838.0
@@ -155,7 +159,6 @@ if useTriggerWeights:
 else:
     minMX=1000.0
     maxMX=5500.0
-
 
 cuts['acceptance']= "(jj_LV_mass>{minMVV}&&jj_LV_mass<{maxMVV}&&jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMVV=minMVV,maxMVV=maxMVV,minMJ=minMJ,maxMJ=maxMJ)
 cuts['acceptanceMJ']= "(jj_l1_softDrop_mass>{minMJ}&&jj_l1_softDrop_mass<{maxMJ}&&jj_l2_softDrop_mass>{minMJ}&&jj_l2_softDrop_mass<{maxMJ})".format(minMJ=minMJ,maxMJ=maxMJ)
@@ -209,7 +212,7 @@ def makeSignalYields(filename,template,branchingFraction,sfP = {'HPHP':1.0,'HPLP
   cmd='vvMakeSignalYields.py -s {template} -c "{cut}" -o {output} -V "jj_LV_mass" -m {minMVV} -M {maxMVV} -f {fnc} -b {BR} --minMX {minMX} --maxMX {maxMX} {addOption} samples_lo '.format(template=template, cut=cut, output=yieldFile,minMVV=minMVV,maxMVV=maxMVV,fnc=fnc,BR=branchingFraction,minMX=minMX,maxMX=maxMX,addOption=addOption)
   os.system(cmd)
 
-def fitVJets(filename,template):
+def fitVJets(filename,template,Wxsec=1,Zxsec=1):
   for p in purities:
     cut='*'.join([cuts['common'],cuts[p],cuts['acceptance']])
     rootFile=filename+"_"+p+".root"
@@ -307,11 +310,10 @@ def makeBackgroundShapesMJSpline(name,filename,template,leg,addCut="1"):
   os.system(cmd)
 
 
-def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DMVV",wait=True):
+def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DMVV",wait=True,corrFactorW=1,corrFactorZ=1):
  pwd = os.getcwd()
  for p in purities:
   jobname = jobName+"_"+p
-  print " Working on purity: ", p
   resFile="JJ_nonRes_detectorResponse.root"   
   # resFile="JJ_nonRes_detectorResponse_l1_accepCuts.root"
   rootFile = filename+"_"+name+"_MVV_"+p+".root"
@@ -328,6 +330,7 @@ def makeBackgroundShapesMVVKernel(name,filename,template,addCut="1",jobName="1DM
     if wait: merge1DMVVTemplate(jobList,files,jobname,p,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV)
   else:
     cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{template}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {addOption} {samples}'.format(rootFile=rootFile,template=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,addOption=addOption,samples=samples)
+#     cmd='vvMake1DMVVTemplateWithKernels.py -H "x" -o "{rootFile}" -s "{samples}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {addOption} samples --corrFactorW {corrFactorW} --corrFactorZ {corrFactorZ} '.format(rootFile=rootFile,samples=template,cut=cut,res=resFile,binsMVV=binsMVV,minMVV=minMVV,maxMVV=maxMVV,addOption=addOption,corrFactorW=corrFactorW,corrFactorZ=corrFactorZ)
     cmd = cmd+HCALbinsMVV
     os.system(cmd)    
 
@@ -461,6 +464,7 @@ makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
 makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
 makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
+
 # makeDetectorResponsePerCat("nonRes","JJ",nonResTemplate,cuts['nonres'])
 # makeDetectorResponsePerLeg("nonRes","JJ",nonResTemplate,cuts['nonres'],"DRl1","l1")
 # makeDetectorResponsePerLeg("nonRes","JJ",nonResTemplate,cuts['nonres'],"DRl2","l2")
@@ -489,7 +493,7 @@ else:
 if runParallel and submitToBatch: mergeKernelJobs()
 mergeBackgroundShapes("nonRes","JJ")
 
-# Do QCD normalisation
+#  Do QCD normalisation
 makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nR")
 
 # Do Vjets
@@ -501,10 +505,13 @@ if period == 2017:
     makeNormalizations("ZJets","JJ",ZresTemplate,0,cuts['nonres'],"nRes","ZJetsToQQ_HT800toInf:0.09811023622")
     # makeNormalizations("TThad","JJ",TTresTemplate,0,cuts['nonres'],"nRes")
 else:
+    fitVJets("JJ_VJets",resTemplate,1,41.34/581.8)
+    makeBackgroundShapesMVVKernel("VJets","JJ",resTemplate,cuts['res'],"1D",0)
     makeNormalizations("VJets","JJ",resTemplate,0,cuts['res'],"nRes","ZJetsToQQ:0.071")
 fitVJets("JJ_WJets",WresTemplate)
 fitVJets("JJ_ZJets",ZresTemplate)
 # fitVJets("JJ_TThad",TTresTemplate)
+
 
 makeBackgroundShapesMVVKernel("WJets","JJ",WresTemplate,cuts['nonres'],"1D",0)
 makeBackgroundShapesMVVKernel("ZJets","JJ",ZresTemplate,cuts['nonres'],"1D",0)
