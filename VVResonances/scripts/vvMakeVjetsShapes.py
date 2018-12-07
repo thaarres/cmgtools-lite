@@ -9,6 +9,7 @@ from CMGTools.VVResonances.statistics.Fitter import Fitter
 from math import log
 import os, sys, re, optparse,pickle,shutil,json
 ROOT.gROOT.SetBatch(True)
+ROOT.gStyle.SetOptStat(0)
 
 
 
@@ -50,6 +51,7 @@ for words in t:
     el+=words+"_"
 label = el
 
+
 sampleTypes=options.sample.split(',')
 for filename in os.listdir(args[0]):
    for sampleType in sampleTypes:
@@ -69,8 +71,6 @@ for filename in os.listdir(args[0]):
 
 sigmas=[]
 params={}
-NRes = [0,0]
-NnonRes= [0,0]
 legs=["l1","l2"]
 
 plotters=[]
@@ -82,18 +82,20 @@ for name in samples.keys():
     plotters[-1].addCorrectionFactor('puWeight','tree')
     if options.triggerW: plotters[-1].addCorrectionFactor('triggerWeight','tree')	
 
+
     corrFactor = 1.
     if samples[name].find('W') != -1: corrFactor = options.corrFactorW
     if samples[name].find('Z') != -1: corrFactor = options.corrFactorZ
     plotters[-1].addCorrectionFactor(corrFactor,'flat')
-    
-plotter=MergedPlotter(plotters)        
-
+        
+plotter=MergedPlotter(plotters)
 print 'Fitting Mjet:' 
 
 for leg in legs:
-
+ tmp=[]
+ tmp_nonres=[]
  fitter=Fitter(['x'])
+
  #fitter.jetResonanceVjets('model','x')
  
  # fitter.gaus('model','x')
@@ -127,10 +129,11 @@ for leg in legs:
  else:
      NRes[1] += histo.Integral()
     
+
  fitter.importBinnedData(histo,['x'],'data')
- fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1)])
- #fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
+ fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1),ROOT.RooFit.Range(55,120)])
  fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_Res.png")
+
  fitter.projection("model","data","x","debugJ"+leg+"_"+options.output+"_Res.root")
  if options.output.find("TT")!=-1: 
    params[label+"_Res_"+leg]={"meanW": {"val": fitter.w.var("meanW").getVal(), "err": fitter.w.var("meanW").getError()},"meanW": {"val": fitter.w.var("meanTop").getVal(), "err": fitter.w.var("meanTop").getError()}, "sigmaW": {"val": fitter.w.var("sigmaW").getVal(), "err": fitter.w.var("sigmaW").getError()}, "sigmaTop": {"val": fitter.w.var("sigmaTop").getVal(), "err": fitter.w.var("sigmaTop").getError()}, "alphaW":{ "val": fitter.w.var("alphaW").getVal(), "err": fitter.w.var("alphaW").getError()},"alphaW2":{"val": fitter.w.var("alphaW2").getVal(), "err": fitter.w.var("alphaW2").getError()},"alphaTop":{ "val": fitter.w.var("alphaTop").getVal(), "err": fitter.w.var("alphaTop")},"alphaTop2":{"val": fitter.w.var("alphaTop2").getVal(),"err": fitter.w.var("alpha2").getError()},"n":{ "val": fitter.w.var("n").getVal(), "err": fitter.w.var("n").getError()}}
@@ -148,10 +151,10 @@ for leg in legs:
  else:
      NnonRes[1] += histo.Integral()
           
-print 'fitting MJJ: ' 
+# print 'fitting MJJ: ' 
 
-fitter=Fitter(['MVV'])
-fitter.qcd('model','MVV',True)
+# fitter=Fitter(['MVV'])
+# fitter.qcd('model','MVV',True)
 
 #if options.fixPars!="":
 #    fixedPars =options.fixPars.split(',')
@@ -163,25 +166,20 @@ fitter.qcd('model','MVV',True)
 
 #histo = plotter.drawTH1("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",36,options.minMVV,options.maxMVV)
 
-binning=getBinning(options.binsMVV,options.minMVV,options.maxMVV,1000)
-roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
+# binning=getBinning(options.binsMVV,options.minMVV,options.maxMVV,1000)
+# roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
 
-histo = plotter.drawTH1Binned("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",binning)
+# histo = plotter.drawTH1Binned("jj_LV_mass",options.cut+"*(jj_"+leg+"_mergedVTruth==1)","1",binning)
 
-fitter.importBinnedData(histo,['MVV'],'data')
-fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1)])
-#fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Minos(1)])
-fitter.projection("model","data",'MVV',"debugMVV_"+options.output+".png",roobins)
-fitter.projection("model","data",'MVV',"debugMVV_log_"+options.output+".png",roobins,True)
-params[label+"_MVV"]={"CMS_p0": {"val":fitter.w.var("c_0").getVal(), "err":fitter.w.var("c_0").getError() }, "CMS_p1":{ "val": fitter.w.var("c_1").getVal(), "err": fitter.w.var("c_1").getError()}, "CMS_p2":{ "val":  fitter.w.var("c_2").getVal(), "err": fitter.w.var("c_2").getError()}}
-    
+# fitter.importBinnedData(histo,['MVV'],'data')
+# fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Save(1)])
+# #fitter.fit('model','data',[ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Minos(1)])
+# fitter.projection("model","data",'MVV',"debugMVV_"+options.output+".png",roobins)
+# fitter.projection("model","data",'MVV',"debugMVV_log_"+options.output+".png",roobins,True)
+# params[label+"_MVV"]={"CMS_p0": {"val":fitter.w.var("c_0").getVal(), "err":fitter.w.var("c_0").getError() }, "CMS_p1":{ "val": fitter.w.var("c_1").getVal(), "err": fitter.w.var("c_1").getError()}, "CMS_p2":{ "val":  fitter.w.var("c_2").getVal(), "err": fitter.w.var("c_2").getError()}}
    
         
-if options.store!="":
-    f=open(options.store,"w")
-    for par in params:
-        f.write(str(par)+ " = " +str(params[par])+"\n")
-    print NRes
-    print NnonRes
-    f.write(label+"_ratio_l1 = "+str(NRes[0]/(NRes[0]+NnonRes[0]))+"\n")
-    f.write(label+"_ratio_l2 = "+str(NRes[1]/(NRes[1]+NnonRes[1]))+"\n")
+# if options.store!="":
+#     f=open(options.store,"w")
+#     for par in params:
+#         f.write(str(par)+ " = " +str(params[par])+"\n")
