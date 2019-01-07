@@ -438,42 +438,42 @@ def makeNormalizations(name,filename,template,data=0,addCut='1',jobName="nR",fac
   
   
 
-makeSignalShapesMVV("JJ_WprimeWZ_"+str(period),WprimeTemplate)
-makeSignalShapesMJ("JJ_WprimeWZ_"+str(period),WprimeTemplate,'l1')
-makeSignalShapesMJ("JJ_WprimeWZ_"+str(period),WprimeTemplate,'l2')
-makeSignalYields("JJ_WprimeWZ_"+str(period),WprimeTemplate,BRWZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+makeSignalShapesMVV("JJ_WprimeWZ",WprimeTemplate)
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l1')
+makeSignalShapesMJ("JJ_WprimeWZ",WprimeTemplate,'l2')
+makeSignalYields("JJ_WprimeWZ",WprimeTemplate,BRWZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
-makeSignalShapesMVV("JJ_BulkGWW_"+str(period),BulkGravWWTemplate)
-makeSignalShapesMJ("JJ_BulkGWW_"+str(period),BulkGravWWTemplate,'l1')
-makeSignalShapesMJ("JJ_BulkGWW_"+str(period),BulkGravWWTemplate,'l2')
-makeSignalYields("JJ_BulkGWW_"+str(period),BulkGravWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+makeSignalShapesMVV("JJ_BulkGWW",BulkGravWWTemplate)
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGWW",BulkGravWWTemplate,'l2')
+makeSignalYields("JJ_BulkGWW",BulkGravWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
-makeSignalShapesMVV("JJ_ZprimeWW_"+str(period),ZprimeWWTemplate)
-makeSignalShapesMJ("JJ_ZprimeWW_"+str(period),ZprimeWWTemplate,'l1')
-makeSignalShapesMJ("JJ_ZprimeWW_"+str(period),ZprimeWWTemplate,'l2')
-makeSignalYields("JJ_ZprimeWW_"+str(period),ZprimeWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+makeSignalShapesMVV("JJ_ZprimeWW",ZprimeWWTemplate)
+makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l1')
+makeSignalShapesMJ("JJ_ZprimeWW",ZprimeWWTemplate,'l2')
+makeSignalYields("JJ_ZprimeWW",ZprimeWWTemplate,BRWW,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
-makeSignalShapesMVV("JJ_BulkGZZ_"+str(period),BulkGravZZTemplate)
-makeSignalShapesMJ("JJ_BulkGZZ_"+str(period),BulkGravZZTemplate,'l1')
-makeSignalShapesMJ("JJ_BulkGZZ_"+str(period),BulkGravZZTemplate,'l2')
-makeSignalYields("JJ_BulkGZZ_"+str(period),BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
+makeSignalShapesMVV("JJ_BulkGZZ",BulkGravZZTemplate)
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l1')
+makeSignalShapesMJ("JJ_BulkGZZ",BulkGravZZTemplate,'l2')
+makeSignalYields("JJ_BulkGZZ",BulkGravZZTemplate,BRZZ,{'HPHP':HPSF*HPSF,'HPLP':HPSF*LPSF,'LPLP':LPSF*LPSF})
 
-makeDetectorResponse("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'])
+makeDetectorResponse("nonRes","JJ",nonResTemplate,cuts['nonres'])
 
 ## # Make nonres kernel
 if runParallel and submitToBatch:
   wait = False
-  makeBackgroundShapesMVVKernel("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'],"1D",wait)
-  makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-  makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
   print "Exiting system! When all jobs are finished, please run mergeKernelJobs below"
   sys.exit()
   mergeKernelJobs()
 else:
   wait = True
-  makeBackgroundShapesMVVKernel("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'],"1D",wait)
-  makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-  makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+  makeBackgroundShapesMVVKernel("nonRes","JJ",nonResTemplate,cuts['nonres'],"1D",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+  makeBackgroundShapesMVVConditional("nonRes","JJ",nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 
 
 
