@@ -181,56 +181,39 @@ histos2D={}
 histos2D_nonRes={}
 histos2D_nonRes_l2={}
 
-#for p in range(0,len(plotters)):
-     #key ="Wjets"
-     #if str(names[p]).find("ZJets")!=-1: key = "Zjets"
-     #if str(names[p]).find("TT")!=-1: key = "TTbar"
-     #print "make histo for "+key
-     #histos2D_nonRes [key] = plotters[p].drawTH2("jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut+"*(jj_l1_mergedVTruth==0)*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)","1",80,55,215,80,55,215)
-     #histos2D_nonRes [key].SetName(key+"_nonResl1")
+for p in range(0,len(plotters)):
+     key ="Wjets"
+     if str(names[p]).find("ZJets")!=-1: key = "Zjets"
+     if str(names[p]).find("TT")!=-1: key = "TTbar"
+     print "make histo for "+key
+     histos2D_nonRes [key] = plotters[p].drawTH2("jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut+"*(jj_l1_mergedVTruth==0)*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)","1",80,55,215,80,55,215)
+     histos2D_nonRes [key].SetName(key+"_nonResl1")
      
-     #histos2D [key] = plotters[p].drawTH2("jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut+"*(jj_l1_mergedVTruth==1)*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)","1",80,55,215,80,55,215)
+     histos2D [key] = plotters[p].drawTH2("jj_l1_softDrop_mass:jj_l2_softDrop_mass",options.cut+"*(jj_l1_mergedVTruth==1)*(jj_l1_softDrop_mass>55&&jj_l1_softDrop_mass<215)","1",80,55,215,80,55,215)
      
-     #histos2D [key].SetName(key+"_Resl1")
+     histos2D [key].SetName(key+"_Resl1")
       
-     #histos2D_nonRes_l2 [key] = plotters[p].drawTH2("jj_l2_softDrop_mass:jj_l1_softDrop_mass",options.cut+"*(jj_l2_mergedVTruth==0)*(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1",80,55,215,80,55,215)
-     #histos2D_nonRes_l2 [key].SetName(key+"_nonResl2")
+     histos2D_nonRes_l2 [key] = plotters[p].drawTH2("jj_l2_softDrop_mass:jj_l1_softDrop_mass",options.cut+"*(jj_l2_mergedVTruth==0)*(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1",80,55,215,80,55,215)
+     histos2D_nonRes_l2 [key].SetName(key+"_nonResl2")
      
-     #histos2D_l2 [key] = plotters[p].drawTH2("jj_l2_softDrop_mass:jj_l1_softDrop_mass",options.cut+"*(jj_l2_mergedVTruth==1)*(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1",80,55,215,80,55,215)
+     histos2D_l2 [key] = plotters[p].drawTH2("jj_l2_softDrop_mass:jj_l1_softDrop_mass",options.cut+"*(jj_l2_mergedVTruth==1)*(jj_l2_softDrop_mass>55&&jj_l2_softDrop_mass<215)","1",80,55,215,80,55,215)
      
-     #histos2D_l2 [key].SetName(key+"_Resl2")
+     histos2D_l2 [key].SetName(key+"_Resl2")
      
       
-     #histos2D[key].Scale(35900.)
-     #histos2D_l2[key].Scale(35900.)
-     #histos2D_nonRes[key].Scale(35900.)
-     #histos2D_nonRes_l2[key].Scale(35900.)
+     histos2D[key].Scale(35900.)
+     histos2D_l2[key].Scale(35900.)
+     histos2D_nonRes[key].Scale(35900.)
+     histos2D_nonRes_l2[key].Scale(35900.)
  
-#############################
-#tmpfile = ROOT.TFile("test.root","RECREATE")
-#for key in histos2D.keys():
+############################
+tmpfile = ROOT.TFile("test.root","RECREATE")
+for key in histos2D.keys():
     
-    #histos2D_l2[key].Write()
-    #histos2D_nonRes[key].Write()
-    #histos2D_nonRes_l2[key].Write()
-    #histos2D[key].Write()
-
-
-tmpfile = ROOT.TFile("test.root","READ")
-histos2D["Wjets"] = tmpfile.Get("Wjets_Resl1")
-histos2D_nonRes["Wjets"] = tmpfile.Get("Wjets_nonResl1")
-histos2D_l2["Wjets"] = tmpfile.Get("Wjets_Resl2")
-histos2D_nonRes_l2["Wjets"] = tmpfile.Get("Wjets_nonResl2")
-
-histos2D["Zjets"] = tmpfile.Get("Zjets_Resl1")
-histos2D_nonRes["Zjets"] = tmpfile.Get("Zjets_nonResl1")
-histos2D_l2["Zjets"] = tmpfile.Get("Zjets_Resl2")
-histos2D_nonRes_l2["Zjets"] = tmpfile.Get("Zjets_nonResl2")
-
-histos2D["TTbar"] = tmpfile.Get("TTbar_Resl1")
-histos2D_nonRes["TTbar"] = tmpfile.Get("TTbar_nonResl1")
-histos2D_l2["TTbar"] = tmpfile.Get("TTbar_Resl2")
-histos2D_nonRes_l2["TTbar"] = tmpfile.Get("TTbar_nonResl2")
+    histos2D_l2[key].Write()
+    histos2D_nonRes[key].Write()
+    histos2D_nonRes_l2[key].Write()
+    histos2D[key].Write()
 
 
 ###########################
@@ -440,23 +423,6 @@ if options.store!="":
         f.write(str(par)+ " = " +str(params[par])+"\n")
 
  
- 
-def f(MJ2):
-    res = 0+(50.3310390872)+(-1.82902889265)*MJ2+(0.030896434249)*MJ2*MJ2+(-0.000333221984602)*MJ2*MJ2*MJ2+(2.31367978112e-06)*MJ2*MJ2*MJ2*MJ2+(-8.75592900444e-09)*MJ2*MJ2*MJ2*MJ2*MJ2+(1.32617347289e-11)*MJ2*MJ2*MJ2*MJ2*MJ2*MJ2
-    return res
-
-
-print f(55)
-print f(60)
-print f(100)
-print f(150)
-print f(180)
-print f(200)
-print f(215)
-print f(1300)
-print f(0)
-
-
 
 
 
