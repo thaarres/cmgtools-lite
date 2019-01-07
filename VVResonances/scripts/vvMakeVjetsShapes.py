@@ -164,12 +164,6 @@ for name in samples.keys():
     plotters[-1].addCorrectionFactor(corrFactor,'flat')
     names.append(samples[name])
 
-print samplenames
-print samples
-print samples.keys()
-
-
-
 
 
     
@@ -256,8 +250,7 @@ for leg in legs:
         scales_nonRes [key] = histos_nonRes[key].Integral()
    
    
-    print histos 
-    print histos_nonRes
+   
     # combine ttbar and wjets contributions:  
     Wjets = histos["Wjets"]
     Wjets_nonRes = histos_nonRes["Wjets"]
@@ -283,7 +276,6 @@ for leg in legs:
         
     fitter.drawVjets("Vjets_mjetRes_"+leg+"_"+purity+".pdf",histos,histos_nonRes,scales,scales_nonRes)
     del histos,histos_nonRes,fitter,fitterZ
-print params
 
 
 graphs={}
@@ -309,9 +301,7 @@ for key in keys:
             tt_i2_l2 =   histos2D_nonRes["TTbar"].ProjectionY("tmp2",p[0],p[1]).Integral()
             graphs[key].SetPoint(n,55+p[0]*2+(p[1]-p[0]),(i1/i2 +i1_l2/i2_l2)/2.+(tt_i1/tt_i2 + tt_i1_l2/tt_i2_l2)/2.)
         
-        
-        
-        print norm
+    
         err = ROOT.TMath.Sqrt(pow(ROOT.TMath.Sqrt(i1)/i2 + ROOT.TMath.Sqrt(i2)*i1/(i2*i2),2)+pow(ROOT.TMath.Sqrt(i1_l2)/i2_l2 + ROOT.TMath.Sqrt(i2_l2)*i1_l2/(i2_l2*i2_l2),2))
         graphs[key].SetPointError(n,0,err)
         
@@ -323,7 +313,6 @@ for key in keys:
 func=ROOT.TF1("pol","pol6",55,215)
 
 func2=ROOT.TF1("pol","pol6",55,215)
-#+[5]*x*x*x*x*x+[4]*x*x*x*x
 l="ratio"
 for key in graphs.keys():
    if key.find("Z")!=-1:
@@ -336,15 +325,15 @@ for key in graphs.keys():
    if key.find("W")!=-1:
        graphs[key].Fit(func)
        st = returnString(func,"pol","MJ2")
-       #params["ratio_Res_nonRes_l1"][l] = st
+       params["ratio_Res_nonRes_l1"][l] = st
        st = returnString(func,"pol","MJ1")
-       #params["ratio_Res_nonRes_l2"][l] = st
+       params["ratio_Res_nonRes_l2"][l] = st
    else:
        graphs[key].Fit(func2)
        st = returnString(func2,"pol","MJ2")
-       #params["ratio_Res_nonRes_l1"][l] = st
+       params["ratio_Res_nonRes_l1"][l] = st
        st = returnString(func2,"pol","MJ1")
-       #params["ratio_Res_nonRes_l2"][l] = st
+       params["ratio_Res_nonRes_l2"][l] = st
 
    
    graphs[key].SetMarkerColor(ROOT.kBlack)
@@ -414,7 +403,6 @@ if 'TTbar' in graphs.keys():
     c.SaveAs("debug_corr_l1_l2_TTbar.pdf")
 
 
-print params
 
 if options.store!="":
     print "write to file "+options.store

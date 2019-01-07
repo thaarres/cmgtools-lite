@@ -89,17 +89,14 @@ class DataCardMaker:
 
         scaleSysts=[]
         resolutionSysts=[]
-        print "blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+       
         for syst,factor in scale.iteritems():
             self.w.factory(syst+"[0,-0.1,0.1]")
             scaleStr=scaleStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             scaleSysts.append(syst)
         for syst,factor in resolution.iteritems():
-            #self.w.factory(syst+"[0,-0.8,0.8]")
             self.w.factory(syst+"[0,-0.5,0.5]")
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
-            #print syst+"[0,-0.5,0.5]"
-            #print resolutionStr
             resolutionSysts.append(syst)
 
         MVV=variable    
@@ -113,7 +110,7 @@ class DataCardMaker:
 
         SIGMAVar="_".join(["SIGMA",name,self.tag])
         self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=SIGMAVar,param=info['SIGMA'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)))
-        print SIGMAVar
+
 
         ALPHAVar="_".join(["ALPHA",name,self.tag])
         self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHAVar,param=info['ALPHA']))
@@ -448,16 +445,11 @@ class DataCardMaker:
             tag=newTag
         else:
             tag=name+"_"+self.tag
-        print "########################################"
-        print tag
-        print self.tag
-        print "#########################################"
+       
         FR=ROOT.TFile(filename)
 
         #Load PDF
         histo=FR.Get(histoname)
-	print histo.GetName()
-
 
         if len(systematics)>0:
             histName="_".join([name+"NominalHIST",tag])
@@ -1267,25 +1259,15 @@ class DataCardMaker:
         pdfName1="_".join([pdf1,self.tag])
         pdfName2="_".join([pdf2,self.tag])
         
-        #MJ = "MJ1"
-        #if num.find("MJ2")!=-1:
-            #MJ="MJ2"
-        #print "==============================="
-        #print self.tag 
-        #print MJ
-        #print num
-        #print "============================== "
-        #if name.find("1")!=-1:
-            #self.w.factory("SUM::{name}(expr::{name2}_ratio1('({f}*{num})',{f},{MJ})*{name1},expr::{name2}_ratio('(1-{f})',{f})*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2,num=num,MJ=MJ))
-        #if name.find("2")!=-1:
-            #self.w.factory("SUM::{name}(expr::{name2}_ratio1('((1-{f})*{num})',{f},{MJ})*{name1},expr::{name2}_ratio('{f}',{f})*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2,num=num,MJ=MJ))
-       
-       
-       # put out the second dependence on the other jet mass :
+        MJ = "MJ1"
+        if num.find("MJ2")!=-1:
+            MJ="MJ2"
         if name.find("1")!=-1:
-            self.w.factory("SUM::{name}(expr::{name2}_ratio1('({f}*{num})',{f})*{name1},expr::{name2}_ratio('(1-{f})',{f})*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2,num=num))
+            self.w.factory("SUM::{name}(expr::{name2}_ratio1('({f}*{num})',{f},{MJ})*{name1},expr::{name2}_ratio('(1-{f})',{f})*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2,num=num,MJ=MJ))
         if name.find("2")!=-1:
-            self.w.factory("SUM::{name}(expr::{name2}_ratio1('((1-{f})*{num})',{f},{MJ})*{name1},expr::{name2}_ratio('{f}',{f})*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2,num=num))
+            self.w.factory("SUM::{name}(expr::{name2}_ratio1('((1-{f})*{num})',{f},{MJ})*{name1},expr::{name2}_ratio('{f}',{f})*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2,num=num,MJ=MJ))
+       
+       
 
 
     def conditionalProduct(self,name,pdf1,varName,pdf2,pdf3,tag1="",tag2="",tag3=""):
@@ -1313,15 +1295,10 @@ class DataCardMaker:
         self.w.factory("PROD::{name}({name1},{name2})".format(name=pdfName,name1=pdfName1,name2=pdfName2))
 
     def product3D(self,name,pdf1,pdf2,pdf3):
-        print self.tag
         pdfName="_".join([name,self.tag])
         pdfName1="_".join([pdf1,self.tag])
         pdfName2="_".join([pdf2,self.tag])
         pdfName3="_".join([pdf3,self.tag])
-        print pdfName
-        print pdfName1
-        print pdfName2
-        print pdfName3
         self.w.factory("PROD::{name}({name1},{name2},{name3})".format(name=pdfName,name1=pdfName1,name2=pdfName2,name3=pdfName3))
         
    
