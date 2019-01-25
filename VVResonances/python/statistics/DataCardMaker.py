@@ -1309,50 +1309,8 @@ class DataCardMaker:
         print pdfName2
         print pdfName3
         self.w.factory("PROD::{name}({name1},{name2},{name3})".format(name=pdfName,name1=pdfName1,name2=pdfName2,name3=pdfName3))
-        
-    def getValuesFromString(self,s):
-        ls = s.split("+")
-        results=[]
-        for line in ls:
-            if line=="0": continue
-            res = (line.split(")")[0]).replace("(","")
-            results.append(float(res))
-        return results
     
     
-    def product3D_ResBkg(self,name,pdf1,pdf2,pdf3,ratio):
-        print self.tag
-        pdfName="_".join([name,self.tag])
-        pdfName1="_".join([pdf1,self.tag])
-        pdfName2="_".join([pdf2,self.tag])
-        pdfName3="_".join([pdf3,self.tag])
-        print pdfName
-        print pdfName1
-        print pdfName2
-        print pdfName3
-        MJ = "MJ1"
-        if ratio.find("MJ2")!=-1: MJ="MJ2"
-        valuelist = self.getValuesFromString(ratio)
-        i=0
-        arglist = ROOT.RooArgList()
-        for p in valuelist:
-            pname="_".join(["p"+str(i),pdfName])
-            self.w.factory("{name}[{val},{val},{val}]".format(name=pname,val=p))
-            self.w.var(pname).setConstant(1)
-            print pname
-            print self.w.var(pname)
-            
-            arglist.add(self.w.var(pname))
-            i+=1
-        
-        
-        
-        #mjetcorr = ROOT.RooPolynomial(pdfName+"_RatioPar",pdfName+"_RatioPar",self.w.var(MJ),arglist)
-        #getattr(self.w,'import')(mjetcorr,ROOT.RooFit.Rename(pdfName+"_RatioPar"))
-        
-    
-        self.w.factory("PROD::{name}({name1},{name2},{name3})".format(name=pdfName,name1=pdfName1,name2=pdfName2,name3=pdfName3))
-
     def envelope(self,name,pdfs):
         catName = "envelope_"+name+"_"+self.tag
         pdfName="_".join([name,self.tag])
@@ -1670,7 +1628,7 @@ class DataCardMaker:
             elif i==2:
                 axis=histogram.GetZaxis()
             else:
-                #print 'Asking for more than 3 D . ROOT doesnt support that, use unbinned data instead'
+                print 'Asking for more than 3 D . ROOT doesnt support that, use unbinned data instead'
                 return
             mini=axis.GetXmin()
             maxi=axis.GetXmax()
