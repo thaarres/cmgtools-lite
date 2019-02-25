@@ -136,7 +136,7 @@ for sig in signals:
     
 
       #background normalization
-      card.addSystematic("CMS_VV_JJ_nonRes_norm","lnN",{'nonRes':1.2})
+      card.addSystematic("CMS_VV_JJ_nonRes_norm","lnN",{'nonRes':1.5})
       card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjets':1.2})
       
       card.addSystematic("CMS_VV_JJ_Vjets_ratio","param",[0.4,0.1])#0.01
