@@ -24,7 +24,9 @@ vtag_unc['HPHP'] = {'2016':'1.094/0.910','2017':'1.082/0.922'}
 vtag_unc['HPLP'] = {'2016':'0.939/1.063','2017':'0.957/1.043'}    
 vtag_unc['LPLP'] = {'2016':'1.063','2017':'1.043'}
 
-vtag_pt_dependence = {'HPHP':'0.085*log(MH/400)*0.085*log(MH/400)','HPLP':'0.085*log(MH/400)*0.039*log(MH/400)','LPLP':'0.039*log(MH/400)*0.039*log(MH/400)'}
+#vtag_pt_dependence = {'HPHP':'((1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.31/(1+exp(-0.03*(MH/2-406))))-1.0)','HPLP':'((1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.12*log(MH/538))-1.0)','LPLP':'0.12*log(MH/538)*0.12*log(MH/538)'}
+vtag_pt_dependence = {'HPHP':'(1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.31/(1+exp(-0.03*(MH/2-406))))','HPLP':'(1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.12*log(MH/538))','LPLP':'0.12*log(MH/538)*0.12*log(MH/538)'}
+#vtag_pt_dependence = {'HPHP':'0.085*log(MH/400)*0.085*log(MH/400)','HPLP':'0.085*log(MH/400)*0.039*log(MH/400)','LPLP':'0.039*log(MH/400)*0.039*log(MH/400)'}
   
 purities= ['HPHP','HPLP']
 signals = ["BulkGWW"]
@@ -50,7 +52,7 @@ for sig in signals:
       card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",dataset+"/JJ_%s_MVV.json"%sig,{'CMS_scale_j':1},{'CMS_res_j':1.0})
       card.addMJJSignalParametricShapeNOEXP("Wqq1","MJ1" ,dataset+"/JJ_%s_MJl1_"%sig+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
       card.addMJJSignalParametricShapeNOEXP("Wqq2","MJ2" ,dataset+"/JJ_%s_MJl2_"%sig+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
-      card.addParametricYieldWithUncertainty("%s"%sig,0  ,dataset+"/JJ_%s_"%sig+p+"_yield.json",1,'CMS_tau21_PtDependence',vtag_pt_dependence[p],0.019)
+      card.addParametricYieldWithUncertainty("%s"%sig,0  ,dataset+"/JJ_%s_"%sig+p+"_yield.json",1,'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)
       card.product3D("%s"%sig,"Wqq1","Wqq2","%s_MVV"%sig)
 
       #---------------------------------------------------------------------------------
@@ -84,7 +86,8 @@ for sig in signals:
       card.sumPdf('Wjets',"Wjets_c1","Wjets_c2","CMS_ratio_Wjets_"+p+"_"+dataset)
 
       card.addYieldWithRateParameterFromFile('Wjets',ncontrib,'Wjets_%s_%s'%(p,dataset),"2017/JJ_WJets_%s.root"%p,"WJets")
-     
+      #card.addYieldWithRateParameterFromFileWithUncertainty('Wjets',ncontrib,'Wjets_%s_%s'%(p,dataset),"2017/JJ_WJets_%s.root"%p,"WJets",'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)
+    
       ncontrib+=1
             
       # begin Z+jets background :
@@ -107,6 +110,8 @@ for sig in signals:
       card.product3D("Zjets_c2","Zjets_mjetRes_l2","Zjets_mjetNonRes_l1","Zjets_mjj_c2")
       card.sumPdf('Zjets',"Zjets_c1","Zjets_c2","CMS_ratio_Zjets_"+p+"_"+dataset)
       card.addYieldWithRateParameter('Zjets',ncontrib,'Zjets_%s_%s'%(p,dataset),"@0*@1",['Wjets_%s_%s'%(p,dataset),"CMS_VV_JJ_Vjets_ratio"])
+      #card.addYieldWithRateParameterWithUncertainty('Zjets',ncontrib,'Zjets_%s_%s'%(p,dataset),"@0*@1",['Wjets_%s_%s'%(p,dataset),"CMS_VV_JJ_Vjets_ratio"],'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)
+
       ncontrib+=1
       
       
