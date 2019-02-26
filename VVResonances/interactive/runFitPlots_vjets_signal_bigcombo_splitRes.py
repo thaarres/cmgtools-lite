@@ -1031,8 +1031,8 @@ if __name__=="__main__":
       pdf1Name = "pdf_binJJ_"+purity+"_13TeV_2016"
       pdf2Name = "pdf_binJJ_"+purity+"_13TeV_2017"
      print "Expected number of QCD events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_nonRes"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_nonRes"].getVal(),"(2017)"
-     print "Expected number of W+jets events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjet"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjet"].getVal(),"(2017)"
-     print "Expected number of Z+jets events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjet"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].getVal(),"(2017)"
+     print "Expected number of W+jets events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjets"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjets"].getVal(),"(2017)"
+     print "Expected number of Z+jets events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjets"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjets"].getVal(),"(2017)"
      if options.addTop:
        print "Expected number of tt events:",(args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_TThad"].getVal(),"(2016)",(args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_TThad"].getVal(),"(2017)"
      if options.fitSignal:
@@ -1094,18 +1094,18 @@ if __name__=="__main__":
      pdf2_nonres_shape_postfit.coefList().Print()
      
      print "2016 Postfit W+jets res pdf:"
-     pdf1_Wres_shape_postfit  = args["shapeBkg_Wjet_JJ_"+purity+"_13TeV_2016"]
+     pdf1_Wres_shape_postfit  = args["shapeBkg_Wjets_JJ_"+purity+"_13TeV_2016"]
      pdf1_Wres_shape_postfit.Print()
      print "2017 Postfit W+jets res pdf:"
-     pdf2_Wres_shape_postfit  = args["shapeBkg_Wjet_JJ_"+purity+"_13TeV_2017"]
+     pdf2_Wres_shape_postfit  = args["shapeBkg_Wjets_JJ_"+purity+"_13TeV_2017"]
      pdf2_Wres_shape_postfit.Print()
      print
      
      print "2016 Postfit Z+jets res pdf:"
-     pdf1_Zres_shape_postfit  = args["shapeBkg_Zjet_JJ_"+purity+"_13TeV_2016"]
+     pdf1_Zres_shape_postfit  = args["shapeBkg_Zjets_JJ_"+purity+"_13TeV_2016"]
      pdf1_Zres_shape_postfit.Print()
      print "2017 Postfit Z+jets res pdf:"
-     pdf2_Zres_shape_postfit  = args["shapeBkg_Zjet_JJ_"+purity+"_13TeV_2017"]
+     pdf2_Zres_shape_postfit  = args["shapeBkg_Zjets_JJ_"+purity+"_13TeV_2017"]
      pdf2_Zres_shape_postfit.Print()
      print
      
@@ -1216,26 +1216,26 @@ if __name__=="__main__":
      norm2_nonres[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_nonRes"].getPropagatedError(fitresult)
                 
      print
-     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjet"].dump()
+     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjets"].dump()
      norm1_Wres = [0,0]
-     norm1_Wres[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjet"].getVal()
-     norm1_Wres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjet"].getPropagatedError(fitresult)
+     norm1_Wres[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjets"].getVal()
+     norm1_Wres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Wjets"].getPropagatedError(fitresult)
      print
-     (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjet"].dump()
+     (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjets"].dump()
      norm2_Wres = [0,0]
-     norm2_Wres[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjet"].getVal()
-     norm2_Wres[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjet"].getPropagatedError(fitresult)
+     norm2_Wres[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjets"].getVal()
+     norm2_Wres[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Wjets"].getPropagatedError(fitresult)
      
      print
-     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjet"].dump()
+     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjets"].dump()
      norm1_Zres = [0,0]
-     norm1_Zres[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjet"].getVal()
-     norm1_Zres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjet"].getPropagatedError(fitresult)
+     norm1_Zres[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjets"].getVal()
+     norm1_Zres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2016_proc_Zjets"].getPropagatedError(fitresult)
      print
-     (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].dump()
+     (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjets"].dump()
      norm2_Zres = [0,0]
-     norm2_Zres[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].getVal()
-     norm2_Zres[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjet"].getPropagatedError(fitresult)
+     norm2_Zres[0] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjets"].getVal()
+     norm2_Zres[1] = (args[pdf2Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_2017_proc_Zjets"].getPropagatedError(fitresult)
      
      if options.addTop:
       print

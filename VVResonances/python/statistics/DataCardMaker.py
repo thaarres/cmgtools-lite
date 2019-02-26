@@ -1359,7 +1359,9 @@ class DataCardMaker:
         pdfName="_".join([name,self.tag])
         pdfNorm="_".join([name,self.tag,"norm"])
         self.w.factory(uncertaintyName+'[0,-1,1]')
-        self.w.factory("expr::{name}('({param})*{lumi}*({constant}+{unc}*{form})',MH,{lumi},{unc})".format(name=pdfNorm,param=info['yield'],lumi=self.physics+"_"+self.period+"_lumi",constant=constant,unc=uncertaintyName,form=uncertaintyFormula))
+        #self.w.factory("expr::{name}('({param})*{lumi}*({constant}+{unc}*{form})',MH,{lumi},{unc})".format(name=pdfNorm,param=info['yield'],lumi=self.physics+"_"+self.period+"_lumi",constant=constant,unc=uncertaintyName,form=uncertaintyFormula))
+        #this formula is better: y*exp(log(unc)*theta)
+        self.w.factory("expr::{name}('({param})*{lumi}*(exp(log({form})*{unc}))',MH,{lumi},{unc})".format(name=pdfNorm,param=info['yield'],lumi=self.physics+"_"+self.period+"_lumi",constant=constant,unc=uncertaintyName,form=uncertaintyFormula))
         self.addSystematic(uncertaintyName,"param",[0,uncertaintyValue])
         f.close()
         self.contributions.append({'name':name,'pdf':pdfName,'ID':ID,'yield':1.0})
@@ -1513,9 +1515,38 @@ class DataCardMaker:
         events=histogram.Integral()*self.luminosity*scaleFactor
         
         kind = 'rateParam\t%s\t%s\t%f'%(self.tag,name,events)
-        self.systematics.append({'name':paramName,'kind':kind,'values':values })
-                
+        self.systematics.append({'name':paramName,'kind':kind,'values':values})
 
+    def addYieldWithRateParameterFromFileWithUncertainty(self,name,ID,paramName,filename,histoName,uncertaintyName,uncertaintyFormula,uncertaintyValue,values=[],scaleFactor=1):#jen        
+        pdfName="_".join([name,self.tag])
+        self.contributions.append({'name':name,'pdf':pdfName,'ID':ID,'yield':1.0})    
+
+        f=ROOT.TFile(filename)
+        histogram=f.Get(histoName)
+        events=histogram.Integral()*self.luminosity*scaleFactor
+        
+        kind = 'rateParam\t%s\t%s\t%f'%(self.tag,name,events)
+        self.systematics.append({'name':paramName,'kind':kind,'values':values})
+
+        pdfNorm="_".join([name,self.tag,"norm"])
+        if not self.w.var(uncertaintyName):
+         self.w.factory(uncertaintyName+'[0,-1,1]')
+         self.addSystematic(uncertaintyName,"param",[0,uncertaintyValue])
+        self.w.factory("expr::{name}('exp(log({form})*{unc})',MH,{unc})".format(name=pdfNorm,unc=uncertaintyName,form=uncertaintyFormula))
+
+    def addYieldWithRateParameterWithUncertainty(self,name,ID,paramName,formula,values,uncertaintyName,uncertaintyFormula,uncertaintyValue):#jen        
+        pdfName="_".join([name,self.tag])
+        self.contributions.append({'name':name,'pdf':pdfName,'ID':ID,'yield':1.0})            
+        kind = 'rateParam\t%s\t%s\t%s'%(self.tag,name,formula)
+        self.systematics.append({'name':paramName,'kind':kind,'values':values})
+        
+        pdfNorm="_".join([name,self.tag,"norm"])
+        if not self.w.var(uncertaintyName):
+         self.w.factory(uncertaintyName+'[0,-1,1]')
+         self.addSystematic(uncertaintyName,"param",[0,uncertaintyValue])
+        self.w.factory("expr::{name}('exp(log({form})*{unc})',MH,{unc})".format(name=pdfNorm,unc=uncertaintyName,form=uncertaintyFormula))
+
+       
     def makeCard(self):
 
         if self.cat!="":f = open("datacard_"+self.cat+'.txt','w')
