@@ -24,9 +24,7 @@ vtag_unc['HPHP'] = {'2016':'1.094/0.910','2017':'1.082/0.922'}
 vtag_unc['HPLP'] = {'2016':'0.939/1.063','2017':'0.957/1.043'}    
 vtag_unc['LPLP'] = {'2016':'1.063','2017':'1.043'}
 
-#vtag_pt_dependence = {'HPHP':'((1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.31/(1+exp(-0.03*(MH/2-406))))-1.0)','HPLP':'((1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.12*log(MH/538))-1.0)','LPLP':'0.12*log(MH/538)*0.12*log(MH/538)'}
-vtag_pt_dependence = {'HPHP':'(1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.31/(1+exp(-0.03*(MH/2-406))))','HPLP':'(1+0.31/(1+exp(-0.03*(MH/2-406))))*(1+0.12*log(MH/538))','LPLP':'0.12*log(MH/538)*0.12*log(MH/538)'}
-#vtag_pt_dependence = {'HPHP':'0.085*log(MH/400)*0.085*log(MH/400)','HPLP':'0.085*log(MH/400)*0.039*log(MH/400)','LPLP':'0.039*log(MH/400)*0.039*log(MH/400)'}
+vtag_pt_dependence = {'HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))'}
   
 purities= ['HPHP','HPLP']
 signals = ["BulkGWW"]
@@ -66,7 +64,8 @@ for sig in signals:
       # begin W+jets background :
       
       # W+jets 
-      rootFile = '2017/JJ_WJets_MVV_'+p+'.root' #jen
+      #rootFile = '2017/JJ_WJets_MVV_'+p+'.root' #jen
+      rootFile = '2017/JJ_NLOweights_WJets_MVV_%s.root'%p
       card.addHistoShapeFromFile("Wjets_mjj_c1",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+p,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+p],False,0)
       card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l1","MJ1","",Wjets_TTbar_Res_l1,{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
       
@@ -75,7 +74,8 @@ for sig in signals:
       card.product3D("Wjets_c1","Wjets_mjetRes_l1","Wjets_mjetNonRes_l2","Wjets_mjj_c1")
       
       # jets + W
-      rootFile = '2017/JJ_WJets_MVV_'+p+'.root' #jen
+      #rootFile = '2017/JJ_WJets_MVV_'+p+'.root' #jen
+      rootFile = '2017/JJ_NLOweights_WJets_MVV_%s.root'%p
       card.addHistoShapeFromFile("Wjets_mjj_c2",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+p,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+p],False,0)
       card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l2","MJ2","",Wjets_TTbar_Res_l2,{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
       
@@ -93,7 +93,8 @@ for sig in signals:
       # begin Z+jets background :
       
       # Z+jets 
-      rootFile = '2017/JJ_ZJets_MVV_'+p+'.root' #jen
+      #rootFile = '2017/JJ_ZJets_MVV_'+p+'.root' #jen
+      rootFile = '2017/JJ_NLOweights_ZJets_MVV_%s.root'%p
       card.addHistoShapeFromFile("Zjets_mjj_c1",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+p,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+p],False,0)
       card.addMJJSignalShapeNOEXP("Zjets_mjetRes_l1","MJ1","",Zjets_Res_l1,{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
       
@@ -103,7 +104,8 @@ for sig in signals:
       
       
       # jets + Z
-      rootFile = '2017/JJ_ZJets_MVV_'+p+'.root' #jen
+      #rootFile = '2017/JJ_ZJets_MVV_'+p+'.root' #jen
+      rootFile = '2017/JJ_NLOweights_ZJets_MVV_%s.root'%p
       card.addHistoShapeFromFile("Zjets_mjj_c2",["MJJ"],rootFile,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+p,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+p],False,0)
       card.addMJJSignalShapeNOEXP("Zjets_mjetRes_l2","MJ2","",Zjets_Res_l2,{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
       card.addGaussianShape("Zjets_mjetNonRes_l1","MJ1",Zjets_nonRes_l1)
