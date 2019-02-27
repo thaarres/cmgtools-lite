@@ -390,6 +390,8 @@ class Fitter(object):
 
         peak = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
         getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name+'W'))
+        #self.w.factory("RooExponential::"+name+"B("+poi+",slope[-1,-10,0])")       
+        #self.w.factory("SUM::"+name+"(f[0.8,0,1]*"+name+"S,"+name+"B)")
 
 
     def jetResonance2(self,name = 'model',poi='x'):
@@ -982,6 +984,9 @@ class Fitter(object):
 	 f = ROOT.TFile.Open('fitresults.root','RECREATE')
 	 fitresults.Write()
 	 f.Close()
+	 
+    def getFunc(self,model = "model"):
+        return self.w.pdf(model)
 
     def getLegend(self):
         self.legend = ROOT.TLegend(0.7510112,0.7183362,0.8502143,0.919833)
@@ -1017,15 +1022,13 @@ class Fitter(object):
                 print "No fit result found (fitresults.root), plotting model only"
 	
         if binning:
-          self.w.data(data).plotOn(self.frame,ROOT.RooFit.Binning(binning))
-          # if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning),ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
-          # else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
-          self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))
-        else: 
-          self.w.data(data).plotOn(self.frame)
-          self.w.pdf(model).plotOn(self.frame)
-          # if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed))
-            # else: self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+	 self.w.data(data).plotOn(self.frame,ROOT.RooFit.Binning(binning))
+         if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed)) #ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE)
+	 else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+	else: 
+	 self.w.data(data).plotOn(self.frame)
+	 if fr: self.w.pdf(model).plotOn(self.frame, ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed)) #ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE)
+         else: self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
 
         self.legend = self.getLegend()
         self.legend.AddEntry( self.w.pdf(model)," Full PDF","l")
@@ -1054,7 +1057,7 @@ class Fitter(object):
           self.c.SetLogy()
         self.c.cd()
         self.frame.Draw()
-        self.frame.GetYaxis().SetTitle('')
+        self.frame.GetYaxis().SetTitle('events')
         self.frame.GetXaxis().SetTitle(xtitle)
         self.frame.SetTitle('')
         self.c.Draw()
@@ -1071,10 +1074,137 @@ class Fitter(object):
         self.w.data(data).plotOn(self.frame)
         self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.ProjWData(ROOT.RooArgSet(self.w.var(otherpoi)),self.w.data(data)))
         self.c=ROOT.TCanvas("c","c")
-        self.c.cd()
+        self.c.cd() 
         self.frame.Draw()
         self.c.SaveAs(filename)
         return self.frame.chiSquare()
+    
+    
+    def drawVjets(self,outname,histos,histos_nonRes,scales,scales_nonRes,model="model",data="data",poi="x"):
+        self.frame=self.w.var(poi).frame(ROOT.RooFit.Range(55,215))
+        self.frame.SetTitle("")
+        self.frame.SetXTitle("m_{jet1} (GeV)")
+        if outname.find("l2")!=-1: self.frame.SetXTitle("m_{jet2} (GeV)")
+        self.frame.SetYTitle("Arbitrary scale")
+        self.frame.SetTitleOffset(1.1,"Y")
+        self.frame.SetTitleSize(0.045,"X")
+        self.frame.SetTitleSize(0.045,"Y")
+        color={'Wjets':ROOT.kRed,'Zjets':ROOT.kGreen,'TTbar':ROOT.kBlue}
+        for key in histos.keys():
+            histos[key].Scale(scales[key]/histos[key].Integral())
+            histos_nonRes[key].Scale(scales_nonRes[key]/histos_nonRes[key].Integral())
+            histos[key].SetFillColor(color[key])
+            histos_nonRes[key].SetFillColor(color[key])
+            histos[key].SetLineColor(color[key])
+            histos_nonRes[key].SetLineColor(color[key])
+        
+        
+        if 'Zjets' in histos.keys():
+            histos['Wjets'].Add(histos['Zjets'])
+            histos_nonRes['Wjets'].Add(histos_nonRes['Zjets'])
+        if 'TTbar' in histos.keys():
+            histos['Wjets'].Add(histos['TTbar'])
+            histos_nonRes['Wjets'].Add(histos_nonRes['TTbar'])
+                                                     
+        if 'TTbar' in histos.keys() and 'Zjets' in histos.keys(): 
+            histos['Zjets'].Add(histos['TTbar'])
+            histos_nonRes['Zjets'].Add(histos_nonRes['TTbar'])
+                                                     
+            #self.importBinnedData(histos['Zjets'],['x'],'data1')
+            #self.importBinnedData(histos['ttbar'],['x'],'data2')
+        
+        
+        
+        self.importBinnedData(histos['Wjets'],['x'],'data0')
+        
+        self.w.data("data0").plotOn(self.frame,ROOT.RooFit.FillColor(13),ROOT.RooFit.FillStyle(3144),ROOT.RooFit.DrawOption( "5" ),ROOT.RooFit.Name("errorbars"))
+        #self.w.pdf(model).plotOn(self.frame, ROOT.RooFit.LineColor(ROOT.kBlack),ROOT.RooFit.Name("fit"))
+        ##self.w.data("data1").plotOn(self.frame,ROOT.RooFit.FillColor(ROOT.kGreen),ROOT.RooFit.DrawOption( "BX" ))
+        ##self.w.data("data2").plotOn(self.frame,ROOT.RooFit.FillColor(ROOT.kBlue),ROOT.RooFit.DrawOption( "BX" ))
+        
+        self.c=ROOT.TCanvas("c","c")       
+        self.c.cd() 
+        self.c.SetFillColor(0)
+        self.c.SetBorderMode(0)
+        self.c.SetFrameFillStyle(0)
+        self.c.SetFrameBorderMode(0)
+        self.c.SetLeftMargin(0.13)
+        self.c.SetRightMargin(0.08)
+        self.c.SetTopMargin( 0.1 )
+        self.c.SetBottomMargin( 0.12 )
+   
+
+        l = ROOT.TLegend(0.5607383,0.6063123,0.9,0.8089701)
+        l.SetLineWidth(2)
+        l.SetBorderSize(0)
+        l.SetFillColor(0)
+        l.SetTextFont(42)
+        l.SetTextSize(0.04)
+        l.SetTextAlign(12)
+        #l.AddEntry(self.frame.findObject("fit"),'double CB','L')
+        l.AddEntry(self.frame.findObject("errorbars"),'MC uncertainty','F')
+        l.AddEntry(histos['Wjets'],'W+jets','F')
+        if 'Zjets' in histos.keys(): l.AddEntry(histos['Zjets'],'Z+jets','F')
+        if 'TTbar' in histos.keys(): l.AddEntry(histos['TTbar'],'t#bar{t}','F')
+        self.frame.Draw()
+        l.Draw()
+        histos['Wjets'].Draw("histFsame")
+        if 'Zjets' in histos.keys(): histos['Zjets'].Draw("histFsame")
+        if 'TTbar' in histos.keys(): histos['TTbar'].Draw("histFsame")
+        self.frame.Draw("same")
+        l.Draw()
+        text = ROOT.TLatex()
+        text.DrawLatexNDC(0.13,0.92,"#font[62]{CMS} #font[52]{Simulation}")
+        self.c.SaveAs(outname)
+        
+        
+        # draw non res contribution: 
+        self.importBinnedData(histos_nonRes['Wjets'],['x'],'data1')
+        self.frame=self.w.var(poi).frame(ROOT.RooFit.Range(55,215))
+        self.frame.SetTitle("")
+        self.frame.SetXTitle("m_{jet} (GeV)")
+        self.frame.SetYTitle("Arbitrary scale")
+        self.frame.SetTitleOffset(1.1,"Y")
+        self.frame.SetTitleSize(0.045,"X")
+        self.frame.SetTitleSize(0.045,"Y")
+        self.w.data("data1").plotOn(self.frame,ROOT.RooFit.FillColor(13),ROOT.RooFit.FillStyle(3144),ROOT.RooFit.DrawOption( "5" ),ROOT.RooFit.Name("errorbars"))
+        
+        
+        self.c=ROOT.TCanvas("c_nonRes","c_nonRes")       
+        self.c.cd() 
+        self.c.SetFillColor(0)
+        self.c.SetBorderMode(0)
+        self.c.SetFrameFillStyle(0)
+        self.c.SetFrameBorderMode(0)
+        self.c.SetLeftMargin(0.13)
+        self.c.SetRightMargin(0.08)
+        self.c.SetTopMargin( 0.1 )
+        self.c.SetBottomMargin( 0.12 )
+   
+
+        l = ROOT.TLegend(0.5607383,0.6063123,0.9,0.8089701)
+        l.SetLineWidth(2)
+        l.SetBorderSize(0)
+        l.SetFillColor(0)
+        l.SetTextFont(42)
+        l.SetTextSize(0.04)
+        l.SetTextAlign(12)
+        #l.AddEntry(self.frame.findObject("fit"),'double CB','L')
+        l.AddEntry(self.frame.findObject("errorbars"),'MC uncertainty','F')
+        l.AddEntry(histos_nonRes['Wjets'],'W+jets','F')
+        if 'Zjets' in histos_nonRes.keys(): l.AddEntry(histos_nonRes['Zjets'],'Z+jets','F')
+        if 'TTbar' in histos_nonRes.keys(): l.AddEntry(histos_nonRes['TTbar'],'t#bar{t}','F')
+        self.frame.Draw()
+        l.Draw()
+        histos_nonRes['Wjets'].Draw("histFsame")
+        if 'Zjets' in histos_nonRes.keys(): histos_nonRes['Zjets'].Draw("histFsame")
+        if 'TTbar' in histos_nonRes.keys(): histos_nonRes['TTbar'].Draw("histFsame")
+        self.frame.Draw("same")
+        l.Draw()
+        text = ROOT.TLatex()
+        text.DrawLatexNDC(0.13,0.92,"#font[62]{CMS} #font[52]{Simulation}")
+        self.c.SaveAs(outname.replace(".pdf","_nonRes.pdf"))
+        
         
     def getFrame(self,model = "model",data="data",poi="x",xtitle='x',mass=1000):
         self.frame=self.w.var(poi).frame()
