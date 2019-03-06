@@ -176,7 +176,7 @@ def doSingle():
       # pt.AddText(purity)
 
       pt.Draw()
-      cmslabel_sim(c1,'2016',11)
+      cmslabel_final(c1,'2016',11)
       c1.Update()
       
       c1.SaveAs(path+"signalShapes%s_%s.png" %(options.var, inFileName.rsplit(".", 1)[0]))
@@ -203,6 +203,7 @@ def doAll():
             w.pdf('signal_%d%s'%(MH,name)).plotOn(frame, ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[ii][i])),ROOT.RooFit.Name(str(MH)+name))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
         leg.AddEntry(frame.findObject(str(1800)+name), legs[ii], "L")
     frame.GetYaxis().SetTitle("A.U")
+    frame.GetYaxis().SetTitleOffset(1.15)
     frame.GetYaxis().SetNdivisions(4,5,0)
     frame.SetMaximum(0.15)
     if options.var == 'mVV':frame.SetMaximum(0.5)
@@ -216,7 +217,7 @@ def doAll():
     pt.SetTextSize(0.035)
     pt.AddText("1.2-5.2 TeV")
     pt.Draw()
-    cmslabel_sim_prelim(c1,'sim',11)
+    cmslabel_final(c1,'sim',11)
     c1.Update()
       
     c1.SaveAs(path+"signalShapes_%s_All.png"  %(options.var))
