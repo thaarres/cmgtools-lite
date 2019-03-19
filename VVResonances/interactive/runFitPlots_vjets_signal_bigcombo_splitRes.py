@@ -11,7 +11,7 @@ ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
 #ROOT.gSystem.Load("Util_cxx.so")
 #from ROOT import draw_error_band
 
-#python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_BulkGWW.root  -l comboHPHP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPHP.root -M 1200
+#python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_BulkGWW.root  -l comboHPHP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPHP.root -M 1200 -s
 #python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_BulkGWW.root  -l comboHPLP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPLP.root -M 1200
 
 addTT = False 
@@ -45,7 +45,7 @@ def get_canvas(cname):
  CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
  CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
  CMS_lumi.writeExtraText = 1
- CMS_lumi.extraText = "Preliminary"
+ CMS_lumi.extraText = " "
  CMS_lumi.lumi_sqrtS = "77.3 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
  iPos = 11
@@ -85,7 +85,7 @@ def get_pad(name):
  CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
  CMS_lumi.lumi_13TeV = "77.3 fb^{-1}"
  CMS_lumi.writeExtraText = 1
- CMS_lumi.extraText = "Preliminary"
+ CMS_lumi.extraText = " "
  CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
  iPos = 0
@@ -270,7 +270,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
  
     histos[1].SetLineColor(colors[1])
     histos[1].SetLineWidth(2)
-    leg.AddEntry(histos[1],"W(qq)+jets","l")
+    leg.AddEntry(histos[1],"W(qq)+jets plus t#bar{t}","l")
     
     histos[2].SetLineColor(colors[2])
     histos[2].SetLineWidth(2)
@@ -312,7 +312,11 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors):
      #leg.AddEntry(hsig,"Signal pdf","F")
      leg.AddEntry(hsig,"G_{bulk} (%.1f TeV) #rightarrow WW"%(options.signalMass/1000.),"F")
     
-    errors[0].Draw("E5same")
+    #errors[0].Draw("E5same")
+    if axis=="z":
+        errors[0].Draw("2same")
+    else:
+        errors[0].Draw("3same")
     histos[0].Draw("samehist")
     if options.addTop: histos[3].Draw("histsame") 
     histos[1].Draw("histsame") 
@@ -486,6 +490,8 @@ def doZprojection(pdfs,data1,data2,norm1_nonres,norm2_nonres,norm1_Wres,norm2_Wr
     htot_Wres = ROOT.TH1F("htot_Wres","htot_Wres",len(zBinslowedge)-1,zBinslowedge)
     htot_Wres.Add(h[2])
     htot_Wres.Add(h[3])
+    #htot_Wres.Add(h[4])
+    #htot_Wres.Add(h[5])
     
     htot_Zres = ROOT.TH1F("htot_Zres","htot_Zres",len(zBinslowedge)-1,zBinslowedge)
     htot_Zres.Add(h[4])
@@ -593,6 +599,8 @@ def doXprojection(pdfs,data1,data2,norm1_nonres,norm2_nonres,norm1_Wres,norm2_Wr
     htot_Wres = ROOT.TH1F("htot_Wres","htot_Wres",len(xBinslowedge)-1,xBinslowedge)
     htot_Wres.Add(h[2])
     htot_Wres.Add(h[3])
+    #htot_Wres.Add(h[4])
+    #htot_Wres.Add(h[5])
     
     htot_Zres = ROOT.TH1F("htot_Zres","htot_Zres",len(xBinslowedge)-1,xBinslowedge)
     htot_Zres.Add(h[4])
@@ -700,6 +708,8 @@ def doYprojection(pdfs,data1,data2,norm1_nonres,norm2_nonres,norm1_Wres,norm2_Wr
     htot_Wres = ROOT.TH1F("htot_Wres","htot_Wres",len(yBinslowedge)-1,yBinslowedge)
     htot_Wres.Add(h[2])
     htot_Wres.Add(h[3])
+    #htot_Wres.Add(h[4])
+    #htot_Wres.Add(h[5])
     
     htot_Zres = ROOT.TH1F("htot_Wres","htot_Wres",len(yBinslowedge)-1,yBinslowedge)
     htot_Zres.Add(h[4])
@@ -737,10 +747,15 @@ def addPullPlot(hdata,hpostfit,nBins,error_band):
     gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
     for i in range(1,N+1):
         m = hdata.GetXaxis().GetBinCenter(i)
-        ypostfit = (hdata.GetBinContent(i) - hpostfit.GetBinContent(i))/hdata.GetBinErrorUp(i)
+        #ypostfit = (hdata.GetBinContent(i) - hpostfit.GetBinContent(i))/hdata.GetBinErrorUp(i)
+        if hpostfit.GetBinContent(i) <= hdata.GetBinContent(i):
+            ypostfit = (hdata.GetBinContent(i) - hpostfit.GetBinContent(i))/ ROOT.TMath.Sqrt(ROOT.TMath.Abs( pow(hdata.GetBinErrorUp(i),2) - pow(error_band.GetErrorYhigh(i-1),2) ))
+        else:
+            ypostfit = (hdata.GetBinContent(i) - hpostfit.GetBinContent(i))/ ROOT.TMath.Sqrt(ROOT.TMath.Abs( pow(hdata.GetBinErrorUp(i),2) - pow(error_band.GetErrorYlow(i-1),2) ))
         gpost.SetPoint(i-1,m,ypostfit)
         gt.SetBinContent(i,ypostfit)
-	print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"err data",hdata.GetBinErrorUp(i),"err fit",error_band.GetBinError(i),"pull postfit",ypostfit
+	#print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"err data",hdata.GetBinErrorUp(i),"err fit",error_band.GetBinError(i),"pull postfit",ypostfit
+	print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"err data",hdata.GetBinErrorUp(i),"err fit",error_band.GetErrorYhigh(i-1),"pull postfit",ypostfit
 		
     gpost.SetLineColor(colors[1])
     gpost.SetMarkerColor(colors[1])
@@ -845,7 +860,10 @@ def draw_error_band(histo_central,norm1,err_norm1,norm2,err_norm2,rpdf1,rpdf2,x_
     number_point = len(value)
     
     par_pdf1 = rpdf1.getParameters(argset)  
-    par_pdf2 = rpdf2.getParameters(argset)  
+    par_pdf2 = rpdf2.getParameters(argset)
+    
+   # par_pdf1.Print()
+   # par_pdf2.Print()
       
     for j in range(number_errorband):
     
@@ -893,7 +911,7 @@ def draw_error_band(histo_central,norm1,err_norm1,norm2,err_norm2,rpdf1,rpdf2,x_
       syst[j].SetPoint(ix, x, value[ix])
 
     #Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one 2sigma interval        
-    errorband = ROOT.TH1F("errorband","errorband",len(x_min)-1,x_min)
+    errorband = ROOT.TGraphAsymmErrors()#ROOT.TH1F("errorband","errorband",len(x_min)-1,x_min)
 
     val = [0 for i in range(number_errorband)]
     for ix,x in enumerate(x_min):
@@ -901,16 +919,16 @@ def draw_error_band(histo_central,norm1,err_norm1,norm2,err_norm2,rpdf1,rpdf2,x_
      for j in range(number_errorband):
       val[j]=(syst[j]).GetY()[ix]
      val.sort()
-
-     errorband.SetBinContent(ix+1,histo_central.GetBinContent(ix+1))
+     errorband.SetPoint(ix,x_min[ix]+histo_central.GetBinWidth(ix+1)/2.,histo_central.GetBinContent(ix+1))
+     #errorband.SetBinContent(ix+1,histo_central.GetBinContent(ix+1))
      #print "set bin content error band "+str(histo_central.GetBinContent(ix+1))+" for bin "+str(ix+1)
      errup = (val[int(0.84*number_errorband)]-histo_central.GetBinContent(ix+1)) #ROOT.TMath.Abs
      errdn = ( histo_central.GetBinContent(ix+1)-val[int(0.16*number_errorband)])
-     #print "error up "+str(errup)+" error down "+str(errdn)
-     if errup > errdn: errorband.SetBinError(ix+1,errup)
-     else: errorband.SetBinError(ix+1,errdn)
+     print "error up "+str(errup)+" error down "+str(errdn)
+     #if errup > errdn: errorband.SetBinError(ix+1,errup)
+     #else: errorband.SetBinError(ix+1,errdn)
      #print ix,ix+1,histo_central.GetBinContent(ix+1),errorband.GetBinContent(ix+1)
-     
+     errorband.SetPointError(ix,histo_central.GetBinWidth(ix+1)/2.,histo_central.GetBinWidth(ix+1)/2.,ROOT.TMath.Abs(errdn),ROOT.TMath.Abs(errup))
     errorband.SetFillColor(ROOT.kBlack)
     errorband.SetFillStyle(3008)
     errorband.SetLineColor(ROOT.kGreen)
