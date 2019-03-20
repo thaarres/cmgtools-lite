@@ -22,7 +22,9 @@ vtag_pt_dependence = {'HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','
   
 purities= ['HPHP','HPLP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV"]
-signals = ['VprimeWV']
+#signals = ['VprimeWV']
+signals = ['BulkGVV']
+#signals = ['BulkGZZ']
 
 for sig in signals:
   cmd ="combineCards.py"
@@ -52,6 +54,19 @@ for sig in signals:
        card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig2,"MJ1" ,dataset+"/JJ_%s_MJl1_"%sig2+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
        card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig2,"MJ2" ,dataset+"/JJ_%s_MJl2_"%sig2+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
        card.addParametricYieldHVTBR("%s"%sig2,ncontrib,dataset+"/JJ_%s_"%sig2+p+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWZ",1000.,'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)
+       card.product3D("%s"%sig2,"%s_Wqq1"%sig2,"%s_Wqq2"%sig2,"%s_MVV"%sig2)
+      elif sig=='BulkGVV':
+       sig1 = 'BulkGWW'
+       card.addMVVSignalParametricShape("%s_MVV"%sig1,"MJJ",dataset+"/JJ_%s_MVV.json"%sig1,{'CMS_scale_j':1},{'CMS_res_j':1.0})
+       card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig1,"MJ1" ,dataset+"/JJ_%s_MJl1_"%sig1+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
+       card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig1,"MJ2" ,dataset+"/JJ_%s_MJl2_"%sig1+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
+       card.addParametricYieldHVTBR("%s"%sig1,ncontrib-1,dataset+"/JJ_%s_"%sig1+p+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRWW",1000.,'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)
+       card.product3D("%s"%sig1,"%s_Wqq1"%sig1,"%s_Wqq2"%sig1,"%s_MVV"%sig1)
+       sig2 = 'BulkGZZ'
+       card.addMVVSignalParametricShape("%s_MVV"%sig2,"MJJ",dataset+"/JJ_%s_MVV.json"%sig2,{'CMS_scale_j':1},{'CMS_res_j':1.0})
+       card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig2,"MJ1" ,dataset+"/JJ_%s_MJl1_"%sig2+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
+       card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig2,"MJ2" ,dataset+"/JJ_%s_MJl2_"%sig2+p+".json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
+       card.addParametricYieldHVTBR("%s"%sig2,ncontrib,dataset+"/JJ_%s_"%sig2+p+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRZZ",1000.,'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)
        card.product3D("%s"%sig2,"%s_Wqq1"%sig2,"%s_Wqq2"%sig2,"%s_MVV"%sig2)
       else:
        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",dataset+"/JJ_%s_MVV.json"%sig,{'CMS_scale_j':1},{'CMS_res_j':1.0})

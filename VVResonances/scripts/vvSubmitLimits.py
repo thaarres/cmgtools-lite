@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#vvSubmitLimits.py workspace_JJ_ZprimeWW_HPHP_13TeV_2016.root -s 100 -m 1200 -M 1300 -C 1 -q workday
+#vvSubmitLimits.py workspace_JJ_ZprimeWW_HPHP_13TeV_2016.root -s 100 -m 1200 -M 1300 -C 1 -q workday/tomorrow
 
 import ROOT
 import os, sys, re, optparse,pickle,shutil,json,random
