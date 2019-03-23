@@ -22,7 +22,7 @@ parser.add_option("-T","--titleY",dest="titleY",default='#sigma x BR(X #rightarr
 
 parser.add_option("-p","--period",dest="period",default='2017',help="period")
 parser.add_option("-f","--final",dest="final",type=int, default=1,help="Preliminary or not")
-parser.add_option("--hvt","--hvt",dest="hvt",type=int, default=0,help="do HVT")
+parser.add_option("--hvt","--hvt",dest="hvt",type=int, default=0,help="do HVT (1) or do BulkG (2)")
 parser.add_option("--HVTworkspace","--HVTworkspace",dest="HVTworkspace",default="workspace_JJ_VprimeWV_13TeV.root",help="HVT workspace with spline interpolation")
 
 #    parser.add_option("-x","--minMVV",dest="minMVV",type=float,help="minimum MVV",default=1000.0)
@@ -38,12 +38,17 @@ scaleLimits = {}
 for m in masses:
  scaleLimits[str(int(m))] = options.sigscale
 
-if options.hvt:
+if options.hvt>0:
  fin = ROOT.TFile.Open(options.HVTworkspace,"READ")
  w = fin.Get("w")
   
- filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/WprimeWZ.root"
- filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/ZprimeWW.root"
+ if options.hvt == 1:
+  filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/WprimeWZ.root"
+  filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/ZprimeWW.root"
+ else:
+  filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/BulkGWW.root"
+  filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/BulkGZZ.root"
+     
  thFileWp       = ROOT.TFile.Open(filenameTHWp,'READ')   
  thFileZp       = ROOT.TFile.Open(filenameTHZp,'READ')  
  print "Opening file " ,thFileWp.GetName()
@@ -69,10 +74,14 @@ if options.hvt:
   MH=w.var("MH")
   argset.add(MH)
   MH.setVal(m)
-  func1 = w.function('ZprimeWW_JJ_HPHP_13TeV_2016_sigma')
-  func2 = w.function('WprimeWZ_JJ_HPHP_13TeV_2016_sigma')  
+  if options.hvt == 1:
+   func1 = w.function('ZprimeWW_JJ_HPHP_13TeV_2016_sigma')
+   func2 = w.function('WprimeWZ_JJ_HPHP_13TeV_2016_sigma')  
+  else: 
+   func1 = w.function('BulkGWW_JJ_HPHP_13TeV_2016_sigma')
+   func2 = w.function('BulkGZZ_JJ_HPHP_13TeV_2016_sigma')  
   scaleLimits[str(int(m))] = func1.getVal(argset)+func2.getVal(argset) 
-
+  
  spline_x_wp = []
  spline_y_wp = []
  spline_y_wpUP = []
@@ -116,7 +125,7 @@ if options.hvt:
   y = ROOT.Double(0.)
   gtheoryZpDOWN.GetPoint(i,x,y)  
   spline_y_zpDOWN.append(y)
-      
+       
  spline_zp=ROOT.RooSpline1D("Zprime_sigma","Zprime_sigma",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zp))  
  spline_wp=ROOT.RooSpline1D("Wprime_sigma","Wprime_sigma",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wp))  
  spline_zpUP=ROOT.RooSpline1D("Zprime_sigmaUP","Zprime_sigmaUP",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpUP))  
@@ -372,7 +381,11 @@ if "Vprime"  in options.sig:
   ltheory="#sigma_{TH}#timesBR(V'#rightarrowWV) HVT_{B}"
   ytitle ="#sigma x BR(V' #rightarrow WV) [pb]  "
   xtitle = "M_{V'} [GeV]"
-  
+if "BulkGVV"  in options.sig: 
+  ltheory="#sigma_{TH}#timesBR(G_{Bulk}#rightarrowVV) #tilde{k}=0.5"  
+  ytitle ="#sigma x BR(G_{Bulk} #rightarrow VV) [pb]  "
+  xtitle = "M_{G_{Bulk}} [GeV]"
+    
 frame=c.DrawFrame(options.minX,options.minY,options.maxX,options.maxY)
 frame.GetXaxis().SetTitle(xtitle)
 frame.GetXaxis().SetTitleOffset(0.9)
@@ -446,6 +459,7 @@ if options.blind==0:
     bandObs.Draw("PLsame")
 c.SaveAs(options.output+options.sig+".png")    
 c.SaveAs(options.output+options.sig+".pdf")    
+c.SaveAs(options.output+options.sig+".C")    
 
 fout=ROOT.TFile(options.output+options.sig+".root","RECREATE")
 fout.cd()
