@@ -1,6 +1,6 @@
 # VV statistical analysis in 10X
 
-Prepare the working directory with Higgs Combine Tools. Use the 10X release compatible with [UHH](https://github.com/UHH2/UHH2/wiki/Installing,-Compiling,-Ntuples-(RunII-2016,17,-18-datasets-in-CMSSW_10_2_X-v1) framework. If you have that already installed you do
+Prepare the working directory with Higgs Combine Tools. Use the 10X release compatible with [UHH!](https://github.com/UHH2/UHH2/wiki/Installing,-Compiling,-Ntuples-(RunII-2016,17,-18-datasets-in-CMSSW_10_2_X-v1) framework. If you have that already installed you do
 not need to check out the CMSSW release again.
 
 ```
