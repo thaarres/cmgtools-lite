@@ -116,7 +116,7 @@ for filename in os.listdir(args[0]):
    ext=fnameParts[1]
    if ext.find("root") ==-1:
        continue
-   dataPlotters.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
+   dataPlotters.append(TreePlotter(args[0]+'/'+fname+'.root','AnalysisTree'))
    dataPlotters[-1].setupFromFile(args[0]+'/'+fname+'.pck')
    dataPlotters[-1].addCorrectionFactor('xsec','tree')
    dataPlotters[-1].addCorrectionFactor('genWeight','tree')
@@ -125,7 +125,7 @@ for filename in os.listdir(args[0]):
    for w in weights_:
     if w != '': dataPlotters[-1].addCorrectionFactor(w,'branch')
    dataPlotters[-1].filename=fname
-   dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
+   dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','AnalysisTree'))
    dataPlottersNW[-1].addCorrectionFactor('puWeight','tree')
    dataPlottersNW[-1].addCorrectionFactor('genWeight','tree')
    if options.triggerW: dataPlottersNW[-1].addCorrectionFactor('triggerWeight','tree')
@@ -306,14 +306,15 @@ for hist in histograms:
 #conditional(histogram_altshapeDown)
 #histogram_altshapeDown.Write()
 
-alpha=1.5/215.
+print options.maxx,options.minx
+alpha=1.5/(options.maxx)
 histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha)
 conditional(histogram_pt_down)
 histogram_pt_down.Write()
 conditional(histogram_pt_up)
 histogram_pt_up.Write()
 
-alpha=1.5*55.
+alpha=1.5*(options.minx)
 h1,h2=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_OPT",alpha,-1)
 conditional(h1)
 h1.Write()

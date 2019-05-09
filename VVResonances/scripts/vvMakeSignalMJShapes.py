@@ -24,7 +24,7 @@ parser.add_option("-o","--output",dest="output",help="Output JSON",default='')
 parser.add_option("-V","--MVV",dest="mvv",help="mVV variable",default='')
 parser.add_option("-m","--min",dest="mini",type=float,help="min MJJ",default=40)
 parser.add_option("-M","--max",dest="maxi",type=float,help="max MJJ",default=160)
-parser.add_option("-e","--exp",dest="doExp",type=int,help="useExponential",default=1)
+parser.add_option("-e","--exp",dest="doExp",type=int,help="useExponential",default=0)
 parser.add_option("-f","--fix",dest="fixPars",help="Fixed parameters",default="1")
 parser.add_option("-r","--minMX",dest="minMX",type=float, help="smallest Mx to fit ",default=1000.0)
 parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fit " ,default=7000.0)
@@ -33,54 +33,50 @@ parser.add_option("-t","--triggerweight",dest="triggerW",action="store_true",hel
 (options,args) = parser.parse_args()
 #define output dictionary
 
+isVH = False
 samples={}
-graphs={'mean':ROOT.TGraphErrors(),'sigma':ROOT.TGraphErrors(),'alpha':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'slope':ROOT.TGraphErrors(),'alpha2':ROOT.TGraphErrors(),'n2':ROOT.TGraphErrors()}
-#if options.sample.find("Wprime")!=-1:
-    #graphs = {'meanW':ROOT.TGraphErrors(),'sigmaW':ROOT.TGraphErrors(),'alphaW':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'alphaW2':ROOT.TGraphErrors(),'meanZ':ROOT.TGraphErrors(),'sigmaZ':ROOT.TGraphErrors(),'alphaZ':ROOT.TGraphErrors(),'alphaZ2':ROOT.TGraphErrors()}
 
 for filename in os.listdir(args[0]):
     if not (filename.find(options.sample)!=-1):
         continue
 
-#found sample. get the mass
+    if filename.find('hbb'):
+     isVH=True
+     print "INFO: fitting VH sample with double peak"
+     
     fnameParts=filename.split('.')
     fname=fnameParts[0]
     ext=fnameParts[1]
     if ext.find("root") ==-1:
         continue
         
-
     mass = float(fname.split('_')[-1])
     if mass < options.minMX or mass > options.maxMX: continue	
-
-        
-
     samples[mass] = fname
 
     print 'found',filename,'mass',str(mass) 
 
 leg = options.mvv.split('_')[1]
+graphs={'mean':ROOT.TGraphErrors(),'sigma':ROOT.TGraphErrors(),'alpha':ROOT.TGraphErrors(),'n':ROOT.TGraphErrors(),'f':ROOT.TGraphErrors(),'slope':ROOT.TGraphErrors(),'alpha2':ROOT.TGraphErrors(),'n2':ROOT.TGraphErrors(),
+        'meanH':ROOT.TGraphErrors(),'sigmaH':ROOT.TGraphErrors(),'alphaH':ROOT.TGraphErrors(),'nH':ROOT.TGraphErrors(),'fH':ROOT.TGraphErrors(),'slopeH':ROOT.TGraphErrors(),'alpha2H':ROOT.TGraphErrors(),'n2H':ROOT.TGraphErrors() }
 
 #Now we have the samples: Sort the masses and run the fits
 N=0
 for mass in sorted(samples.keys()):
 
     print 'fitting',str(mass) 
-    plotter=TreePlotter(args[0]+'/'+samples[mass]+'.root','tree')
-#    plotter.setupFromFile(args[0]+'/'+samples[mass]+'.pck')
-    plotter.addCorrectionFactor('genWeight_LO','tree')
-#    plotter.addCorrectionFactor('xsec','tree')
+    plotter=TreePlotter(args[0]+'/'+samples[mass]+'.root','AnalysisTree')
+    plotter.addCorrectionFactor('genWeight','tree')
     plotter.addCorrectionFactor('puWeight','tree')
-    plotter.addCorrectionFactor('jj_triggerWeight','tree')
+    if options.triggerW:
+     plotter.addCorrectionFactor('jj_triggerWeight','tree')
+     print "Using triggerweight"
        
         
     fitter=Fitter(['x'])
-    if options.doExp==1:
-            fitter.jetResonance('model','x')
-    else:
-            fitter.jetResonanceNOEXP('model','x')
-
-
+    if isVH: fitter.jetDoublePeakVH('model','x')
+    else: fitter.jetResonanceNOEXP('model','x')
+    
     if options.fixPars!="1":
         fixedPars =options.fixPars.split(',')
         for par in fixedPars:
@@ -104,6 +100,7 @@ for mass in sorted(samples.keys()):
         graph.SetPointError(N,0.0,error)
                 
     N=N+1
+    fitter.delete()
         
 F=ROOT.TFile(options.output,"RECREATE")
 F.cd()

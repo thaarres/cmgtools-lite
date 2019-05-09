@@ -259,14 +259,19 @@ print "- sigmoid for nominal"
 histo_up,histo_down = add_sigmoid_shape(output.histo)
 histo_up.Write()
 histo_down.Write()
-if output.histo_herwig:
- print "- sigmoid for herwig"
- histo_herwig_up,histo_herwig_down = add_sigmoid_shape(output.histo_herwig)
- histo_herwig_up.Write()
- histo_herwig_down.Write()
-if output.histo_madgraph:
+try: 
+  print "- sigmoid for herwig"
+  histo_herwig_up,histo_herwig_down = add_sigmoid_shape(output.histo_herwig)
+  histo_herwig_up.Write()
+  histo_herwig_down.Write()
+except:
+    print('histo_herwig not in output file!')
+try:
  print "- sigmoid for madgraph"
  histo_madgraph_up,histo_madgraph_down = add_sigmoid_shape(output.histo_madgraph)
  histo_madgraph_up.Write()
  histo_madgraph_down.Write()
+except:
+     print('histo_madgraph not in output file!')
+
 output.Close()

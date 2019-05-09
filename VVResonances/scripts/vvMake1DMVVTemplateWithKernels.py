@@ -130,13 +130,11 @@ dataPlottersNW=[]
 for filename in os.listdir(args[0]):
     for sampleType in sampleTypes:
         if filename.find(sampleType)!=-1:
-            print filename
             fnameParts=filename.split('.')
             fname=fnameParts[0]
             ext=fnameParts[1]
-            if ext.find("root") ==-1:
-                continue
-            dataPlotters.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
+            if ext.find("root") ==-1: continue
+            dataPlotters.append(TreePlotter(args[0]+'/'+fname+'.root','AnalysisTree'))
             dataPlotters[-1].setupFromFile(args[0]+'/'+fname+'.pck')
             dataPlotters[-1].addCorrectionFactor('xsec','tree')
             dataPlotters[-1].addCorrectionFactor('genWeight','tree')
@@ -156,7 +154,7 @@ for filename in os.listdir(args[0]):
             dataPlotters[-1].addCorrectionFactor(corrFactor,'flat') 
 
             dataPlotters[-1].filename=fname
-            dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
+            dataPlottersNW.append(TreePlotter(args[0]+'/'+fname+'.root','AnalysisTree'))
             dataPlottersNW[-1].addCorrectionFactor('puWeight','tree')
             dataPlottersNW[-1].addCorrectionFactor('genWeight','tree')
             if options.triggerW: dataPlottersNW[-1].addCorrectionFactor('triggerWeight','tree')
@@ -231,16 +229,12 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
 
    histI2.Delete()
    histTMP.Delete()
- 
- #histogram_nominal.SetLineColor(ROOT.kRed)
- #histogram_nominal.SetFillColorAlpha(ROOT.kRed, 0.6)
- #stack.Add(histogram_nominal)
+
 
  if len(sampleTypes)<2: continue
  elif plotter.filename.find(sampleTypes[1].replace('.root','')) != -1: #alternative shape Herwig
    print "Preparing alternative shapes for sampletype " ,sampleTypes[1]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
-   #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
    histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
  
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
@@ -259,7 +253,6 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    histI2.Delete()
    histTMP.Delete()
 
-
    histogram_altshapeUp.SetLineColor(ROOT.kBlue)
    histogram_altshapeUp.SetFillColorAlpha(ROOT.kBlue, 0.6)
    stack.Add(histogram_altshapeUp)
@@ -269,7 +262,6 @@ for plotter,plotterNW in zip(dataPlotters,dataPlottersNW):
    print "Preparing alternative shapes for sampletype " ,sampleTypes[2]
    print "filename: ", plotter.filename, " preparing alternate shape histo"
    
-   #histI=plotter.drawTH1(options.var,options.cut,"1",1,0,1000000000)
    histI2=plotter.drawTH1Binned('jj_LV_mass',options.cut,"1",array('f',binning))
 
    dataset=plotterNW.makeDataSet('jj_gen_partialMass,jj_l1_gen_pt,jj_l1_gen_softDrop_mass',options.cut,options.firstEv,options.lastEv)     
@@ -331,34 +323,26 @@ for hist in finalHistograms.itervalues():
 
  hist.Write(hist.GetName())
  finalHistograms[hist.GetName()]=hist
- # if (options.output).find("VJets")!=-1 and hist.GetName()!="mvv_nominal":
-#   c = ROOT.TCanvas("c","C",400,400)
-#   finalHistograms["histo_nominal"].Draw("hist")
-#   data = finalHistograms["mvv_nominal"]
-#   data.SetMarkerColor(ROOT.kBlack)
-#   data.Draw("same")
-#   c.SetLogy()
-#   c.SaveAs("debug_Vjets_mVV_kernels.png")
-#   print "for debugging save   debug_Vjets_mVV_kernels.png "
-  ########################################################
 
+########################################################
 
-alpha=1.5/5000
+options.minx,options.maxx
+alpha=1.5/float(options.maxx)
 histogram_pt_down,histogram_pt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT",alpha)
 histogram_pt_down.Write()
 histogram_pt_up.Write()
 
-alpha=1.5*800.
+alpha=1.5*float(options.minx)
 histogram_opt_down,histogram_opt_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT",alpha,-1)
 histogram_opt_down.Write()
 histogram_opt_up.Write()
 
-alpha=5000.*5000.
+alpha=float(options.maxx)*float(options.maxx)
 histogram_pt2_down,histogram_pt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_PT2",alpha,2)
 histogram_pt2_down.Write()
 histogram_pt2_up.Write()
 
-alpha=800.*800.
+alpha=float(options.minx)*float(options.minx)
 histogram_opt2_down,histogram_opt2_up=unequalScale(finalHistograms["histo_nominal"],"histo_nominal_OPT2",alpha,-2)
 histogram_opt2_down.Write()
 histogram_opt2_up.Write() 
@@ -408,13 +392,14 @@ l.AddEntry(histogram_pt_up,"#propto m_{jj}","l")
 l.AddEntry(histogram_opt_up,"#propto 1/m_{jj}","l")
 l.Draw("same")
 
-tmplabel="Jets_HPHP"
-if options.output.find('HPLP')!=-1:
-    tmplabel="Jets_HPLP"
-if options.output.find("W")!=-1: tmplabel="W"+tmplabel
-else: tmplabel= "Z"+tmplabel
+tmplabel = "nonRes"
+if 'Jets' in sampleTypes: tmplabel="Jets"
+if options.output.find('HPLP')!=-1: tmplabel+='_HPLP'
+if options.output.find('HPHP')!=-1: tmplabel+='_HPHP'
+if 'W' in sampleTypes: tmplabel="W"+tmplabel
+if 'Z' in sampleTypes: tmplabel="Z"+tmplabel
 c.SaveAs("debug_mVV_kernels_"+tmplabel+".pdf")
-print "for debugging save   debug_Vjets_mVV_kernels.png "
+print "for debugging save","debug_mVV_kernels_"+tmplabel+".pdf"
 
 ########################################################
 
