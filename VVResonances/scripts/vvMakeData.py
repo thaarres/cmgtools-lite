@@ -47,7 +47,7 @@ for filename in os.listdir(args[0]):
             ext=fnameParts[1]
             if ext.find("root") ==-1:
                 continue
-            dataPlotters.append(TreePlotter(args[0]+'/'+fname+'.root','tree'))
+            dataPlotters.append(TreePlotter(args[0]+'/'+fname+'.root','AnalysisTree'))
             if options.data==0 or options.data==2:
                 dataPlotters[-1].setupFromFile(args[0]+'/'+fname+'.pck')
                 dataPlotters[-1].addCorrectionFactor('xsec','tree')

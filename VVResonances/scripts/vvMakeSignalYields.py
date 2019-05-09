@@ -62,12 +62,14 @@ N=0
 for mass in sorted(samples.keys()):
 
     print 'fitting',str(mass) 
-    plotter=TreePlotter(args[0]+'/'+samples[mass]+'.root','tree')
+    plotter=TreePlotter(args[0]+'/'+samples[mass]+'.root','AnalysisTree')
     plotter.setupFromFile(args[0]+'/'+samples[mass]+'.pck')
-    plotter.addCorrectionFactor('genWeight_LO','tree')
+    plotter.addCorrectionFactor('genWeight','tree')
     plotter.addCorrectionFactor('xsec','tree')
     plotter.addCorrectionFactor('puWeight','tree')
-    plotter.addCorrectionFactor('jj_triggerWeight','tree')
+    if options.triggerW:
+        plotter.addCorrectionFactor('jj_triggerWeight','tree')	
+        print "Using triggerweight"
     histo = plotter.drawTH1(options.mvv,options.cut,"1",500,options.min,options.max)
     err=ROOT.Double(0)
     integral=histo.IntegralAndError(1,histo.GetNbinsX(),err) 

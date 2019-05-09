@@ -15,7 +15,12 @@ class Fitter(object):
         for v in poi:
             self.w.factory(v+"[1,161]")
 
-
+    def delete(self):
+     if self.w:
+      self.w.Delete()
+      self.cache.Close()
+      self.cache.Delete()
+    
     def factory(self,expr):
         self.w.factory(expr)
 
@@ -376,6 +381,15 @@ class Fitter(object):
         self.w.factory("slope[0.0]")
         self.w.factory("f[0.0]")
 
+        self.w.factory("meanH[0.0]")
+        self.w.factory("sigmaH[0.0]")
+        self.w.factory("alphaH[0.0]")
+        self.w.factory("nH[0.0]")
+        self.w.factory("alpha2H[0.0]")
+        self.w.factory("n2H[0.0]")
+        self.w.factory("slopeH[0.0]")
+        self.w.factory("fH[0.0]")
+	
         peak = ROOT.RooDoubleCB(name,'modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
         getattr(self.w,'import')(peak,ROOT.RooFit.Rename(name))
 
@@ -431,7 +445,33 @@ class Fitter(object):
         self.w.factory("SUM::"+name+"(f[0]*WPeak,ZPeak)")
 
 
+    def jetDoublePeakVH(self,name = 'model',poi='x'):
+        ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
 
+        self.w.factory("mean[80,50,200]")
+        self.w.factory("sigma[10,2,40]")
+        self.w.factory("alpha[3,0.5,10]")
+        self.w.factory("n[2]")
+        self.w.factory("alpha2[3,0.5,10]")
+        self.w.factory("n2[2]")
+        self.w.factory("slope[0.0]")
+        self.w.factory("f[0.0]")
+		        
+        self.w.factory("meanH[120,80,250]")
+        self.w.factory("sigmaH[10,2,40]")
+        self.w.factory("alphaH[3,0.5,10]")
+        self.w.factory("nH[2]")
+        self.w.factory("alpha2H[3,0.5,10]")
+        self.w.factory("n2H[2]")
+        self.w.factory("slopeH[0.0]")
+        self.w.factory("fH[0.0]")
+		
+        peak = ROOT.RooDoubleCB('VPeak','modelS',self.w.var(poi),self.w.var('mean'),self.w.var('sigma'),self.w.var('alpha'),self.w.var('n'),self.w.var("alpha2"),self.w.var("n2"))
+        getattr(self.w,'import')(peak,ROOT.RooFit.Rename('VPeak'))
+        peak2 = ROOT.RooDoubleCB('HPeak','modelS',self.w.var(poi),self.w.var('meanH'),self.w.var('sigmaH'),self.w.var('alphaH'),self.w.var('nH'),self.w.var("alpha2H"),self.w.var("n2H"))
+        getattr(self.w,'import')(peak2,ROOT.RooFit.Rename('HPeak'))
+        self.w.factory("SUM::"+name+"(r[0.5,0,1]*VPeak,HPeak)")
+	
     def jetDoublePeak(self,name = 'model',poi='x'):
         ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
         

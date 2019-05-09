@@ -1,20 +1,21 @@
-# VV statistical analysis in 74X
+# VV statistical analysis in 10X
 
-Prepare your working dir with Higgs combine tools (74X)
+Prepare the working directory with Higgs Combine Tools. Use the 10X release compatible with the [UHH framework](https://github.com/UHH2/UHH2). If you have that already installed you do
+not need to check out the CMSSW release again.
 
 ```
 mkdir VVAnalysisWith2DFit
-mkdir CMGToolsForStat74X
-cd CMGToolsForStat74X
-cmsrel CMSSW_7_4_7
-cd CMSSW_7_4_7/src
+mkdir CMGToolsForStat10X
+cd CMGToolsForStat10X
+export SCRAM_ARCH=slc6_amd64_gcc700
+cmsrel CMSSW_10_2_10
+cd CMSSW_10_2_10/src
 cmsenv
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-cd HiggsAnalysis/CombinedLimit
 cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
 git fetch origin
-git checkout v6.3.1
-scram b clean; scram b -j 8
+git checkout v8.0.0
+scramv1 b clean && scramv1 b -j 8
 ```
 
 Fork cmgtools from https://github.com/Diboson3D/cmgtools-lite and checkout the VV statistical tools
@@ -24,9 +25,9 @@ cd ../..
 export GITUSER=`git config user.github`
 git clone https://github.com/${GITUSER}/cmgtools-lite CMGTools
 cd CMGTools
-git remote add Diboson3D https://github.com/Diboson3D/cmgtools-lite
+git remote add Diboson3D https://github.com/Diboson3D/cmgtools-lite -b VV_VH
 git fetch Diboson3D
-git checkout -b 3DVVstat Diboson3D/3DVVstat
+git checkout -b VV_VH Diboson3D/VV_VH
 scram b -j 8
 cd VVResonances/interactive
 ln -s samples_location sample

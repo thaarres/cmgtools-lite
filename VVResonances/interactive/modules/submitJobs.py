@@ -621,7 +621,7 @@ def merge2DDetectorParam(resFile,binsxStr,jobname):
     #use the pythia det resolution for all the sample in the following steps
     os.system( 'cp %s %s'%(outname,resFile) )
             
-def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV):
+def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbinsMVV):
 	print "Merging 1D templates"
 	print
 	print "Jobs to merge :   " ,jobList
@@ -795,11 +795,9 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		mvv_nominal.Write('mvv_nominal')
 		histo_nominal.Scale(1./histo_nominal.Integral())
 		histo_nominal.Write('histo_nominal')
-		#histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp')
-		#histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown')
 			
 		print "Now pT"
-		alpha=1.5/float(maxMVV) #1.5/5000
+		alpha=1.5/float(maxMVV)
 		histogram_pt_up,histogram_pt_down=unequalScale(histo_nominal,"histo_nominal_PT",alpha)
 		histogram_pt_down.SetName('histo_nominal_PTDown')
 		histogram_pt_down.SetTitle('histo_nominal_PTDown')
@@ -809,7 +807,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_pt_up.Write('histo_nominal_PTUp')
 
                 print "Now OPT"
-		alpha=1.5*float(minMVV) #1.5*1000
+		alpha=1.5*float(minMVV)
 		histogram_opt_up,histogram_opt_down=unequalScale(histo_nominal,"histo_nominal_OPT",alpha,-1)
 		histogram_opt_down.SetName('histo_nominal_OPTDown')
 		histogram_opt_down.SetTitle('histo_nominal_OPTDown')
@@ -817,130 +815,13 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_opt_up.SetName('histo_nominal_OPTUp')
 		histogram_opt_up.SetTitle('histo_nominal_OPTUp')
 		histogram_opt_up.Write('histo_nominal_OPTUp')
-
-                '''							
-                print "Now pT2"				
-		alpha=15./(5000.*5000.)
-		histogram_pt2_up,histogram_pt2_down=unequalScale(histo_nominal,"histo_nominal_PT2",alpha,2)
-		histogram_pt2_down.SetName('histo_nominal_PT2Down')
-		histogram_pt2_down.SetTitle('histo_nominal_PT2Down')
-		histogram_pt2_down.Write('histo_nominal_PT2Down')		
-		histogram_pt2_up.SetName('histo_nominal_PT2Up')
-		histogram_pt2_up.SetTitle('histo_nominal_PT2Up')
-		histogram_pt2_up.Write('histo_nominal_PT2Up')
-
-                print "Now opT2"		
-		alpha=15.*1000.*1000.
-		histogram_opt2_up,histogram_opt2_down=unequalScale(histo_nominal,"histo_nominal_OPT2",alpha,-2)		
-		histogram_opt2_up.SetName('histo_nominal_OPT2Up')
-		histogram_opt2_up.SetTitle('histo_nominal_OPT2Up')
-		histogram_opt2_up.Write('histo_nominal_OPT2Up')		
-		histogram_opt2_down.SetName('histo_nominal_OPT2Down')
-		histogram_opt2_down.SetTitle('histo_nominal_OPT2Down')
-		histogram_opt2_down.Write('histo_nominal_OPT2Down')
-
-                #alpha=5000.*5000.*5000.
-		alpha=150./(7000.*7000.*7000.)
-		histogram_pt3_down,histogram_pt3_up=unequalScale(histo_nominal,"histo_nominal_PT3",alpha,3)
-		histogram_pt3_down.SetName('histo_nominal_PT3Down')
-		histogram_pt3_down.SetTitle('histo_nominal_PT3Down')
-		histogram_pt3_down.Write('histo_nominal_PT3Down')		
-		histogram_pt3_up.SetName('histo_nominal_PT3Up')
-		histogram_pt3_up.SetTitle('histo_nominal_PT3Up')
-		histogram_pt3_up.Write('histo_nominal_PT3Up')
-
-		alpha=150.*1000.*1000.*1000.
-		histogram_opt3_down,histogram_opt3_up=unequalScale(histo_nominal,"histo_nominal_OPT3",alpha,-3)
-		histogram_opt3_up.SetName('histo_nominal_OPT3Up')
-		histogram_opt3_up.SetTitle('histo_nominal_OPT3Up')
-		histogram_opt3_up.Write('histo_nominal_OPT3Up')		
-		histogram_opt3_down.SetName('histo_nominal_OPT3Down')
-		histogram_opt3_down.SetTitle('histo_nominal_OPT3Down')
-		histogram_opt3_down.Write('histo_nominal_OPT3Down')
-               
-		#alpha=5000.*5000.*5000.
-		alpha=1500./(7000.*7000.*7000.*7000.)
-		histogram_pt4_down,histogram_pt4_up=unequalScale(histo_nominal,"histo_nominal_PT4",alpha,4)
-		histogram_pt4_down.SetName('histo_nominal_PT4Down')
-		histogram_pt4_down.SetTitle('histo_nominal_PT4Down')
-		histogram_pt4_down.Write('histo_nominal_PT4Down')		
-		histogram_pt4_up.SetName('histo_nominal_PT4Up')
-		histogram_pt4_up.SetTitle('histo_nominal_PT4Up')
-		histogram_pt4_up.Write('histo_nominal_PT4Up')
-
-		alpha=1500.*1000.*1000.*1000.*1000.
-		histogram_opt4_down,histogram_opt4_up=unequalScale(histo_nominal,"histo_nominal_OPT4",alpha,-4)
-		histogram_opt4_up.SetName('histo_nominal_OPT4Up')
-		histogram_opt4_up.SetTitle('histo_nominal_OPT4Up')
-		histogram_opt4_up.Write('histo_nominal_OPT4Up')		
-		histogram_opt4_down.SetName('histo_nominal_OPT4Down')
-		histogram_opt4_down.SetTitle('histo_nominal_OPT4Down')
-		histogram_opt4_down.Write('histo_nominal_OPT4Down')
-
-		#alpha=5000.*5000.*5000.
-		alpha=15000./(7000.*7000.*7000.*7000.*7000.)
-		histogram_pt5_down,histogram_pt5_up=unequalScale(histo_nominal,"histo_nominal_PT5",alpha,5)
-		histogram_pt5_down.SetName('histo_nominal_PT5Down')
-		histogram_pt5_down.SetTitle('histo_nominal_PT5Down')
-		histogram_pt5_down.Write('histo_nominal_PT5Down')		
-		histogram_pt5_up.SetName('histo_nominal_PT5Up')
-		histogram_pt5_up.SetTitle('histo_nominal_PT5Up')
-		histogram_pt5_up.Write('histo_nominal_PT5Up')
-
-		alpha=15000.*1000.*1000.*1000.*1000.*1000.
-		histogram_opt5_down,histogram_opt5_up=unequalScale(histo_nominal,"histo_nominal_OPT5",alpha,-5)
-		histogram_opt5_up.SetName('histo_nominal_OPT5Up')
-		histogram_opt5_up.SetTitle('histo_nominal_OPT5Up')
-		histogram_opt5_up.Write('histo_nominal_OPT5Up')		
-		histogram_opt5_down.SetName('histo_nominal_OPT5Down')
-		histogram_opt5_down.SetTitle('histo_nominal_OPT5Down')
-		histogram_opt5_down.Write('histo_nominal_OPT5Down')
-
-		#alpha=5000.*5000.*5000.
-		alpha=150000./(7000.*7000.*7000.*7000.*7000.*7000)
-		histogram_pt6_down,histogram_pt6_up=unequalScale(histo_nominal,"histo_nominal_PT6",alpha,6)
-		histogram_pt6_down.SetName('histo_nominal_PT6Down')
-		histogram_pt6_down.SetTitle('histo_nominal_PT6Down')
-		histogram_pt6_down.Write('histo_nominal_PT6Down')		
-		histogram_pt6_up.SetName('histo_nominal_PT6Up')
-		histogram_pt6_up.SetTitle('histo_nominal_PT6Up')
-		histogram_pt6_up.Write('histo_nominal_PT6Up')
-
-		alpha=150000.*1000.*1000.*1000.*1000.*1000.*1000
-		histogram_opt6_down,histogram_opt6_up=unequalScale(histo_nominal,"histo_nominal_OPT6",alpha,-6)
-		histogram_opt6_up.SetName('histo_nominal_OPT6Up')
-		histogram_opt6_up.SetTitle('histo_nominal_OPT6Up')
-		histogram_opt6_up.Write('histo_nominal_OPT6Up')		
-		histogram_opt6_down.SetName('histo_nominal_OPT6Down')
-		histogram_opt6_down.SetTitle('histo_nominal_OPT6Down')
-		histogram_opt6_down.Write('histo_nominal_OPT6Down')		
-
-		#alpha=5000.*5000.*5000.
-		alpha=0.
-		histogram_ptn_down,histogram_ptn_up=unequalScale(histo_nominal,"histo_nominal_PTN",alpha,0)
-		histogram_ptn_down.SetName('histo_nominal_PTNDown')
-		histogram_ptn_down.SetTitle('histo_nominal_PTNDown')
-		histogram_ptn_down.Write('histo_nominal_PTNDown')		
-		histogram_ptn_up.SetName('histo_nominal_PTNUp')
-		histogram_ptn_up.SetTitle('histo_nominal_PTNUp')
-		histogram_ptn_up.Write('histo_nominal_PTNUp')
-
-		alpha=0.
-		histogram_optn_down,histogram_optn_up=unequalScale(histo_nominal,"histo_nominal_OPTN",alpha,100)
-		histogram_optn_up.SetName('histo_nominal_OPTNUp')
-		histogram_optn_up.SetTitle('histo_nominal_OPTNUp')
-		histogram_optn_up.Write('histo_nominal_OPTNUp')		
-		histogram_optn_down.SetName('histo_nominal_OPTNDown')
-		histogram_optn_down.SetTitle('histo_nominal_OPTNDown')
-		histogram_optn_down.Write('histo_nominal_OPTNDown')
-		'''
 				
 	if doHerwig:
 		mvv_altshapeUp.Write('mvv_altshapeUp')
 		histo_altshapeUp.Write('histo_altshapeUp')
     
 		print "Now pT"
-		alpha=1.5/float(maxMVV) #1.5/5000
+		alpha=1.5/float(maxMVV)
 		histogram_altshapeUp_pt_up,histogram_altshapeUp_pt_down=unequalScale(histo_nominal,"histo_altshapeUp_PT",alpha)
 		histogram_altshapeUp_pt_down.SetName('histo_altshapeUp_PTDown')
 		histogram_altshapeUp_pt_down.SetTitle('histo_altshapeUp_PTDown')
@@ -950,7 +831,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_altshapeUp_pt_up.Write('histo_altshapeUp_PTUp')
 
                 print "Now OPT"
-		alpha=1.5*float(minMVV) #1.5*1000
+		alpha=1.5*float(minMVV)
 		histogram_altshapeUp_opt_up,histogram_altshapeUp_opt_down=unequalScale(histo_altshapeUp,"histo_altshapeUp_OPT",alpha,-1)
 		histogram_altshapeUp_opt_down.SetName('histo_altshapeUp_OPTDown')
 		histogram_altshapeUp_opt_down.SetTitle('histo_altshapeUp_OPTDown')
@@ -958,9 +839,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_altshapeUp_opt_up.SetName('histo_altshapeUp_OPTUp')
 		histogram_altshapeUp_opt_up.SetTitle('histo_altshapeUp_OPTUp')
 		histogram_altshapeUp_opt_up.Write('histo_altshapeUp_OPTUp')
-    
-		#histo_altshape_ScaleUp.Write('histo_altshape_ScaleUp')
-		#histo_altshape_ScaleDown.Write('histo_altshape_ScaleDown')
+
 		if doPythia:
 			histogram_altshapeDown=mirror(histo_altshapeUp,histo_nominal,"histo_altshapeDown")
 			histogram_altshapeDown.SetName('histo_altshapeDown')
@@ -972,7 +851,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histo_altshape2Up.Write('histo_altshape2Up')
     
 		print "Now pT"
-		alpha=1.5/float(maxMVV) #1.5/5000
+		alpha=1.5/float(maxMVV)
 		histogram_altshape2_pt_up,histogram_altshape2_pt_down=unequalScale(histo_nominal,"histo_altshape2_PT",alpha)
 		histogram_altshape2_pt_down.SetName('histo_altshape2_PTDown')
 		histogram_altshape2_pt_down.SetTitle('histo_altshape2_PTDown')
@@ -982,7 +861,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 		histogram_altshape2_pt_up.Write('histo_altshape2_PTUp')
 
                 print "Now OPT"
-		alpha=1.5*float(minMVV) #1.5*1000
+		alpha=1.5*float(minMVV)
 		histogram_altshape2_opt_up,histogram_altshape2_opt_down=unequalScale(histo_altshape2Up,"histo_altshape2_OPT",alpha,-1)
 		histogram_altshape2_opt_down.SetName('histo_altshape2_OPTDown')
 		histogram_altshape2_opt_down.SetTitle('histo_altshape2_OPTDown')
@@ -1006,9 +885,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,binsMJ,minMVV,maxMVV
 			histogram_NLODown.SetTitle('histo_NLODown')
 			histogram_NLODown.Write('histo_NLODown')
 						
-	#os.system('mv JJ_nonRes_MVV_'+purity+'.root '+startpath)
 	os.system('rm -rf '+outdir+'_out/')
-	#os.system('rm -rf '+outdir+'/')
 
 def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,HCALbinsMVV):  
   
@@ -1237,18 +1114,6 @@ def merge2DTemplate(jobList,files,jobname,purity,leg,binsMVV,binsMJ,minMVV,maxMV
     expanded.SetTitle('histo_nominal')
     expanded.Write('histo_nominal')
     finalHistograms['histo_nominal'] = histo_nominal
-    
-    #histo_nominal_ScaleUp.Write('histo_nominal_ScaleUp')
-    #conditional(histo_nominal_ScaleUp)
-    #expanded=expandHisto(histo_nominal_ScaleUp,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-    #conditional(expanded)
-    #expanded.Write('histo_nominal_ScaleUp')
-
-    #histo_nominal_ScaleDown.Write('histo_nominal_ScaleDown')
-    #conditional(histo_nominal_ScaleDown)
-    #expanded=expandHisto(histo_nominal_ScaleDown,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ)
-    #conditional(expanded)
-    #expanded.Write('histo_nominal_ScaleDown')
     
     alpha=1.5/float(maxMJ)
     histogram_pt_up,histogram_pt_down=unequalScale(finalHistograms['histo_nominal'],"histo_nominal_PT",alpha,1,2)
