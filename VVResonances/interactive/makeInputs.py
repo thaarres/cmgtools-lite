@@ -1,8 +1,8 @@
 from functions import *
 
 period = 2016
-samples= "samples/"
-sorting = 'random'
+samples= "samples_byBTag/"
+sorting = 'btag'
 
 submitToBatch = False #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = False #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
@@ -72,10 +72,10 @@ if sorting == 'random':
  cuts['VV_HPLP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')' + ')'
 else:
  print "Use b-tagging sorting"
- cuts['VH_HPHP'] = '('+  '&&'.join([catVtag['HP1'],catHtag['HP2']]) + ')'
- cuts['VH_HPLP'] = '('+  '&&'.join([catVtag['HP1'],catHtag['LP2']]) + ')'
- cuts['VH_LPHP'] = '('+  '&&'.join([catVtag['LP1'],catHtag['HP2']]) + ')'
- cuts['VH_LPLP'] = '('+  '&&'.join([catVtag['LP1'],catHtag['LP2']]) + ')'
+ cuts['VH_HPHP'] = '('+  '&&'.join([catHtag['HP1'],catVtag['HP2']]) + ')'
+ cuts['VH_HPLP'] = '('+  '&&'.join([catHtag['HP1'],catVtag['LP2']]) + ')'
+ cuts['VH_LPHP'] = '('+  '&&'.join([catHtag['LP1'],catVtag['HP2']]) + ')'
+ cuts['VH_LPLP'] = '('+  '&&'.join([catHtag['LP1'],catVtag['LP2']]) + ')'
  cuts['VH_all'] =  '('+  '||'.join([cuts['VH_HPHP'],cuts['VH_HPLP'],cuts['VH_LPHP'],cuts['VH_LPLP']]) + ')'
  cuts['VV_HPHP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '&&'.join([catVtag['HP1'],catVtag['HP2']]) + ')' + ')'
  cuts['VV_HPLP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')' + ')'
@@ -96,8 +96,7 @@ cuts['res'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>60&&jj_l1_softDrop_ma
 cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop_mass<200)'
 
 #all categories
-categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP','VV_LPLP']
-categories=['VV_HPHP']
+categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP']
 
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW"
@@ -153,7 +152,7 @@ parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categor
 f = AllFunctions(parameters)
 
 #Fitting steps for one signal sample 
-f.makeSignalShapesMVV("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate) #nb, to be optimized
+#f.makeSignalShapesMVV("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate) #nb, to be optimized
 f.makeSignalShapesMJ("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,'l1')
 f.makeSignalShapesMJ("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,'l2')
 f.makeSignalYields("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,BRZH,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF})
