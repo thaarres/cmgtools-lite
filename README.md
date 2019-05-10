@@ -36,7 +36,13 @@ ln -s samples_location sample
 Current sample location with random sorting of jet1 and jet2
 
 ```
-/eos/cms/store/cmst3/group/exovv/VVtuple/VV3Dproduction/
+/eos/cms/store/cmst3/group/exovv/VVtuple/FullRun2VVVHNtuple/2016/
+```
+
+and with sorting by b-tag value (MassDecorrelatedDeepBoosted_ZHbbvsQCD)
+
+```
+/eos/cms/store/cmst3/group/exovv/VVtuple/FullRun2VVVHNtuple/2016_byBTag/
 ```
 
 Make the 3D templates
