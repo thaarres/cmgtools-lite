@@ -107,9 +107,10 @@ def getEvents(template,samples):
 
     for f in files:
      inf = ROOT.TFile('%s/'%samples+f,'READ')
+     print "opening file "+str(samples+f)
      minEv[f] = []
      maxEv[f] = []
-     intree = inf.Get('tree')
+     intree = inf.Get('AnalysisTree')
      nentries = intree.GetEntries()
      print f,nentries,nentries/500000
      if nentries/500000 == 0:
@@ -706,7 +707,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
 
 	for f in filelist:
 	 if f.find('QCD_HT') != -1: mg_files.append('./'+outdir+'_out'+'/'+f)
-	 elif f.find('QCD_Pt_') != -1: pythia_files.append('./'+outdir+'_out'+'/'+f)
+	 elif f.find('QCD_Pt-') != -1: pythia_files.append('./'+outdir+'_out'+'/'+f)
 	 elif f.find('QCD_Pt-') != -1: herwig_files.append('./'+outdir+'_out'+'/'+f)
 	 else: dijet_files.append('./'+outdir+'_out'+'/'+f)
 	 
@@ -734,7 +735,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
 		
 		doMadGraph = True
 		
-
+        print "len(herwig_files) = "+str(len(herwig_files))
 	if len(herwig_files) > 0:
 		cmd = 'hadd -f JJ_nonRes_MVV_%s_altshapeUp.root '%purity
 		for f in herwig_files:
@@ -753,6 +754,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
 		
 		doHerwig = True
  	
+        print "len(pythia_files) = "+str(len(pythia_files))
 	if len(pythia_files) > 0:
 		cmd = 'hadd -f JJ_nonRes_MVV_%s_nominal.root '%purity
 		for f in pythia_files:
@@ -792,7 +794,8 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
 	outf = ROOT.TFile.Open('JJ_nonRes_MVV_%s.root'%purity,'RECREATE') 
     
 	if doPythia:
-		mvv_nominal.Write('mvv_nominal')
+		print "doing Pythia"
+                mvv_nominal.Write('mvv_nominal')
 		histo_nominal.Scale(1./histo_nominal.Integral())
 		histo_nominal.Write('histo_nominal')
 			
@@ -817,6 +820,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
 		histogram_opt_up.Write('histo_nominal_OPTUp')
 				
 	if doHerwig:
+                print "doing Herwig"
 		mvv_altshapeUp.Write('mvv_altshapeUp')
 		histo_altshapeUp.Write('histo_altshapeUp')
     
@@ -847,6 +851,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
 			histogram_altshapeDown.Write('histo_altshapeDown')
 		
 	if doMadGraph:
+                print "doing Madgraph"
 		mvv_altshape2.Write('mvv_altshape2')
 		histo_altshape2Up.Write('histo_altshape2Up')
     
