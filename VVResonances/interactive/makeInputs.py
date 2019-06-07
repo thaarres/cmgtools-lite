@@ -1,10 +1,10 @@
 from functions import *
 
 period = 2016
-samples= "samples_byBTag/"
+samples= str(period)+"_byBTag/"
 sorting = 'btag'
 
-submitToBatch = False #Set to true if you want to submit kernels + makeData to batch!
+submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = False #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
 dijetBinning = True
 useTriggerWeights = False
@@ -133,8 +133,8 @@ minMVV=838.0
 maxMVV=6000.
 binsMVV=100
 
-minMX=1000.0
-maxMX=7000.0
+minMX=1200.0
+maxMX=4500.0
     
 if dijetBinning:
     minMVV = float(dijetbins[0])
@@ -152,7 +152,7 @@ parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categor
 f = AllFunctions(parameters)
 
 #Fitting steps for one signal sample 
-#f.makeSignalShapesMVV("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate) #nb, to be optimized
+f.makeSignalShapesMVV("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate) #nb, to be optimized
 f.makeSignalShapesMJ("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,'l1')
 f.makeSignalShapesMJ("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,'l2')
 f.makeSignalYields("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,BRZH,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF})
