@@ -1447,7 +1447,7 @@ def mergeData(jobname,purity,rootFile,filename,name):
         os.system(cmd)
     
     if len(data_files) > 0:
-        cmd = 'hadd -f JJ_%s.root '%(filename,name,purity)
+        cmd = 'hadd -f JJ_%s.root '%purity
         for f in data_files:
          cmd += f
          cmd += ' '
