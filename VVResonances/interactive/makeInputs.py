@@ -1,7 +1,7 @@
 from functions import *
 
 period = 2016
-samples= str(period)+"_byBTag/"
+samples= str(period)+"_new/"
 sorting = 'btag'
 
 submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
@@ -176,7 +176,7 @@ else:
   f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 
 f.mergeBackgroundShapes("nonRes","JJ_"+str(period))
-f.makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nRes")
+f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],"nRes")
 
 ## Do data or pseudodata
 #f.makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
