@@ -857,13 +857,14 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
     
 		print "Now pT"
 		alpha=1.5/float(maxMVV)
-		histogram_altshape2_pt_up,histogram_altshape2_pt_down=unequalScale(histo_nominal,"histo_altshape2_PT",alpha)
-		histogram_altshape2_pt_down.SetName('histo_altshape2_PTDown')
-		histogram_altshape2_pt_down.SetTitle('histo_altshape2_PTDown')
-		histogram_altshape2_pt_down.Write('histo_altshape2_PTDown')
-		histogram_altshape2_pt_up.SetName('histo_altshape2_PTUp')
-		histogram_altshape2_pt_up.SetTitle('histo_altshape2_PTUp')
-		histogram_altshape2_pt_up.Write('histo_altshape2_PTUp')
+                print " #################   careful!!! newt line are commented out because histo_nominal is missing at the moment!!! ####################"
+#		histogram_altshape2_pt_up,histogram_altshape2_pt_down=unequalScale(histo_nominal,"histo_altshape2_PT",alpha)
+#		histogram_altshape2_pt_down.SetName('histo_altshape2_PTDown')
+#		histogram_altshape2_pt_down.SetTitle('histo_altshape2_PTDown')
+#		histogram_altshape2_pt_down.Write('histo_altshape2_PTDown')
+#		histogram_altshape2_pt_up.SetName('histo_altshape2_PTUp')
+#		histogram_altshape2_pt_up.SetTitle('histo_altshape2_PTUp')
+#		histogram_altshape2_pt_up.Write('histo_altshape2_PTUp')
 
                 print "Now OPT"
 		alpha=1.5*float(minMVV)
@@ -1399,7 +1400,7 @@ def makeData(template,cut,rootFile,binsMVV,binsMJ,minMVV,maxMVV,minMJ,maxMJ,fact
     print
     return joblist, files
 
-def mergeData(jobname,purity,rootFile):
+def mergeData(jobname,purity,rootFile,filename,name):
     
     print "Merging data from job " ,jobname
     print "Purity is " ,purity
