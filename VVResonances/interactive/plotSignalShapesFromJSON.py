@@ -9,7 +9,7 @@ from  CMGTools.VVResonances.plotting.CMS_lumi import *
 
 # ROOT.gROOT.SetBatch(True)
 
-path = "/eos/user/t/thaarres/www/vvana/3D_latest/signalFits/"
+path = "../plots/"
 
 def getLegend(x1=0.70010112,y1=0.693362,x2=0.90202143,y2=0.829833):
   legend = ROOT.TLegend(x1,y1,x2,y2)
@@ -147,7 +147,7 @@ def doSingle():
       for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
         if options.var == 'mVV': getMVVPdf(j,MH)
         else: getMJPdf(j,MH)
-        w.pdf('signal_%d'%MH).plotOn(frame, ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[i])),ROOT.RooFit.Name(str(MH)))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
+        w.pdf('signal_%d'%MH).plotOn(frame, ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[0][i])),ROOT.RooFit.Name(str(MH)))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
         leg.AddEntry(frame.findObject(str(MH)), "%d GeV" % MH, "L")
       frame.GetYaxis().SetTitle("A.U")
       frame.GetYaxis().SetNdivisions(4,5,0)
@@ -226,5 +226,5 @@ def doAll():
     # sleep(1000)
       
 if __name__ == '__main__':
-    # doSingle()
-    doAll()
+    doSingle()
+    #doAll()
