@@ -1,10 +1,11 @@
 from functions import *
 
 period = 2016
-samples= "samples_byBTag/"
-sorting = 'btag'
+samples= str(period)+"_new/"
+sorting = 'random'
+#sorting = 'btag'
 
-submitToBatch = False #Set to true if you want to submit kernels + makeData to batch!
+submitToBatch = True #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = False #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
 dijetBinning = True
 useTriggerWeights = False
@@ -96,7 +97,8 @@ cuts['res'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>60&&jj_l1_softDrop_ma
 cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop_mass<200)'
 
 #all categories
-categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP']
+#categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP']
+categories=['VV_HPLP']
 
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW"
@@ -118,7 +120,8 @@ dataTemplate="JetHT"
 nonResTemplate="QCD_Pt_" #high stat
 
 #background samples
-nonResTemplate="QCD_Pt-"
+#nonResTemplate="QCD_Pt-"
+nonResTemplate="QCD_HT"
 TTemplate= "TTHad" #do we need a separate fit for ttbar?
 WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
 ZresTemplate= "ZJetsToQQ_HT800toInf_new"
@@ -133,8 +136,8 @@ minMVV=838.0
 maxMVV=6000.
 binsMVV=100
 
-minMX=1000.0
-maxMX=7000.0
+minMX=1200.0
+maxMX=4500.0
     
 if dijetBinning:
     minMVV = float(dijetbins[0])
@@ -151,11 +154,14 @@ cuts['looseacceptanceMJ']= "(jj_l1_softDrop_mass>35&&jj_l1_softDrop_mass<300&&jj
 parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categories,minMJ,maxMJ,binsMJ,submitToBatch]   
 f = AllFunctions(parameters)
 
+signal_inuse="BulkGravWW"
+signaltemplate_inuse=BulkGravWWTemplate
+xsec_inuse=BRWW
 #Fitting steps for one signal sample 
-#f.makeSignalShapesMVV("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate) #nb, to be optimized
-f.makeSignalShapesMJ("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,'l1')
-f.makeSignalShapesMJ("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,'l2')
-f.makeSignalYields("JJ_ZprimeZH_"+str(period),ZprimeZHTemplate,BRZH,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF})
+#f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse) #nb, to be optimized
+#f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1')
+#f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2')
+#f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF})
 
 #Detector response
 f.makeDetectorResponse("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'])
@@ -176,7 +182,7 @@ else:
   f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 
 f.mergeBackgroundShapes("nonRes","JJ_"+str(period))
-f.makeNormalizations("nonRes","JJ",nonResTemplate,0,cuts['nonres'],"nRes")
+f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],"nRes")
 
 ## Do data or pseudodata
 #f.makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
