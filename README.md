@@ -36,13 +36,8 @@ ln -s samples_location sample
 Current sample location with random sorting of jet1 and jet2
 
 ```
-/eos/cms/store/cmst3/group/exovv/VVtuple/FullRun2VVVHNtuple/2016/
-```
-
-and with sorting by b-tag value (MassDecorrelatedDeepBoosted_ZHbbvsQCD)
-
-```
-/eos/cms/store/cmst3/group/exovv/VVtuple/FullRun2VVVHNtuple/2016_byBTag/
+/eos/cms/store/cmst3/group/exovv/VVtuple/FullRun2VVVHNtuple/2016_new/
+/eos/cms/store/cmst3/group/exovv/VVtuple/FullRun2VVVHNtuple/2018/
 ```
 
 Make the 3D templates
@@ -54,19 +49,19 @@ python makeInputs.py
 Run closure test of signal fits:
 
 ```
-python plotSignalShapesFromJSON.py -f JJ_BulkGWW_MJl1_HPLP.json -v mJ
-python plotSignalShapesFromJSON.py -f JJ_BulkGWW_MJl2_HPLP.json -v mJ
-python plotSignalShapesFromJSON.py -f JJ_BulkGWW_MVV.json -v mVV
+python plotSignalShapesFromJSON.py -f JJ_BulkGravWW_2016_MJl1_VV_HPLP.json -v mJ
+python plotSignalShapesFromJSON.py -f JJ_BulkGravWW_2016_MJl2_VV_HPLP.json -v mJ
+python plotSignalShapesFromJSON.py -f JJ_BulkGravWW_2016_MVV.json -v mVV
 ```
 
-Run closure test of 3D templates versus simulation with Projections3DHisto.C script:
+Run closure test of 3D templates versus simulation with Projections3DHisto.py script:
 
 ```
-root -l
-.x  Projections3DHisto.C("JJ_nonRes_HPHP_nominal.root","nonRes","JJ_nonRes_2D_HPHP.root","histo","control-plots")
+python Projections3DHisto.py --mc JJ_nonRes_VH_HPLP.root,nonRes -k JJ_2016_nonRes_3D_VH_HPLP.root,histo -o control-plots-HPLP-pythia
+
 ```
 
-Create datacard and workspace and run post fit
+Create datacard and workspace and run post fit (Some major modification are needed to include the new categories and handle the different years + many background are still missing)
 
 ```
 python makeCard.py
@@ -74,14 +69,15 @@ text2workspace.py datacard_JJ_HPHP_13TeV.txt -o JJ_BulkGWW_HPHP_13TeV_workspace.
 python runPostFit.py
 ```
 
-Run the limits with combine and make final plot
+Run the limits with combine and make final plot (but not tested because datacards missing, will need modification for desy condor)
 
 ```
 vvSubmitLimits.py JJ_BulkGWW_HPHP_13TeV_workspace.root -s 100 -q 1nd -m 1200 -M 4200
 find higgsCombineTest.Asymptotic.* -size +1500c | xargs hadd Limits_BulkGWW_HPHP_13TeV.root
-vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 (expected limits)
-vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 -b 0 (expected+observed limits)
+vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 #(expected limits)
+vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 -b 0 #(expected+observed limits)
 ```
 
 Further instructions on how to run the code can be found at:
-https://www.evernote.com/shard/s531/sh/cead4d9f-6b68-465f-8583-388f7527e7fc/f59cc13785c6e236454d2f69d5ce970c
+https://docs.google.com/document/d/1hU84u27mY85UaAK5R11OHYctBMckDU6kX7IcorboZf8/edit?usp=sharing
+
