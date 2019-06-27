@@ -1,7 +1,8 @@
 from functions import *
 
-period = 2016
-samples= str(period)+"_new/"
+period = 2018
+samples= str(period)+"/" #for V+jets we use 2018 samples also for 2016 because the 2016 ones are buggy and they need to be processed before to add the NLO weights!
+#samples= str(period)+"_new/"
 sorting = 'random'
 #sorting = 'btag'
 
@@ -123,9 +124,12 @@ nonResTemplate="QCD_Pt_" #high stat
 #nonResTemplate="QCD_Pt-"
 nonResTemplate="QCD_HT"
 TTemplate= "TTHad" #do we need a separate fit for ttbar?
-WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
-ZresTemplate= "ZJetsToQQ_HT800toInf_new"
-resTemplate= "ZJetsToQQ_HT800toInf_new,WJetsToQQ_HT800toInf_new,TTHad_pow"
+#WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
+#ZresTemplate= "ZJetsToQQ_HT800toInf_new"
+#resTemplate= "ZJetsToQQ_HT800toInf_new,WJetsToQQ_HT800toInf_new,TTHad_pow"
+WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+ZresTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf"
+resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
 
 #ranges and binning
 minMJ=55.0
@@ -151,7 +155,7 @@ cuts['acceptanceGEN']='(jj_l1_gen_softDrop_mass>20.&&jj_l2_gen_softDrop_mass>20.
 cuts['looseacceptanceMJ']= "(jj_l1_softDrop_mass>35&&jj_l1_softDrop_mass<300&&jj_l2_softDrop_mass>35&&jj_l2_softDrop_mass<300)"
 
 #do not change the order here, add at the end instead
-parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categories,minMJ,maxMJ,binsMJ,submitToBatch]   
+parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categories,minMJ,maxMJ,binsMJ,lumi,submitToBatch]   
 f = AllFunctions(parameters)
 
 signal_inuse="BulkGravWW"
@@ -164,7 +168,7 @@ xsec_inuse=BRWW
 #f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF})
 
 #Detector response
-f.makeDetectorResponse("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'])
+#f.makeDetectorResponse("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'])
 
 # Make nonresonant QCD templates and normalization
 if runParallel and submitToBatch:
@@ -177,12 +181,28 @@ if runParallel and submitToBatch:
   f.mergeKernelJobs()
 else:
   wait = True
-  f.makeBackgroundShapesMVVKernel("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'],"1D",wait)
-  f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
-  f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
+#  f.makeBackgroundShapesMVVKernel("nonRes","JJ_"+str(period),nonResTemplate,cuts['nonres'],"1D",wait)
+#  f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l1',cuts['nonres'],"2Dl1",wait)
+#  f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+str(period),nonResTemplate,'l2',cuts['nonres'],"2Dl2",wait)
 
-f.mergeBackgroundShapes("nonRes","JJ_"+str(period))
-f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],"nRes")
+#f.mergeBackgroundShapes("nonRes","JJ_"+str(period))
+#f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],"nRes")
+
+
+#for V+jets
+print "making V+jets templates!! "
+#print "first we fit"
+#f.fitVJets("JJ_WJets",resTemplate,1.,1.)
+#print "and then we make kernels"
+#print " did you run Detector response  for this period? otherwise the kernels steps will not work!"
+#print "first kernel W"
+#f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
+#print "then kernel Z"
+#f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
+#print "then norm W"
+#f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
+print "then norm Z"
+f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
 
 ## Do data or pseudodata
 #f.makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
@@ -190,3 +210,6 @@ f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],
 #for p in purities: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PDnoVjets_%s.root"%p,lumi)
 #from modules.submitJobs import makePseudoDataVjets
 #for p in purities: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)
+
+
+print " ########## I did everything I could! ###### "
