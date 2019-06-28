@@ -123,13 +123,13 @@ nonResTemplate="QCD_Pt_" #high stat
 #background samples
 #nonResTemplate="QCD_Pt-"
 nonResTemplate="QCD_HT"
-TTemplate= "TTHad" #do we need a separate fit for ttbar?
-#WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
-#ZresTemplate= "ZJetsToQQ_HT800toInf_new"
-#resTemplate= "ZJetsToQQ_HT800toInf_new,WJetsToQQ_HT800toInf_new,TTHad_pow"
-WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+if(period == 2016):
+    TTemplate= "TT_Mtt-700to1000,TT_Mtt-1000toInf" #do we need a separate fit for ttbar?
+else:
+    TTemplate= "TTToHadronic" #do we need a separate fit for ttbar?
+WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
 ZresTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf"
-resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
 
 #ranges and binning
 minMJ=55.0
