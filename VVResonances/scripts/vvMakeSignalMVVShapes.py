@@ -9,6 +9,7 @@ from CMGTools.VVResonances.statistics.Fitter import Fitter
 from math import log
 import os, sys, re, optparse,pickle,shutil,json
 ROOT.gROOT.SetBatch(True)
+testcorr= True
 
 def returnString(func):
     st='0'
@@ -92,6 +93,102 @@ for mass in sorted(samples.keys()):
        
     fitter=Fitter(['MVV'])
     fitter.signalResonance('model',"MVV",mass,False)
+   
+    fitter.w.var("MH").setVal(mass)
+
+    binning= truncate(getBinning(options.binsMVV,options.min,options.max,100),0.80*mass,1.2*mass)    
+    histo = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.80*mass,1.2*mass),"1",binning)
+    fitter.importBinnedData(histo,['MVV'],'data')
+    ps = []
+    if testcorr==True:
+        print "do 2D histos"
+        histos2D = plotter.drawTH2("jj_LV_mass:jj_l2_softDrop_mass",options.cut,"1",80,55,215,50,1126,5000)
+        ctest = ROOT.TCanvas("test","test",400,400)
+        histos2D.Draw("colz")
+        ctest.SaveAs(samples[mass]+"_M"+str(mass)+"_2D.pdf")
+        ctest.SaveAs(samples[mass]+"_M"+str(mass)+"_2D.png")
+        proj = histos2D.ProjectionX("p")
+        
+        graph_mean = ROOT.TGraphErrors()
+        graph_sigma = ROOT.TGraphErrors()
+        n=-1
+        bins_all = [[0,80],[0,10],[10,20],[20,40],[40,80]]
+        if samples[mass].find("hbb")==-1:
+            bins_all = [[0,80],[0,11],[11,16],[16,22],[22,80]]
+        for bins in bins_all:
+            ps .append( histos2D.ProjectionY("p2"+str(n+1),bins[0],bins[1]))#,proj.GetBin(55),proj.GetBin(85))
+            c3 = ROOT.TCanvas("test3","test3",400,400)
+            fit = ROOT.TF1("gauss","gaus",0.9*mass,1.1*mass)
+            ps[-1].Fit(fit,"","",0.9*mass,1.1*mass)
+            ps[-1].Draw("same")
+            #proj.Draw()
+            c3.SaveAs("test3_M"+str(mass)+".pdf")
+            if n==-1:
+                mean = fit.GetParameter(1)
+                sigma = fit.GetParameter(2)
+                n+=1
+            else:
+                graph_mean.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,fit.GetParameter(1)/mean)
+                graph_mean.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., fit.GetParError(1)/mean)
+                #graph_mean.SetPointError(n,0, fit.GetParError(1)/mean)
+                graph_sigma.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,fit.GetParameter(2)/sigma)
+                graph_sigma.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., fit.GetParError(2)/sigma)
+                print fit.GetParameter(2)
+                n+=1
+        pol3=ROOT.TF1("pol","pol3",55,215)
+        f1 = ROOT.TF1("f1","[0]+[1]*log(x)",1,13000)
+        f2 = ROOT.TF1("f2","[0]+[1]*sqrt(x)",1,13000)
+        f3 = ROOT.TF1("f3","[0]+[1]*TMath::DiLog(x)",1,13000)
+        f4 = ROOT.TF1("f4","[0]+[1]*log(x)-[2]*x",1,13000)
+        f4.SetParLimits(2,0,1)
+        f5 = ROOT.TF1("f5","[0]+[1]*log(sqrt(x))",1,13000)
+        f6 = ROOT.TF1("f6","[0]+[1]*log(x*x)",1,13000)
+        f7 = ROOT.TF1("f7","1-[0]*exp(-(x-55))",1,13000)
+        
+        
+        f10 = ROOT.TF1("f10","[0]+[1]/sqrt(x)",1,13000)
+        
+        c = ROOT.TCanvas("test2","test2",400,400)
+        graph_mean.SetMinimum(0.8)
+        graph_mean.SetMaximum(1.2)
+        graph_mean.SetLineColor(ROOT.kBlue)
+        graph_mean.SetMarkerStyle(8)
+        graph_mean.SetMarkerColor(ROOT.kBlue)
+        graph_mean.Fit(f2,"","",55,215)
+        graph_mean.Draw("lap")
+        graph_sigma.SetLineColor(ROOT.kRed)
+        graph_sigma.SetMarkerStyle(5)
+        graph_sigma.SetMarkerColor(ROOT.kRed)
+        graph_sigma.Fit(f10,"","",55,215)
+        graph_sigma.Draw("plsame")        
+        c.SaveAs(samples[mass]+"_M"+str(mass)+".pdf")
+        c.SaveAs(samples[mass]+"_M"+str(mass)+".png")
+         
+        f=open("testcorr_"+samples[mass]+".json","w") 
+        f.write("{'sigma_corr' : '("+str(f10.GetParameter(0))+"+"+str(f10.GetParameter(1))+"/sqrt(MJ1) + "+str(f10.GetParameter(0))+"+"+str(f10.GetParameter(1))+"/sqrt(MJ2))/2.'" )
+        f.write(", 'mean_corr' : '("+str(f2.GetParameter(0))+"+"+str(f2.GetParameter(1))+"*sqrt(MJ1) + "+str(f2.GetParameter(0))+"+"+str(f2.GetParameter(1))+"*sqrt(MJ2))/2.' }" )
+        f.close()
+        
+
+    Fhists.cd()
+    histo.Write("%i"%mass)
+    roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
+   
+    #if samples[mass].find("hbb")==-1:
+    #fitter.signalResonance('model1',"MVV",mass,False)
+    #bins_all = [[0,80],[0,11],[11,16],[16,22],[22,80]]
+    #h1 = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)*(jj_l1_softDrop_mass >65 && jj_l1_softDrop_mass < 85)"%(0.80*mass,1.2*mass),"1",binning)
+    #fitter.importBinnedData(h1,['MVV'],'data1')
+    #c3 = ROOT.TCanvas("test3","test3",400,400)
+    
+    #fitter.fit('model1','data1')
+    #h1.Draw("same")
+            ##proj.Draw()
+    #c3.SaveAs("test3_M"+str(mass)+".pdf")
+    
+    #fitter.projection("model1","data1","MVV","1debugVV_"+options.output+"_"+str(mass)+".png",roobins)
+    
+    
     if options.fixPars!="1":
         fixedPars =options.fixPars.split(',')
         print fixedPars
@@ -100,19 +197,13 @@ for mass in sorted(samples.keys()):
 	    if len(parVal) > 1:
              fitter.w.var(parVal[0]).setVal(float(parVal[1]))
              fitter.w.var(parVal[0]).setConstant(1)
-    fitter.w.var("MH").setVal(mass)
-
-    binning= truncate(getBinning(options.binsMVV,options.min,options.max,1000),0.80*mass,1.2*mass)    
-    histo = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.80*mass,1.2*mass),"1",binning)
-
-    Fhists.cd()
-    histo.Write("%i"%mass)
     
-    fitter.importBinnedData(histo,['MVV'],'data')
+    
+  
     fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
     fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
     
-    roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
+    
     fitter.projection("model","data","MVV","debugVV_"+options.output+"_"+str(mass)+".png",roobins)
 
     for var,graph in graphs.iteritems():
