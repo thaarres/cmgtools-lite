@@ -15,7 +15,8 @@ class AllFunctions():
   self.minMJ = parameters[9]
   self.maxMJ = parameters[10]
   self.binsMJ = parameters[11]
-  self.submitToBatch = parameters[12]
+  self.lumi = parameters[12]
+  self.submitToBatch = parameters[13]
 
   self.printAllParameters()
   
@@ -84,7 +85,7 @@ class AllFunctions():
    jobname = jobName+"_"+c
    print "Working on purity: ", c
    
-   resFile  = pwd + "/"+ filename+"_"+name+"_detectorResponse.root"
+   resFile=filename+"_nonRes_detectorResponse.root"
    print "Reading " ,resFile
 
    rootFile = filename+"_"+name+"_MVV_"+c+".root"
@@ -148,6 +149,7 @@ class AllFunctions():
    print "Saving to ",rootFile 
    
    cmd='vvMergeHistosToPDF3D.py -i "{inputx}" -I "{inputy}" -z "{inputz}" -o "{rootFile}"'.format(rootFile=rootFile,inputx=inputx,inputy=inputy,inputz=inputz)
+   print "going to execute "+str(cmd)
    os.system(cmd)
    
    #print "Adding trigger shape uncertainties"
@@ -155,7 +157,7 @@ class AllFunctions():
    #   cmd='vvMakeTriggerShapes.py -i "{rootFile}"'.format(rootFile=rootFile)
    #   os.system(cmd)
 
- def makeNormalizations(self,name,filename,template,data=0,addCut='1',jobName="nR",factors="1",wait=True):
+ def makeNormalizations(self,name,filename,template,data=0,addCut='1',jobName="nR",factors="1",wait=True,HPSF=1.,LPSF=1.):
  
   pwd = os.getcwd()
   sam = pwd +"/"+self.samples
@@ -183,7 +185,26 @@ class AllFunctions():
    else:
         cmd='vvMakeData.py -s "{template}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factors} -n "{name}" {samples}'.format(template=template,cut=cut,rootFile=rootFile,BINS=self.binsMVV,bins=self.binsMJ,MINI=self.minMVV,MAXI=self.maxMVV,mini=self.minMJ,maxi=self.maxMJ,factors=factors,name=name,data=data,samples=sam)
         cmd=cmd+self.HCALbinsMVV
+        print "going to execute command "+str(cmd)
+        print " "
         os.system(cmd)
+
+
+ def fitVJets(self,filename,template,Wxsec=1,Zxsec=1):
+   for c in self.categories:
+     cut='*'.join([self.cuts['common'],self.cuts[c],self.cuts['acceptance']])
+     rootFile=filename+"_"+c+".root"
+     pwd = os.getcwd()
+     directory=pwd+"/"+self.samples
+
+     print self.cuts["acceptance"]
+     fixPars="1"  #"n:0.8,alpha:1.9"
+     cmd='vvMakeVjetsShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} --store "{filename}_{purity}.py" --minMVV {minMVV} --maxMVV {maxMVV} {addOption} --corrFactorW {Wxsec} --corrFactorZ {Zxsec} {samples} {lumi}'.format(template=template,cut=cut,rootFile=rootFile,minMJ=self.minMJ,maxMJ=self.maxMJ,filename=filename,purity=c,minMVV=self.minMVV,maxMVV=self.maxMVV,addOption="",Wxsec=Wxsec,Zxsec=Zxsec,samples=directory,lumi=self.lumi)
+     cmd+=self.HCALbinsMVV
+     print "going to execute command: "
+     print str(cmd)
+     os.system(cmd)
+
 
  #this one I still have to fix and test, do not use submitToBatch yet
  def mergeKernelJobs(self):
