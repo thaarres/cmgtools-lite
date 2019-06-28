@@ -1,7 +1,7 @@
 from functions import *
 
-period = 2018
-samples= str(period)+"/" #for V+jets we use 2018 samples also for 2016 because the 2016 ones are buggy and they need to be processed before to add the NLO weights!
+period = 2016
+samples= str(period)+"_new/" #for V+jets we use 2018 samples also for 2016 because the 2016 ones are buggy and they need to be processed before to add the NLO weights!
 #samples= str(period)+"_new/"
 sorting = 'random'
 #sorting = 'btag'
@@ -241,7 +241,7 @@ print "making V+jets templates!! "
 #print "then norm W"
 #f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
 print "then norm Z"
-f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
+#f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
 
 
 ## Do data or pseudodata

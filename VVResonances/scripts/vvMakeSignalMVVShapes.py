@@ -35,6 +35,27 @@ def truncate(binning,mmin,mmax):
             res.append(b)
     return res
 
+
+def getMJPdf(mvv_min,mvv_max,MH,postfix=""):
+ 
+        var = ROOT.RooRealVar("MVV","MVV",mvv_min,mvv_max)
+	
+        pdfName 	= "signal_%d%s" %(MH,postfix)
+        
+
+        mean        = ROOT.RooRealVar("mean_%d%s"%(MH,postfix),"mean_%d%s"%(MH,postfix),MH ,0.8*MH,1.2*MH)
+        sigma       = ROOT.RooRealVar("sigma_%d%s"%(MH,postfix),"sigma_%d%s"%(MH,postfix),MH*0.05,MH*0.02,MH*0.10)
+        alpha       = ROOT.RooRealVar("alpha_%d%s"%(MH,postfix),"alpha_%d%s"%(MH,postfix),1.2,0.0,18)
+        alpha2      = ROOT.RooRealVar("alpha2_%d%s"%(MH,postfix),"alpha2_%d%s"%(MH,postfix),1.2,0.0,10)
+        sign        = ROOT.RooRealVar("sign_%d%s"%(MH,postfix),"sign_%d%s"%(MH,postfix),5,0,600)
+        sign2        = ROOT.RooRealVar("sign2_%d%s"%(MH,postfix),"sign2_%d%s"%(MH,postfix),5,0,50)  
+        
+  
+        
+	function = ROOT.RooDoubleCB(pdfName, pdfName, var, mean, sigma, alpha, sign,  alpha2, sign2)  
+	return function,var
+
+
 parser = optparse.OptionParser()
 parser.add_option("-s","--sample",dest="sample",default='',help="Type of sample")
 parser.add_option("-c","--cut",dest="cut",help="Cut to apply for shape",default='')
@@ -179,14 +200,25 @@ for mass in sorted(samples.keys()):
     #if samples[mass].find("hbb")==-1:
     #fitter.signalResonance('model1',"MVV",mass,False)
     #bins_all = [[0,80],[0,11],[11,16],[16,22],[22,80]]
-    #h1 = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)*(jj_l1_softDrop_mass >65 && jj_l1_softDrop_mass < 85)"%(0.80*mass,1.2*mass),"1",binning)
-    #fitter.importBinnedData(h1,['MVV'],'data1')
-    #c3 = ROOT.TCanvas("test3","test3",400,400)
+    h1 = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)*(jj_l1_softDrop_mass >65 && jj_l1_softDrop_mass < 85)"%(0.80*mass,1.2*mass),"1",binning)
     
+    func,var = getMJPdf(1126,5000,mass,options.sample)
+    data1 = ROOT.RooDataHist("dh","dh", ROOT.RooArgList(var), ROOT.RooFit.Import(h1)) 
+    
+    print data1
+    
+    print func
+    print var
+    func.fitTo(data1,ROOT.RooFit.Range(mass*0.8,mass*1.2),ROOT.RooFit.SumW2Error(kTRUE),ROOT.RooFit.PrintEvalErrors(-1),ROOT.RooFit.Save(kTRUE))
+    #fitter.importBinnedData(h1,['MVV'],'data1')
+    c3 = ROOT.TCanvas("test3","test3",400,400)
+    frame = var.frame() 
+    func.PlotOn(frame)
+    frame.Draw()
     #fitter.fit('model1','data1')
     #h1.Draw("same")
             ##proj.Draw()
-    #c3.SaveAs("test3_M"+str(mass)+".pdf")
+    c3.SaveAs("test3_M"+str(mass)+".pdf")
     
     #fitter.projection("model1","data1","MVV","1debugVV_"+options.output+"_"+str(mass)+".png",roobins)
     
