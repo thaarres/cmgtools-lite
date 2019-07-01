@@ -58,19 +58,15 @@ class DataCardMaker:
         info=json.load(f)
 
         SCALEVar="_".join(["MEAN",name,self.tag])
-        self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+','.join(scaleSysts)+")")
-        #SCALEVar="_".join(["MEAN",name,self.tag])
-        self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
-        
-        print "MVV signal " 
-        print info['MEAN']
-        
         SIGMAVar="_".join(["SIGMA",name,self.tag])
-        self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+','.join(resolutionSysts)+")")
-        #SIGMAVar="_".join(["SIGMA",name,self.tag])
-        #self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
+        if name.find("H")!=-1:
+            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+','.join(scaleSysts)+")")
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+','.join(resolutionSysts)+")") 
+        else:    
+            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
         
-        print info["SIGMA"]
+        
 
         ALPHA1Var="_".join(["ALPHA1",name,self.tag])
         self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
