@@ -99,7 +99,7 @@ cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop
 
 #all categories
 #categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP']
-categories=['VV_HPLP']
+categories=['VV_HPLP','VV_HPHP']
 
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW_narrow"
@@ -162,45 +162,52 @@ signal_inuse="ZprimeZH"
 signaltemplate_inuse=ZprimeZHTemplate
 xsec_inuse=BRZH
 
-#signal_inuse="BulkGWW"
-#signaltemplate_inuse=BulkGravWWTemplate
-#xsec_inuse=BRWW
+signal_inuse="BulkGWW"
+signaltemplate_inuse=BulkGravWWTemplate
+xsec_inuse=BRWW
 
-#signal_inuse="BulkGZZ"
-#signaltemplate_inuse=BulkGravZZTemplate
-#xsec_inuse=BRZZ
+signal_inuse="BulkGZZ"
+signaltemplate_inuse=BulkGravZZTemplate
+xsec_inuse=BRZZ
 
-#signal_inuse="ZprimeWW"
-#signaltemplate_inuse=ZprimeWWTemplate
-#xsec_inuse=BRWW
+signal_inuse="ZprimeWW"
+signaltemplate_inuse=ZprimeWWTemplate
+xsec_inuse=BRWW
 
-#signal_inuse="WprimeWZ"
-#signaltemplate_inuse=WprimeWZTemplate
-#xsec_inuse=BRWZ
+signal_inuse="WprimeWZ"
+signaltemplate_inuse=WprimeWZTemplate
+xsec_inuse=BRWZ
 
-fixParsSig={"ZprimeZH":{ "VV_HPLP": {"fixPars":"mean:91.5,n:1.83,n2:4.22,alphaH:0.51,sigmaH:10.7","pol":"mean:pol0,sigma:pol5,alpha:pol5,n:pol0,alpha2:pol5,n2:pol0,meanH:pol4,sigmaH:pol0,alphaH:pol0,nH:pol3,alpha2H:pol3,n2H:pol4"}, "VH_all": {"fixPars":"mean:91.5,n2:4.22,n:128,alphaH:0.51,nH:127","pol":"mean:pol0,sigma:pol5,alpha:pol5,n:pol0,alpha2:pol5,n2:pol0,meanH:pol5,sigmaH:pol7,alphaH:pol0,nH:pol3,alpha2H:pol3,n2H:pol4"} },"BulkGWW":{ "VV_HPLP": {"fixPars":"1","pol":"mean:pol3,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol3"}},"BulkGZZ":{"VV_HPLP":{"fixPars":"n:3.07","pol":"mean:pol3,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol4"}},"ZprimeWW":{"VV_HPLP": {"fixPars":"n:0.6,alpha:1.4","pol":"mean:pol3,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol4"}},"WprimeWZ":{"VV_HPLP":{"fixPars":"n:2.3","pol":"mean:pol3,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol1"}}}
+fixParsSig={"ZprimeZH":{ "VV_HPLP": {"fixPars":"mean:91.5,n:1.83,n2:4.22,alphaH:0.51,sigmaH:10.7","pol":"mean:pol0,sigma:pol5,alpha:pol5,n:pol0,alpha2:pol5,n2:pol0,meanH:pol4,sigmaH:pol0,alphaH:pol0,nH:pol3,alpha2H:pol3,n2H:pol4"}, "VH_all": {"fixPars":"mean:91.5,n2:4.22,n:128,alphaH:0.51,nH:127","pol":"mean:pol0,sigma:pol5,alpha:pol5,n:pol0,alpha2:pol5,n2:pol0,meanH:pol5,sigmaH:pol7,alphaH:pol0,nH:pol3,alpha2H:pol3,n2H:pol4"} },
+"BulkGWW":{ "VV_HPLP": {"fixPars":"alpha:1.125,n:2,n2:2","pol":"mean:pol4,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol3"},"VV_HPHP": {"fixPars":"alpha:1.08,n:6,n2:2","pol":"mean:pol5,sigma:pol5,alpha:pol0,n:pol0,alpha2:pol5,n2:pol0"}},
+"BulkGZZ":{"VV_HPLP":{"fixPars":"alpha:1.024,n:3.25","pol":"mean:pol4,sigma:pol3,alpha:pol0,n:pol0,alpha2:pol3,n2:pol4"},
+           "VV_HPHP":{"fixPars":"n:2.1,n2:3.5","pol":"mean:pol3,sigma:pol5,alpha:pol5,n:pol0,alpha2:pol3,n2:pol0"}},
+"ZprimeWW":{"VV_HPLP": {"fixPars":"alpha:1.125","pol":"mean:pol5,sigma:pol5,alpha:pol0,n:pol3,alpha2:pol3,n2:pol3"},
+            "VV_HPHP": {"fixPars":"alpha:1.083,n:3.5,n2:2.3","pol":"mean:pol5,sigma:pol4,alpha:pol0,n:pol0,alpha2:pol5,n2:pol0"}},
+"WprimeWZ":{"VV_HPLP":{"fixPars":"n:2.3","pol":"mean:pol3,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol1"},
+            "VV_HPHP":{"fixPars":"n:2,n2:2,alpha:1.505","pol":"mean:pol3,sigma:pol3,alpha:pol3,n:pol0,alpha2:pol3,n2:pol1"}}}
 
 
 
 fixParsSigMVV={"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol9,N2:pol3,ALPHA2:pol0"},"WprimeWZ":{"fixPars":"N1:7,N2:4","pol": "MEAN:pol1,SIGMA:pol3,N1:pol0,ALPHA1:pol7,N2:pol0,ALPHA2:pol5"}}
 
 ##  Fitting steps for one signal sample 
-#if sorting == "random":
-    #if signal_inuse.find("H")!=-1: 
-        #f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random', fixParsSig[signal_inuse],"jj_random_mergedVTruth==1")
-        #f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse],"jj_random_mergedHTruth==1")
-    #else:
-        #f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse]) 
-#else:
-    #if signal_inuse.find("H")!=-1: 
-        #f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse],"jj_l1_mergedVTruth==1")
-        #f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse],"jj_l2_mergedVTruth==1")
-        #f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse],"jj_l1_mergedHTruth==1")
-        #f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse],"jj_l2_mergedHTruth==1")
-    #else:
-        #f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse])
-        #f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse])
-f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])#,cuts["VV_HPLP"]) #nb, to be optimized        
+if sorting == "random":
+    if signal_inuse.find("H")!=-1: 
+        f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random', fixParsSig[signal_inuse],"jj_random_mergedVTruth==1")
+        f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse],"jj_random_mergedHTruth==1")
+    else:
+        f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse]) 
+else:
+    if signal_inuse.find("H")!=-1: 
+        f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse],"jj_l1_mergedVTruth==1")
+        f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse],"jj_l2_mergedVTruth==1")
+        f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse],"jj_l1_mergedHTruth==1")
+        f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse],"jj_l2_mergedHTruth==1")
+    else:
+        f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse])
+        f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse])
+#f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])#,cuts["VV_HPLP"]) #nb, to be optimized        
 #f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF})
 
 #f.makeNormalizations("ZprimeZH","JJ_"+str(period),"ZprimeToZhToZhadhbb_narrow_2000",0,cuts['nonres'],"sig")

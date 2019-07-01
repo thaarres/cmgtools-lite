@@ -36,7 +36,7 @@ def truncate(binning,mmin,mmax):
     return res
 
 
-def getMJPdf(mvv_min,mvv_max,MH,postfix=""):
+def getMJPdf(mvv_min,mvv_max,MH,postfix="",fixPars="1"):
  
         var = ROOT.RooRealVar("MVV","MVV",mvv_min,mvv_max)
 	
@@ -50,11 +50,56 @@ def getMJPdf(mvv_min,mvv_max,MH,postfix=""):
         sign        = ROOT.RooRealVar("sign_%d%s"%(MH,postfix),"sign_%d%s"%(MH,postfix),5,0,600)
         sign2        = ROOT.RooRealVar("sign2_%d%s"%(MH,postfix),"sign2_%d%s"%(MH,postfix),5,0,50)  
         
-  
-        
+        if fixPars!="1":
+            fixedPars =fixPars.split(',')
+            for par in fixedPars:
+                parVal = par.split(':')
+                if len(parVal) > 1:
+                    if par.find("MEAN")!=-1:
+                        mean.setVal(float(parVal[1]))
+                        mean.setConstant(1)
+                    if par.find("SIGMA")!=-1:
+                        sigma.setVal(float(parVal[1]))
+                        sigma.setConstant(1)
+                    if par.find("ALPHA1")!=-1:
+                        alpha.setVal(float(parVal[1]))
+                        alpha.setConstant(1)
+                    if par.find("ALPHA2")!=-1:
+                        alpha2.setVal(float(parVal[1]))
+                        alpha2.setConstant(1)
+                    if par.find("N1")!=-1:
+                        sign.setVal(float(parVal[1]))
+                        sign.setConstant(1)
+                    if par.find("N2")!=-1:
+                        sign2.setVal(float(parVal[1]))
+                        sign2.setConstant(1)
+        print "================================================"
+        print fixPars
 	function = ROOT.RooDoubleCB(pdfName, pdfName, var, mean, sigma, alpha, sign,  alpha2, sign2)  
-	return function,var
+	return function,var,[mean,sigma,alpha,alpha2,sign,sign2]
 
+def dodCBFits(h1,mass,prefix,fixpars):
+    #h1 = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)*(jj_l1_softDrop_mass >65 && jj_l1_softDrop_mass < 85)"%(0.80*mass,1.2*mass),"1",binning)
+    
+    func,var,params = getMJPdf(1126,5000,mass,options.sample,fixpars)
+    data1 = ROOT.RooDataHist("dh","dh", ROOT.RooArgList(var), ROOT.RooFit.Import(h1)) 
+    
+    print data1
+    
+    print func
+    print var
+    func.fitTo(data1,ROOT.RooFit.Range(mass*0.6,mass*1.3),ROOT.RooFit.PrintEvalErrors(-1))
+    
+    c3 = ROOT.TCanvas("test3","test3",400,400)
+    frame = var.frame() 
+    data1.plotOn(frame)
+    func.plotOn(frame)
+    frame.Draw()
+   
+    c3.SaveAs("test3_M"+str(mass)+"_"+prefix+".pdf")
+    del func,var
+    return { "MEAN":params[0].getVal(), "SIGMA": params[1].getVal(), "ALPHA1": params[2].getVal(), "ALPHA2": params[3].getVal() , "N1": params[4].getVal(), "N2": params[5].getVal(),"MEANERR":params[0].getError(), "SIGMAERR": params[1].getError(), "ALPHA1ERR": params[2].getError(), "ALPHA2ERR": params[3].getError() , "N1ERR": params[4].getError(), "N2ERR": params[5].getError()}
+    
 
 parser = optparse.OptionParser()
 parser.add_option("-s","--sample",dest="sample",default='',help="Type of sample")
@@ -134,94 +179,55 @@ for mass in sorted(samples.keys()):
         
         graph_mean = ROOT.TGraphErrors()
         graph_sigma = ROOT.TGraphErrors()
+        graph_alpha = ROOT.TGraphErrors()
+        graph_alpha2 = ROOT.TGraphErrors()
+        graph_n = ROOT.TGraphErrors()
+        graph_n2 = ROOT.TGraphErrors()
         n=-1
         bins_all = [[0,80],[0,10],[10,20],[20,40],[40,80]]
         if samples[mass].find("hbb")==-1:
             bins_all = [[0,80],[0,11],[11,16],[16,22],[22,80]]
         for bins in bins_all:
             ps .append( histos2D.ProjectionY("p2"+str(n+1),bins[0],bins[1]))#,proj.GetBin(55),proj.GetBin(85))
-            c3 = ROOT.TCanvas("test3","test3",400,400)
-            fit = ROOT.TF1("gauss","gaus",0.9*mass,1.1*mass)
-            ps[-1].Fit(fit,"","",0.9*mass,1.1*mass)
-            ps[-1].Draw("same")
-            #proj.Draw()
-            c3.SaveAs("test3_M"+str(mass)+".pdf")
+            par = dodCBFits(ps[-1],mass,str(n+1),options.fixPars)
             if n==-1:
-                mean = fit.GetParameter(1)
-                sigma = fit.GetParameter(2)
+                mean = par["MEAN"] #fit.GetParameter(1)
+                sigma = par["SIGMA"] #fit.GetParameter(2)
+                alpha = par["ALPHA1"]
+                alpha2 = par["ALPHA2"]
+                n1 = par["N1"]
+                n2 = par["N2"]
                 n+=1
             else:
-                graph_mean.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,fit.GetParameter(1)/mean)
-                graph_mean.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., fit.GetParError(1)/mean)
+                graph_mean.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["MEAN"]/mean)
+                graph_mean.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["MEANERR"]/mean)
                 #graph_mean.SetPointError(n,0, fit.GetParError(1)/mean)
-                graph_sigma.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,fit.GetParameter(2)/sigma)
-                graph_sigma.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., fit.GetParError(2)/sigma)
-                print fit.GetParameter(2)
+                graph_sigma.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["SIGMA"]/sigma)
+                graph_sigma.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["SIGMAERR"]/sigma)
+                graph_alpha.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["ALPHA1"]/alpha)
+                graph_alpha.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["ALPHA1ERR"]/alpha)
+                graph_alpha2.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["ALPHA2"]/alpha2)
+                graph_alpha2.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["ALPHA2ERR"]/alpha2)
+                graph_n.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["N1"]/n1)
+                graph_n.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["N1ERR"]/n1)
+                graph_n2.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["N2"]/n2)
+                graph_n2.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["N2ERR"]/n2)
+                
                 n+=1
-        pol3=ROOT.TF1("pol","pol3",55,215)
-        f1 = ROOT.TF1("f1","[0]+[1]*log(x)",1,13000)
-        f2 = ROOT.TF1("f2","[0]+[1]*sqrt(x)",1,13000)
-        f3 = ROOT.TF1("f3","[0]+[1]*TMath::DiLog(x)",1,13000)
-        f4 = ROOT.TF1("f4","[0]+[1]*log(x)-[2]*x",1,13000)
-        f4.SetParLimits(2,0,1)
-        f5 = ROOT.TF1("f5","[0]+[1]*log(sqrt(x))",1,13000)
-        f6 = ROOT.TF1("f6","[0]+[1]*log(x*x)",1,13000)
-        f7 = ROOT.TF1("f7","1-[0]*exp(-(x-55))",1,13000)
-        
-        
-        f10 = ROOT.TF1("f10","[0]+[1]/sqrt(x)",1,13000)
-        
-        c = ROOT.TCanvas("test2","test2",400,400)
-        graph_mean.SetMinimum(0.8)
-        graph_mean.SetMaximum(1.2)
-        graph_mean.SetLineColor(ROOT.kBlue)
-        graph_mean.SetMarkerStyle(8)
-        graph_mean.SetMarkerColor(ROOT.kBlue)
-        graph_mean.Fit(f2,"","",55,215)
-        graph_mean.Draw("lap")
-        graph_sigma.SetLineColor(ROOT.kRed)
-        graph_sigma.SetMarkerStyle(5)
-        graph_sigma.SetMarkerColor(ROOT.kRed)
-        graph_sigma.Fit(f10,"","",55,215)
-        graph_sigma.Draw("plsame")        
-        c.SaveAs(samples[mass]+"_M"+str(mass)+".pdf")
-        c.SaveAs(samples[mass]+"_M"+str(mass)+".png")
-         
-        f=open("testcorr_"+samples[mass]+".json","w") 
-        f.write("{'sigma_corr' : '("+str(f10.GetParameter(0))+"+"+str(f10.GetParameter(1))+"/sqrt(MJ1) + "+str(f10.GetParameter(0))+"+"+str(f10.GetParameter(1))+"/sqrt(MJ2))/2.'" )
-        f.write(", 'mean_corr' : '("+str(f2.GetParameter(0))+"+"+str(f2.GetParameter(1))+"*sqrt(MJ1) + "+str(f2.GetParameter(0))+"+"+str(f2.GetParameter(1))+"*sqrt(MJ2))/2.' }" )
-        f.close()
-        
+       
+        graph_mean.SetName("corr_mean")
+        graph_sigma.SetName("corr_sigma")
+        graph_alpha.SetName("corr_alpha")
+        graph_alpha2.SetName("corr_alpha2")
+        graph_n.SetName("corr_n")
+        graph_n2.SetName("corr_n2")
+       
 
     Fhists.cd()
     histo.Write("%i"%mass)
     roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
    
-    #if samples[mass].find("hbb")==-1:
-    #fitter.signalResonance('model1',"MVV",mass,False)
-    #bins_all = [[0,80],[0,11],[11,16],[16,22],[22,80]]
-    h1 = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)*(jj_l1_softDrop_mass >65 && jj_l1_softDrop_mass < 85)"%(0.80*mass,1.2*mass),"1",binning)
-    
-    func,var = getMJPdf(1126,5000,mass,options.sample)
-    data1 = ROOT.RooDataHist("dh","dh", ROOT.RooArgList(var), ROOT.RooFit.Import(h1)) 
-    
-    print data1
-    
-    print func
-    print var
-    func.fitTo(data1,ROOT.RooFit.Range(mass*0.8,mass*1.2),ROOT.RooFit.SumW2Error(kTRUE),ROOT.RooFit.PrintEvalErrors(-1),ROOT.RooFit.Save(kTRUE))
-    #fitter.importBinnedData(h1,['MVV'],'data1')
-    c3 = ROOT.TCanvas("test3","test3",400,400)
-    frame = var.frame() 
-    func.PlotOn(frame)
-    frame.Draw()
-    #fitter.fit('model1','data1')
-    #h1.Draw("same")
-            ##proj.Draw()
-    c3.SaveAs("test3_M"+str(mass)+".pdf")
-    
-    #fitter.projection("model1","data1","MVV","1debugVV_"+options.output+"_"+str(mass)+".png",roobins)
-    
+   
     
     if options.fixPars!="1":
         fixedPars =options.fixPars.split(',')
@@ -254,5 +260,15 @@ F=ROOT.TFile(options.output,"RECREATE")
 F.cd()
 for name,graph in graphs.iteritems():
     graph.Write(name)
+ 
+if testcorr==True: 
+    graph_mean   .Write()
+    graph_sigma  .Write()
+    graph_alpha  .Write()
+    graph_alpha2 .Write()
+    graph_n      .Write()
+    graph_n2     .Write()
 F.Close()
+
+print 'wrote file '+options.output
             
