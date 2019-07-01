@@ -2,7 +2,7 @@ from functions import *
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("-p","--period",dest="period",default=2016,help="run period")
+parser.add_option("-p","--period",dest="period",type="int",default=2016,help="run period")
 parser.add_option("-s","--sorting",dest="sorting",help="b-tag or random sorting",default='random')
 parser.add_option("-b","--binning",action="store_false",dest="binning",help="use dijet binning or not",default=True)
 parser.add_option("--batch",action="store_false",dest="batch",help="submit to batch or not ",default=True)
@@ -12,7 +12,7 @@ parser.add_option("--run",dest="run",help="decide which parts of the code should
 
 (options,args) = parser.parse_args()
 
-
+print options
 
 period = options.period
 samples= str(period)+"_new/" #for V+jets we use 2018 samples also for 2016 because the 2016 ones are buggy and they need to be processed before to add the NLO weights!
