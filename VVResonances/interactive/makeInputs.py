@@ -123,13 +123,13 @@ nonResTemplate="QCD_Pt_" #high stat
 #background samples
 #nonResTemplate="QCD_Pt-"
 nonResTemplate="QCD_HT"
-TTemplate= "TTHad" #do we need a separate fit for ttbar?
-#WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
-#ZresTemplate= "ZJetsToQQ_HT800toInf_new"
-#resTemplate= "ZJetsToQQ_HT800toInf_new,WJetsToQQ_HT800toInf_new,TTHad_pow"
-WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+if(period == 2016):
+    TTemplate= "TT_Mtt-700to1000,TT_Mtt-1000toInf" #do we need a separate fit for ttbar?
+else:
+    TTemplate= "TTToHadronic" #do we need a separate fit for ttbar?
+WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
 ZresTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf"
-resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
 
 #ranges and binning
 minMJ=55.0
@@ -158,9 +158,9 @@ cuts['looseacceptanceMJ']= "(jj_l1_softDrop_mass>35&&jj_l1_softDrop_mass<300&&jj
 parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categories,minMJ,maxMJ,binsMJ,lumi,submitToBatch]   
 f = AllFunctions(parameters)
 
-signal_inuse="BulkGravWW"
-signaltemplate_inuse=BulkGravWWTemplate
-xsec_inuse=BRWW
+signal_inuse="BulkGravZZ"
+signaltemplate_inuse=BulkGravZZTemplate
+xsec_inuse=BRZZ
 #Fitting steps for one signal sample 
 #f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse) #nb, to be optimized
 #f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1')
@@ -190,7 +190,7 @@ else:
 
 
 #for V+jets
-print "making V+jets templates!! "
+#print "making V+jets templates!! "
 #print "first we fit"
 #f.fitVJets("JJ_WJets",resTemplate,1.,1.)
 #print "and then we make kernels"
@@ -199,10 +199,12 @@ print "making V+jets templates!! "
 #f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
 #print "then kernel Z"
 #f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
-#print "then norm W"
-#f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
+print "then norm W"
+f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
 print "then norm Z"
 f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
+print "then norm TT"
+f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","")
 
 ## Do data or pseudodata
 #f.makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
