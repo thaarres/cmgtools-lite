@@ -122,9 +122,9 @@ BRWH=1.*0.001*0.676*0.584
 dataTemplate="JetHT"
 
 #background samples
-nonResTemplate="QCD_Pt_" #high stat pythia8
-#nonResTemplate="QCD_Pt-" #low stat herwig
+nonResTemplate="QCD_Pt-" #low stat herwig
 #nonResTemplate="QCD_HT" #medium stat madgraph+pythia
+#nonResTemplate="QCD_Pt_" #high stat pythia8
 if(period == 2016):
     TTemplate= "TT_Mtt-700to1000,TT_Mtt-1000toInf" #do we need a separate fit for ttbar?
 else:
