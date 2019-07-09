@@ -70,7 +70,7 @@ class AllFunctions():
    bins = "200,250,300,350,400,450,500,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3400,3800,5000"#4200,4600,5000,7000"#TODO: The last three bins are empty, remove next iteration!
    if self.submitToBatch:
     from modules.submitJobs import Make2DDetectorParam,merge2DDetectorParam 
-    #jobList, files = Make2DDetectorParam(resFile,template,cut,self.samples,jobName,bins)
+    jobList, files = Make2DDetectorParam(resFile,template,cut,self.samples,jobName,bins)
     jobList = []
     files = []
     merge2DDetectorParam(resFile,bins,jobName,template)
