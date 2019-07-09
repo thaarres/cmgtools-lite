@@ -238,7 +238,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors=None):
      htitle = "Z-Proj. x : "+options.xrange+" y : "+options.yrange
      xtitle = "Dijet invariant mass [GeV]"
      ymin = 0.2
-     ymax = hdata.GetMaximum()*10
+     ymax = hdata.GetMaximum()*50000
      extra1 = xrange.split(',')[0]+' < m_{jet1} < '+ xrange.split(',')[1]+' GeV'
      extra2 = yrange.split(',')[0]+' < m_{jet2} < '+ yrange.split(',')[1]+' GeV'
     elif axis=='x':
@@ -276,8 +276,8 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors=None):
     histos[0].GetYaxis().SetTitleOffset(1.3)
     histos[0].GetYaxis().SetTitle("Events")
     histos[0].GetYaxis().SetTitleOffset(1.3)
-    histos[0].GetYaxis().SetTitle("Events/ 2 GeV")
-    if axis == 'z': histos[0].GetYaxis().SetTitle("Events/ 100 GeV")
+    histos[0].GetYaxis().SetTitle("Events / 2 GeV")
+    if axis == 'z': histos[0].GetYaxis().SetTitle("Events / 100 GeV")
     histos[0].GetYaxis().SetTitleSize(0.06)
     histos[0].GetYaxis().SetLabelSize(0.06)
     histos[0].Draw('HIST')
@@ -324,10 +324,13 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors=None):
         #hsig.Scale(1/hsig.Integral())
         #hsig.Scale(histos[2].Integral()*0.4)
         #hsig.Scale(scaling/hsig.Integral()*0.013146*77300.*eff)
-        print hsig.Integral()
-        hsig.Scale(scaling/0.0865311263651)#/0.270828488383)
+        print "signal integral "+str( hsig.Integral())
+        #hsig.Scale(scaling/0.270828488383)
+        hsig.Scale(scaling/0.140811334131)
+        #hsig.Scale(scaling/0.0865311263651)
         #hsig.Scale(scaling/1.12624917194)
         #hsig.Scale(scaling/7.8149570876e-09)
+        #hsig.Scale(scaling/1.00314421757)
       hsig.SetFillColor(ROOT.kGreen-6)
       hsig.SetLineColor(ROOT.kBlack)
       hsig.SetLineStyle(1)
@@ -392,7 +395,8 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors=None):
     pt.AddText("Prob = %.3f"%ROOT.TMath.Prob(chi2[0],chi2[1]))
     #pt.Draw()
 
-    pt2 = ROOT.TPaveText(0.55,0.29,0.99,0.4,"NDC")
+    #pt2 = ROOT.TPaveText(0.55,0.29,0.99,0.4,"NDC")
+    pt2 = ROOT.TPaveText(0.55,0.39,0.99,0.52,"NDC")
     pt2.SetTextFont(42)
     pt2.SetTextSize(0.05)
     pt2.SetTextAlign(12)
@@ -410,10 +414,10 @@ def MakePlots(histos,hdata,hsig,axis,nBins,errors=None):
     pt3.SetFillColor(0)
     pt3.SetBorderSize(0)
     pt3.SetFillStyle(0)
-    pt3.AddText("%s category"%purity)
+    #pt3.AddText("%s category"%purity)
     #pt3.AddText(extra1)
     #pt3.AddText(extra2)
-    pt3.Draw()
+    #pt3.Draw()
 
     CMS_lumi.CMS_lumi(pad1, 4, 10)
         
@@ -508,9 +512,11 @@ def doZprojection(pdfs,data,norm_nonres,norm_Wres,pdf_sig,norm_sig,norm_Zres,nor
                     lv[i][zv] += p.getVal(argset)*binV
                     i+=1
 		 if pdf_sig:
-                     for s in range(0,100):
-                        MJJ.setVal(zv-zBinsWidth[zk]//2.+s*zBinsWidth[zk]/100.)
-                        lv1_sig[0][zv] += pdf_sig.getVal(argset)*binV/100.
+                     lv1_sig[0][zv] += pdf_sig.getVal(argset)*binV
+                     #print pdf_sig.getVal(argset)
+                     #for s in range(0,100):
+                     #   MJJ.setVal(zv-zBinsWidth[zk]//2.+s*zBinsWidth[zk]/100.)
+                     #   lv1_sig[0][zv] += pdf_sig.getVal(argset)*binV/100.
 
 		 		    
     for i in range(0,len(pdfs)):
@@ -982,7 +988,8 @@ if __name__=="__main__":
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
      purity = options.input.replace('.root','').split('_')[-1]   
-                        
+     #if purity.find("all")!=-1: purity = "VH_all" 
+     print purity 
      #################################################
      xBins= getListOfBins(hinMC,"x")
      xBinslowedge = getListOfBinsLowEdge(hinMC,'x')

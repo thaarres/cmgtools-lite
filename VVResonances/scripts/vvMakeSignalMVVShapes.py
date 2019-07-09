@@ -147,7 +147,7 @@ for filename in os.listdir(args[0]):
 N=0
 
 Fhists=ROOT.TFile("massHISTOS_"+options.output,"RECREATE")
-
+allgraphs=[]
 
 for mass in sorted(samples.keys()):
 
@@ -168,6 +168,7 @@ for mass in sorted(samples.keys()):
     histo = plotter.drawTH1Binned(options.mvv,options.cut+"*(jj_LV_mass>%f&&jj_LV_mass<%f)"%(0.80*mass,1.2*mass),"1",binning)
     fitter.importBinnedData(histo,['MVV'],'data')
     ps = []
+   
     if testcorr==True:
         print "do 2D histos"
         histos2D = plotter.drawTH2("jj_LV_mass:jj_l2_softDrop_mass",options.cut,"1",80,55,215,50,1126,5000)
@@ -215,12 +216,19 @@ for mass in sorted(samples.keys()):
                 
                 n+=1
        
-        graph_mean.SetName("corr_mean")
-        graph_sigma.SetName("corr_sigma")
-        graph_alpha.SetName("corr_alpha")
-        graph_alpha2.SetName("corr_alpha2")
-        graph_n.SetName("corr_n")
-        graph_n2.SetName("corr_n2")
+        graph_mean.SetName("corr_mean_M"+str(mass))
+        graph_sigma.SetName("corr_sigma_M"+str(mass))
+        graph_alpha.SetName("corr_alpha_M"+str(mass))
+        graph_alpha2.SetName("corr_alpha2_M"+str(mass))
+        graph_n.SetName("corr_n_M"+str(mass))
+        graph_n2.SetName("corr_n2_M"+str(mass))
+        allgraphs.append(graph_mean)
+        allgraphs.append(graph_sigma)
+        allgraphs.append(graph_alpha)
+        allgraphs.append(graph_alpha2)
+        allgraphs.append(graph_n)
+        allgraphs.append(graph_n2)
+        
        
 
     Fhists.cd()
@@ -256,18 +264,16 @@ for mass in sorted(samples.keys()):
     
 Fhists.Write()
 Fhists.Close()        
-F=ROOT.TFile(options.output,"RECREATE")
-F.cd()
+
+F =ROOT.TFile(options.output,"RECREATE")
 for name,graph in graphs.iteritems():
     graph.Write(name)
  
-if testcorr==True: 
-    graph_mean   .Write()
-    graph_sigma  .Write()
-    graph_alpha  .Write()
-    graph_alpha2 .Write()
-    graph_n      .Write()
-    graph_n2     .Write()
+if testcorr==True:
+    for g in allgraphs:
+        g.Write()
+        print "write "+g.GetName()
+
 F.Close()
 
 print 'wrote file '+options.output

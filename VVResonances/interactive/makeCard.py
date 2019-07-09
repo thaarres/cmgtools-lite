@@ -9,12 +9,13 @@ datasets=['2016']#,'2017']
 addTT = False
 
 pseudodata = "ZprimeZH"
-outlabel="_sigonly_M2000"
+outlabel="_sigonly_M4500"
 
 lumi = {'2016':35900,'2017':41367}
 lumi_unc = {'2016':1.025,'2017':1.023}
 
 scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
+scales = {"2017" :[1.,1.], "2016":[1.,1.]}
 
 vtag_unc = {'HPHP':{},'HPLP':{},'LPLP':{}}
 vtag_unc['HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
@@ -81,16 +82,16 @@ for sig in signals:
       elif sig.find("H")!=-1:
     # only for test purposes put VH_all only as signal category!!!!!
        card.addMVVSignalParametricShape("%s_MVV_c1"%sig,"MJJ",dataset+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0})
-       card.addMJJSignalParametricShapeHiggs("%s_Wqq1_c1"%sig,"MJ1" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_VH_all.json"%(sig,dataset),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
+       card.addMJJSignalParametricShapeHiggs("%s_Wqq1_c1"%sig,"MJ1" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_VH_all.json"%(sig,dataset),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})
        card.addMJJSignalParametricShapeNOEXP("%s_Wqq2_c1"%sig,"MJ2" ,dataset+"/JJ_Vjet_%s_%s_MJrandom_VH_all.json"%(sig,dataset),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
-       #card.product3D("%s_c1"%sig,"%s_Wqq1_c1"%sig,"%s_Wqq2_c1"%sig,"%s_MVV_c1"%sig) 
-       card.conditionalProduct2("%s_c1"%sig,"%s_Wqq1_c1"%sig,"%s_Wqq2_c1"%sig,"%s_MVV_c1"%sig,"{MJ1,MJ2}")
+       card.product3D("%s_c1"%sig,"%s_Wqq1_c1"%sig,"%s_Wqq2_c1"%sig,"%s_MVV_c1"%sig) 
+       #card.conditionalProduct2("%s_c1"%sig,"%s_Wqq1_c1"%sig,"%s_Wqq2_c1"%sig,"%s_MVV_c1"%sig,"{MJ1,MJ2}")
        
        card.addMVVSignalParametricShape("%s_MVV_c2"%sig,"MJJ",dataset+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0})
        card.addMJJSignalParametricShapeNOEXP("%s_Wqq1_c2"%sig,"MJ1" ,dataset+"/JJ_Vjet_%s_%s_MJrandom_VH_all.json"%(sig,dataset),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
-       card.addMJJSignalParametricShapeHiggs("%s_Wqq2_c2"%sig,"MJ2" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_VH_all.json"%(sig,dataset),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
-       #card.product3D("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig) 
-       card.conditionalProduct2("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig,"{MJ1,MJ2}")
+       card.addMJJSignalParametricShapeHiggs("%s_Wqq2_c2"%sig,"MJ2" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_VH_all.json"%(sig,dataset),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})
+       card.product3D("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig) 
+       #card.conditionalProduct2("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig,"{MJ1,MJ2}")
        
        card.sum("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
        
@@ -170,7 +171,7 @@ for sig in signals:
       if pseudodata=="":
         card.importBinnedData(dataset+"/JJ_"+p+".root","data",["MJ1","MJ2","MJJ"]) 
       if pseudodata=="ZprimeZH":
-          card.importBinnedData(dataset+"/JJ_ZprimeZH_VH_all_M2000.root","data_obs",["MJ1","MJ2","MJJ"])
+          card.importBinnedData(dataset+"/JJ_ZprimeZH_VH_all_M4500.root","data_obs",["MJ1","MJ2","MJJ"])
       if pseudodata=="WprimeWZ":
           card.importBinnedData(dataset+"/JJ_WprimeWZ_VV_HPLP_M2000.root","data_obs",["MJ1","MJ2","MJJ"])
       
@@ -245,7 +246,4 @@ for sig in signals:
   
   
   
-
-
-
 

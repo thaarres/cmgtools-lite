@@ -9,7 +9,10 @@ def returnString(func,ftype):
     if ftype.find("pol")!=-1:
         st='0'
         for i in range(0,func.GetNpar()):
-            st=st+"+("+str(func.GetParameter(i))+")"+("*MH"*i)
+            if func.GetName().find("corr")!=-1: st = st+"+("+str(func.GetParameter(i))+")"+("*(MJ1+MJ2)/2."*i)
+            else:
+                st=st+"+("+str(func.GetParameter(i))+")"+("*MH"*i)
+
         return st    
     elif ftype.find("llog")!=-1:
         return str(func.GetParameter(0))+"+"+str(func.GetParameter(1))+"*log(MH)"
@@ -43,6 +46,7 @@ parameterization={}
 
 ff=ROOT.TFile("debug_"+options.output+".root","RECREATE")
 ff.cd()
+print graphStr
 for string in graphStr:
     comps =string.split(':')      
     graph=rootFile.Get(comps[0])
@@ -60,10 +64,21 @@ for string in graphStr:
         func=ROOT.TF1(comps[0]+"_func",st,1,13000)
         for i in range(0,order):
             func.SetParameter(i,0)
-    
-    graph.Fit(func,"","",options.min,options.max)
-    graph.Fit(func,"","",options.min,options.max)
-    graph.Fit(func,"","",options.min,options.max)
+    elif comps[1]=="sqrt":
+        func = ROOT.TF1(comps[0]+"_func","[0]+[1]*sqrt(x)",1,13000)
+        st= "work in progress"
+    elif comps[1]=="1/sqrt":
+        func = ROOT.TF1(comps[0]+"_func","[0]+[1]/sqrt(x)",1,13000)
+        st = "work in progress"
+      
+    if comps[0].find("corr")!=-1:
+        graph.Fit(func,"","",55,215)
+        graph.Fit(func,"","",55,215)
+        graph.Fit(func,"","",55,215)
+    else:    
+        graph.Fit(func,"","",options.min,options.max)
+        graph.Fit(func,"","",options.min,options.max)
+        graph.Fit(func,"","",options.min,options.max)
     parameterization[comps[0]]=returnString(func,comps[1])
     graph.Write(comps[0])
     func.Write(comps[0]+"_func")
