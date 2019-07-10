@@ -21,6 +21,7 @@ sorting = options.sorting
 #sorting = 'btag'
 
 submitToBatch = options.batch #Set to true if you want to submit kernels + makeData to batch!
+
 runParallel   = False #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! TODO! Add waitForBatchJobs also here?
 dijetBinning = options.binning
 useTriggerWeights = options.trigg
@@ -85,7 +86,9 @@ if sorting == 'random':
  cuts['VH_LPLP'] = '(' + '('+  '&&'.join([catVtag['LP1'],catHtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['LP2'],catHtag['LP1']]) + ')' + ')'
  cuts['VH_all'] =  '('+  '||'.join([cuts['VH_HPHP'],cuts['VH_HPLP'],cuts['VH_LPHP'],cuts['VH_LPLP']]) + ')'
  cuts['VV_HPHP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '&&'.join([catVtag['HP1'],catVtag['HP2']]) + ')' + ')'
- cuts['VV_HPLP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')' + ')'
+ #cuts['VV_HPLP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')' + ')'
+ cuts['VV_HPLP'] = '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')'
+
 else:
  print "Use b-tagging sorting"
  cuts['VH_HPHP'] = '('+  '&&'.join([catHtag['HP1'],catVtag['HP2']]) + ')'
@@ -132,18 +135,20 @@ BRWH=1.*0.001*0.676*0.584
 
 #data samples
 dataTemplate="JetHT"
-nonResTemplate="QCD_Pt_" #high stat
 
 #background samples
-#nonResTemplate="QCD_Pt-"
-nonResTemplate="QCD_HT"
-TTemplate= "TTHad" #do we need a separate fit for ttbar?
-#WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
-#ZresTemplate= "ZJetsToQQ_HT800toInf_new"
-#resTemplate= "ZJetsToQQ_HT800toInf_new,WJetsToQQ_HT800toInf_new,TTHad_pow"
-WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+
+nonResTemplate="QCD_Pt-" #low stat herwig
+#nonResTemplate="QCD_HT" #medium stat madgraph+pythia
+#nonResTemplate="QCD_Pt_" #high stat pythia8
+if(period == 2016):
+    TTemplate= "TT_Mtt-700to1000,TT_Mtt-1000toInf" #do we need a separate fit for ttbar?
+else:
+    TTemplate= "TTToHadronic" #do we need a separate fit for ttbar?
+WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
 ZresTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf"
-resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,TTToHadronic"
+resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
+
 
 #ranges and binning
 minMJ=55.0
@@ -171,6 +176,7 @@ cuts['looseacceptanceMJ']= "(jj_l1_softDrop_mass>35&&jj_l1_softDrop_mass<300&&jj
 #do not change the order here, add at the end instead
 parameters = [cuts,minMVV,maxMVV,minMX,maxMX,binsMVV,HCALbinsMVV,samples,categories,minMJ,maxMJ,binsMJ,lumi,submitToBatch]   
 f = AllFunctions(parameters)
+
 
 signal_inuse="ZprimeZH"
 signaltemplate_inuse=ZprimeZHTemplate
@@ -261,7 +267,6 @@ if options.run.find("all")!=-1 or options.run.find("qcd")!=-1:
 
 if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     print "for V+jets"
-    print "making V+jets templates!! "
     print "first we fit"
     f.fitVJets("JJ_WJets",resTemplate,1.,1.)
     print "and then we make kernels"
@@ -274,6 +279,7 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
     print "then norm Z"
     f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
+    #f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
 
 
 if options.run.find("all")!=-1 or options.run.find("data")!=-1:
