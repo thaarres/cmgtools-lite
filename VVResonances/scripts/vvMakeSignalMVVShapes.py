@@ -144,10 +144,15 @@ for filename in os.listdir(args[0]):
 
 
 #Now we have the samples: Sort the masses and run the fits
+
 N=0
 
 Fhists=ROOT.TFile("massHISTOS_"+options.output,"RECREATE")
-allgraphs=[]
+allgraphs={"MEAN":[1.,1.,1.,1.] ,"SIGMA":[1.,1.,1.,1.], "ALPHA1":[1.,1.,1.,1.] , "ALPHA2":[1.,1.,1.,1.], "N1":[1.,1.,1.,1.], "N2":[1.,1.,1.,1.]}
+allgraphserror={"MEANERR":[1.,1.,1.,1.] ,"SIGMAERR":[1.,1.,1.,1.], "ALPHA1ERR":[1.,1.,1.,1.] , "ALPHA2ERR":[1.,1.,1.,1.], "N1ERR":[1.,1.,1.,1.], "N2ERR":[1.,1.,1.,1.]}
+proj = None
+bins_center =[]
+
 
 for mass in sorted(samples.keys()):
 
@@ -170,6 +175,7 @@ for mass in sorted(samples.keys()):
     ps = []
    
     if testcorr==True:
+        n=-1
         print "do 2D histos"
         histos2D = plotter.drawTH2("jj_LV_mass:jj_l2_softDrop_mass",options.cut,"1",80,55,215,50,1126,5000)
         ctest = ROOT.TCanvas("test","test",400,400)
@@ -177,20 +183,13 @@ for mass in sorted(samples.keys()):
         ctest.SaveAs(samples[mass]+"_M"+str(mass)+"_2D.pdf")
         ctest.SaveAs(samples[mass]+"_M"+str(mass)+"_2D.png")
         proj = histos2D.ProjectionX("p")
-        
-        graph_mean = ROOT.TGraphErrors()
-        graph_sigma = ROOT.TGraphErrors()
-        graph_alpha = ROOT.TGraphErrors()
-        graph_alpha2 = ROOT.TGraphErrors()
-        graph_n = ROOT.TGraphErrors()
-        graph_n2 = ROOT.TGraphErrors()
-        n=-1
-        bins_all = [[0,80],[0,10],[10,20],[20,40],[40,80]]
-        if samples[mass].find("hbb")==-1:
-            bins_all = [[0,80],[0,11],[11,16],[16,22],[22,80]]
+        #bins_all = [[0,80],[0,10],[10,20],[20,40],[40,80]]
+        #if samples[mass].find("hbb")==-1:
+        bins_all = [[0,80],[0,15],[16,25],[26,80]]
         for bins in bins_all:
             ps .append( histos2D.ProjectionY("p2"+str(n+1),bins[0],bins[1]))#,proj.GetBin(55),proj.GetBin(85))
             par = dodCBFits(ps[-1],mass,str(n+1),options.fixPars)
+            
             if n==-1:
                 mean = par["MEAN"] #fit.GetParameter(1)
                 sigma = par["SIGMA"] #fit.GetParameter(2)
@@ -200,34 +199,23 @@ for mass in sorted(samples.keys()):
                 n2 = par["N2"]
                 n+=1
             else:
-                graph_mean.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["MEAN"]/mean)
-                graph_mean.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["MEANERR"]/mean)
-                #graph_mean.SetPointError(n,0, fit.GetParError(1)/mean)
-                graph_sigma.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["SIGMA"]/sigma)
-                graph_sigma.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["SIGMAERR"]/sigma)
-                graph_alpha.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["ALPHA1"]/alpha)
-                graph_alpha.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["ALPHA1ERR"]/alpha)
-                graph_alpha2.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["ALPHA2"]/alpha2)
-                graph_alpha2.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["ALPHA2ERR"]/alpha2)
-                graph_n.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["N1"]/n1)
-                graph_n.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["N1ERR"]/n1)
-                graph_n2.SetPoint(n,proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. ,par["N2"]/n2)
-                graph_n2.SetPointError(n,(proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2., par["N2ERR"]/n2)
                 
                 n+=1
-       
-        graph_mean.SetName("corr_mean_M"+str(mass))
-        graph_sigma.SetName("corr_sigma_M"+str(mass))
-        graph_alpha.SetName("corr_alpha_M"+str(mass))
-        graph_alpha2.SetName("corr_alpha2_M"+str(mass))
-        graph_n.SetName("corr_n_M"+str(mass))
-        graph_n2.SetName("corr_n2_M"+str(mass))
-        allgraphs.append(graph_mean)
-        allgraphs.append(graph_sigma)
-        allgraphs.append(graph_alpha)
-        allgraphs.append(graph_alpha2)
-        allgraphs.append(graph_n)
-        allgraphs.append(graph_n2)
+                allgraphs["MEAN"][n-1] += par["MEAN"]/mean
+                allgraphs["SIGMA"][n-1]+= par["SIGMA"]/sigma
+                allgraphs["ALPHA1"][n-1]+=par["ALPHA1"]/alpha
+                allgraphs["ALPHA2"][n-1]+=par["ALPHA2"]/alpha2
+                allgraphs["N1"][n-1] += par["N1"]/n1
+                allgraphs["N2"][n-1] += par["N2"]/n2
+                
+                
+                allgraphserror["MEANERR"][n-1] += pow( par["MEANERR"]/mean,2)
+                allgraphserror["SIGMAERR"][n-1]+= pow(par["SIGMAERR"]/sigma,2)
+                allgraphserror["ALPHA1ERR"][n-1]+=pow(par["ALPHA1ERR"]/alpha,2)
+                allgraphserror["ALPHA2ERR"][n-1]+=pow(par["ALPHA2ERR"]/alpha2,2)
+                allgraphserror["N1ERR"][n-1] += pow(par["N1ERR"]/n1,2)
+                allgraphserror["N2ERR"][n-1] += pow(par["N2ERR"]/n2,2)
+                bins_center.append([proj.GetBinCenter(bins_all[n][0])+ (proj.GetBinCenter(bins_all[n][1])-proj.GetBinCenter(bins_all[n][0]))/2., (proj.GetBinCenter(bins_all[n][1])-proj.GetBinCenter(bins_all[n][0]))/2.])
         
        
 
@@ -268,11 +256,26 @@ Fhists.Close()
 F =ROOT.TFile(options.output,"RECREATE")
 for name,graph in graphs.iteritems():
     graph.Write(name)
+    
+    
+ 
+   
  
 if testcorr==True:
-    for g in allgraphs:
-        g.Write()
-        print "write "+g.GetName()
+    graph = ROOT.TGraphErrors()
+    
+    for key in allgraphs.keys():
+        for n in range(0,len(allgraphs[key])-1):
+            graph.SetPoint(n,bins_center[n][0] , allgraphs[key][n]/float(N))
+            graph.SetPointError(n,bins_center[n][1], ROOT.TMath.Sqrt(allgraphserror[key+"ERR"][n])/float(N))
+        graph.SetName("corr_"+key)
+        graph.Write()
+        print "write "+graph.GetName()
+        
+       
+    #for g in allgraphs:
+        #g.Write()
+        #print "write "+g.GetName()
 
 F.Close()
 
