@@ -148,7 +148,6 @@ BRWH=1.*0.001*0.676*0.584
 dataTemplate="JetHT"
 
 #background samples
-
 nonResTemplate="QCD_Pt-" #low stat herwig
 #nonResTemplate="QCD_HT" #medium stat madgraph+pythia
 #nonResTemplate="QCD_Pt_" #high stat pythia8
@@ -302,11 +301,11 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
 
 if options.run.find("all")!=-1 or options.run.find("data")!=-1:
     print " Do data or pseudodata"
-    f.makeNormalizations("data","JJ",dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
+    f.makeNormalizations("data","JJ_"+str(period),dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
     from modules.submitJobs import makePseudoData
-    for p in purities: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PDnoVjets_%s.root"%p,lumi)
+    for p in categories: makePseudoData("JJ_nonRes_%s.root"%p,"JJ_nonRes_3D_%s.root"%p,"pythia","JJ_PDnoVjets_%s.root"%p,lumi)
     from modules.submitJobs import makePseudoDataVjets
-    for p in purities: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)
+    for p in categories: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)
 
 
 print " ########## I did everything I could! ###### "
