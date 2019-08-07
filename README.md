@@ -109,7 +109,7 @@ python makeCard.py
 #python runPostFit.py 
 ```
 
-Run the limits with combine and make final plot (but not tested because datacards missing, will need modification for desy condor)
+Run the limits with combine and make final plot
 
 ```
 vvSubmitLimits.py workspace_JJ_BulkGVV_VV_13TeV_2016.root -s 100 -q "tomorrow" -m 1200 -M 4200 -C 1
