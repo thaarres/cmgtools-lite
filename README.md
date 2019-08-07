@@ -114,7 +114,7 @@ Run the limits with combine and make final plot
 ```
 vvSubmitLimits.py workspace_JJ_BulkGVV_VV_13TeV_2016.root -s 100 -q "tomorrow" -m 1200 -M 4200 -C 1
 find higgsCombineTest.AsymptoticLimits.* -size +1500c | xargs hadd Limits_BulkGVV_13TeV_2016.root
-vvMakeLimitPlot.py Limits_BulkGVV_13TeV_2016.root -x 1200 -X 4200 -s BulkGravVV  --hvt 2 --HVTworkspace workspace_JJ_BulkGVV_VV_13TeV_2016.root -p 2016 #(expected limits)
+vvMakeLimitPlot.py Limits_BulkGVV_13TeV_2016.root -x 1200 -X 4200 -s BulkGVV  --hvt 2 --HVTworkspace workspace_JJ_BulkGVV_VV_13TeV_2016.root -p 2016 #(expected limits)
 vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 -b 0 #(expected+observed limits)
 ```
 
