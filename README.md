@@ -101,20 +101,20 @@ python Projections3DHisto_HPHP.py --mc results_2016/JJ_2016_nonRes_VV_HPHP_altsh
 python Projections3DHisto_HPHP.py --mc results_2016/JJ_2016_nonRes_VV_HPHP_altshape2.root,nonRes -k save_new_shapes_2016_pythia_VV_HPHP_3D.root,histo -o control-plots-HPHP-madgraph
 ```
 
-Create datacard and workspace and run post fit 
+Create datacard and workspaces: in order to call the 'addParametricYieldHVTBR' function the signal name BulkGVV or VprimeWV should be used
 
 ```
 python makeCard.py
-text2workspace.py datacard_JJ_HPHP_13TeV.txt -o JJ_BulkGWW_HPHP_13TeV_workspace.root
-python runPostFit.py
+#text2workspace.py datacard_JJ_HPHP_13TeV.txt -o JJ_BulkGWW_HPHP_13TeV_workspace.root
+#python runPostFit.py 
 ```
 
 Run the limits with combine and make final plot (but not tested because datacards missing, will need modification for desy condor)
 
 ```
-vvSubmitLimits.py JJ_BulkGWW_HPHP_13TeV_workspace.root -s 100 -q "workday" -m 1200 -M 4200 -C 1
-find higgsCombineTest.AsymptoticLimits.* -size +1500c | xargs hadd Limits_BulkGWW_HPHP_13TeV.root
-vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 #(expected limits)
+vvSubmitLimits.py workspace_JJ_BulkGVV_VV_13TeV_2016.root -s 100 -q "tomorrow" -m 1200 -M 4200 -C 1
+find higgsCombineTest.AsymptoticLimits.* -size +1500c | xargs hadd Limits_BulkGVV_13TeV_2016.root
+vvMakeLimitPlot.py Limits_BulkGVV_13TeV_2016.root -x 1200 -X 4200 -s BulkGravVV  --hvt 2 --HVTworkspace workspace_JJ_BulkGVV_VV_13TeV_2016.root -p 2016 #(expected limits)
 vvMakeLimitPlot.py Limits_BulkGWW_HPHP_13TeV.root -x 1200 -X 4200 -b 0 #(expected+observed limits)
 ```
 
