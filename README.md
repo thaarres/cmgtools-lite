@@ -123,6 +123,13 @@ Run post fit control plots
 python runFitPlots_vjets_signal_oneyear_splitRes.py -n results_2016/workspace_JJ_BulkGVV_VV_13TeV_2016.root  -l sigonly -i results_2016/JJ_2016_nonRes_VV_HPLP.root -M 2000 -s
 ```
 
+Get pulls of systematics for 1 mass points and produce a nice plot:
+
+```
+combine -M FitDiagnostics -m 1200 workspace.root
+root -l PlotPulls.C
+```
+
 Further instructions on how to run the code can be found at:
 https://docs.google.com/document/d/1hU84u27mY85UaAK5R11OHYctBMckDU6kX7IcorboZf8/edit?usp=sharing
 
