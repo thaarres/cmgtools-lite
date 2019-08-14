@@ -64,21 +64,10 @@ class DataCardMaker:
         N2Var="_".join(["N2",name,self.tag])
         N1Var="_".join(["N1",name,self.tag])
         if name.find("H")!=-1:
-            print "sigma "
-            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"',{MH,MJ1,MJ2})") 
-            #print "('("+info['SIGMA']+")*("+info['corr_SIGMA']+"',{MH,MJ1,MJ2})"
-            #print info['corr_MEAN']
-            print "mean"
+            #fix the uncertainties here!!!!
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"*(1+"+scaleStr+")',{MH,MJ1,MJ2})") 
             self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*"+info['corr_mean']+"',{MH,MJ1,MJ2})") 
-            #print "('("+info['MEAN']+")*("+info['corr_MEAN']+"',{MH,MJ1,MJ2})"
-            #print "alpha"
-            #self.w.factory("expr::"+ALPHA1Var+"('("+info['ALPHA1']+")*"+info['corr_alpha_M4500.0']+"',{MH,MJ1,MJ2})")
-            #self.w.factory("expr::"+N1Var+"('("+info['N1']+")*"+info['corr_n_M4500.0']+"',{MH,MJ1,MJ2})")
-            #self.w.factory("expr::"+N2Var+"('("+info['N2']+")*"+info['corr_n2_M4500.0']+"',{MH,MJ1,MJ2})")
-            #self.w.factory("expr::"+ALPHA2Var+"('("+info['ALPHA2']+")*"+info['corr_alpha2_M4500.0']+"',{MH,MJ1,MJ2})")
             
-            #self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
-            #self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
             self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
             self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
             self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
