@@ -16,6 +16,7 @@ print options
 
 period = options.period
 samples= str(period)+"_new/" #for V+jets we use 2018 samples also for 2016 because the 2016 ones are buggy and they need to be processed before to add the NLO weights!
+
 #samples= str(period)+"_new/"
 sorting = options.sorting
 #sorting = 'btag'
@@ -113,7 +114,7 @@ cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop
 
 #all categories
 #categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP']
-categories=['VV_HPLP','VV_HPHP']
+#categories=['VV_HPLP','VV_HPHP']
 categories=['VH_all']
 
 #list of signal samples --> nb, radion and vbf samples to be added
@@ -137,7 +138,7 @@ nonResTemplate="QCD_Pt_" #high stat
 
 #background samples
 #nonResTemplate="QCD_Pt-"
-nonResTemplate="QCD_HT"
+#nonResTemplate="Dijet_NLO"
 TTemplate= "TTHad" #do we need a separate fit for ttbar?
 #WresTemplate= "WJetsToQQ_HT800toInf_new,TTHad_pow"
 #ZresTemplate= "ZJetsToQQ_HT800toInf_new"
@@ -204,8 +205,13 @@ fixParsSig={"ZprimeZH":{ "VV_HPLP": {"fixPars":"mean:91.5,n:1.83,n2:4.22,alphaH:
 
 
 
-fixParsSigMVV={"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol3,ALPHA2:pol0,corr_alpha_M1200.0:pol1,corr_alpha_M1800.0:pol1,corr_alpha_M2000.0:pol1,corr_alpha_M3000.0:pol1,corr_alpha_M4000.0:pol1,corr_alpha_M4500.0:pol1"},"WprimeWZ":{"fixPars":"N1:7,N2:4","pol": "MEAN:pol1,SIGMA:pol3,N1:pol0,ALPHA1:pol7,N2:pol0,ALPHA2:pol5"}}
+fixParsSigMVV={"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol3,ALPHA2:pol0,corr_mean:pol1,corr_sigma:pol1,corr_mean_M4500.0:pol1,corr_sigma_M4500.0:pol1,corr_mean_M2000.0:pol1,corr_sigma_M2000.0:pol1,gorr_mean_M4500.0:pol1,gorr_sigma_M4500.0:pol1"},
+"ZprimeZHHjet":{"fixPars":"N1:100.,ALPHA2:1.18", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol5,ALPHA2:pol0,corr_mean_M4500.0:pol1,corr_sigma_M4500.0:pol1,corr_n_M4500.0:pol1,corr_alpha_M4500.0:pol1,corr_n2_M4500.0:pol1,corr_alpha2_M4500.0:pol1"},
+"ZprimeZHVjet":{"fixPars":"N1:123.1,ALPHA1:0.5,N2:0.6", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol3,ALPHA2:pol4,corr_mean_M4500.0:pol1,corr_sigma_M4500.0:pol1,corr_n_M4500.0:pol1,corr_alpha_M4500.0:pol1,corr_n2_M4500.0:pol1,corr_alpha2_M4500.0:pol1"}               
+,"WprimeWZ":{"fixPars":"N1:7,N2:4","pol": "MEAN:pol1,SIGMA:pol3,N1:pol0,ALPHA1:pol7,N2:pol0,ALPHA2:pol5"}}
 
+
+fixParsSigMVVtest = {"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"corr_mean_M4500.0:pol1"}}
 
 if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
     print "run signal"
@@ -228,12 +234,27 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
                 f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse])
     if options.run.find("all")!=-1 or options.run.find("mvv")!=-1:
         print "mjj fit for signal "
-        f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])#,cuts["VV_HPLP"])
+        f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass <= 150 && jj_l1_softDrop_mass > 105 && jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass > 65 ")#,cuts["VV_HPLP"])
+        ###print "opened this function"
+        f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 150 && jj_l2_softDrop_mass > 105 && jj_l1_softDrop_mass <= 105 && jj_l1_softDrop_mass > 65")
+        
+        #f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass >= 65 && jj_l1_softDrop_mass <= 105 && jj_l2_softDrop_mass > 105 && jj_l2_softDrop_mass < 150")#,cuts["VV_HPLP"])
+        ####print "opened this function"
+        #f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass >= 65 && jj_l1_softDrop_mass > 105 && jj_l1_softDrop_mass <= 150")
+        
+        #f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])#,cuts["VV_HPLP"])
+        #f.makeNormalizations("ZprimeZH","JJ_M1200_"+str(period),"ZprimeToZhToZhadhbb_narrow_1200",0,cuts['nonres'],"sig")
+        #f.makeNormalizations("ZprimeZH","JJ_M3000"+str(period),"ZprimeToZhToZhadhbb_narrow_3000",0,cuts['nonres'],"sig")
+        #f.makeNormalizations("ZprimeZH","JJ_M1400"+str(period),"ZprimeToZhToZhadhbb_narrow_1400",0,cuts['nonres'],"sig")
+        f.makeNormalizations("ZprimeZH","JJ_M4500"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
+        
+        print "opened this function"
+                
     if options.run.find("all")!=-1 or options.run.find("norm")!=-1:
         print "fit signal norm "
         f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF,'VH_all':HPSF*HPSF+HPSF*LPSF})
     
-        f.makeNormalizations("ZprimeZH","JJ_"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
+        f.makeNormalizations("ZprimeZH","JJ_gen"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
         #f.makeNormalizations("WprimeWZ","JJ_"+str(period),"WprimeToWZToWhadZhad_narrow_4500",0,cuts['nonres'],"sig")
 
 
@@ -285,5 +306,7 @@ if options.run.find("all")!=-1 or options.run.find("data")!=-1:
     from modules.submitJobs import makePseudoDataVjets
     for p in purities: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)
 
+
+#f.mergeBackgroundShapes("nonRes","/portal/ekpbms2/home/dschaefer/DiBoson3D/2016/save_new_shapes_madgraph_HPHP_")
 
 print " ########## I did everything I could! ###### "

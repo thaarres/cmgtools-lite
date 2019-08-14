@@ -60,32 +60,41 @@ class DataCardMaker:
         SCALEVar="_".join(["MEAN",name,self.tag])
         SIGMAVar="_".join(["SIGMA",name,self.tag])
         ALPHA1Var="_".join(["ALPHA1",name,self.tag])
-        #if name.find("H")!=-1:
-            ##self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+','.join(scaleSysts)+")")
-            ##self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+','.join(resolutionSysts)+")") 
+        ALPHA2Var="_".join(["ALPHA2",name,self.tag])
+        N2Var="_".join(["N2",name,self.tag])
+        N1Var="_".join(["N1",name,self.tag])
+        if name.find("H")!=-1:
+            print "sigma "
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"',{MH,MJ1,MJ2})") 
+            #print "('("+info['SIGMA']+")*("+info['corr_SIGMA']+"',{MH,MJ1,MJ2})"
+            #print info['corr_MEAN']
+            print "mean"
+            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*"+info['corr_mean']+"',{MH,MJ1,MJ2})") 
+            #print "('("+info['MEAN']+")*("+info['corr_MEAN']+"',{MH,MJ1,MJ2})"
+            #print "alpha"
+            #self.w.factory("expr::"+ALPHA1Var+"('("+info['ALPHA1']+")*"+info['corr_alpha_M4500.0']+"',{MH,MJ1,MJ2})")
+            #self.w.factory("expr::"+N1Var+"('("+info['N1']+")*"+info['corr_n_M4500.0']+"',{MH,MJ1,MJ2})")
+            #self.w.factory("expr::"+N2Var+"('("+info['N2']+")*"+info['corr_n2_M4500.0']+"',{MH,MJ1,MJ2})")
+            #self.w.factory("expr::"+ALPHA2Var+"('("+info['ALPHA2']+")*"+info['corr_alpha2_M4500.0']+"',{MH,MJ1,MJ2})")
             
             #self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
             #self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
-            #self.w.factory("expr::"+ALPHA1Var+"('(0+"+info['ALPHA1']+")*("+info['corr_alpha_M4000.0']+")',{MH,MJ1,MJ2})") 
-            #print "(0+"+info['ALPHA1']+")*("+info['corr_alpha_M4000.0']+")"
-        #else:    
-        self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
-        self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
-        
-        
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))  
+        else:    
+            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))     
+                
+            
 
         
         
-
-        ALPHA2Var="_".join(["ALPHA2",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
-
-        N1Var="_".join(["N1",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
-
-        N2Var="_".join(["N2",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))        
 
         pdfName="_".join([name,self.tag])
         vvMass = ROOT.RooDoubleCB(pdfName,pdfName,self.w.var(MVV),self.w.function(SCALEVar),self.w.function(SIGMAVar),self.w.function(ALPHA1Var),self.w.function(N1Var),self.w.function(ALPHA2Var),self.w.function(N2Var))

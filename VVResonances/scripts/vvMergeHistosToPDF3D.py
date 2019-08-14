@@ -125,41 +125,41 @@ print options.inputY
 print options.inputZ
 print options.output
 
-#print "   - nominal"
-#makeHisto("histo",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal",output)
-#print "   - pt (x,y) up/down"
-#makeHisto("histo_PTXYUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
-#makeHisto("histo_PTXYDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTDown",inputz,"histo_nominal",output)
-#print "   - pt z up/down"
-#makeHisto("histo_PTZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PTUp",output)
-#makeHisto("histo_PTZDown",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PTDown",output)
-#print "   - pt x up/down"
-#makeHisto("histo_PTXUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
-#makeHisto("histo_PTXDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal",inputz,"histo_nominal",output)
-#print "   - pt y up/down"
-#makeHisto("histo_PTYUp",inputx,"histo_nominal",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
-#makeHisto("histo_PTYDown",inputx,"histo_nominal",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
-#print "   - Opt (x,y) up/down"
-#makeHisto("histo_OPTXYUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
-#makeHisto("histo_OPTXYDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",inputz,"histo_nominal",output)
-#print "   - Opt z up/down"
-#makeHisto("histo_OPTZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_OPTUp",output)
-#makeHisto("histo_OPTZDown",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_OPTDown",output)
-#print "   - pt x,y,z up/down"
-#makeHisto("histo_PTUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal_PTUp",inputz,"histo_nominal_PTUp",output)
-#makeHisto("histo_PTDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTDown",inputz,"histo_nominal_PTDown",output)
-#print "   - Opt x,y,z up/down"
-#makeHisto("histo_OPTUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal_OPTUp",output)
-#makeHisto("histo_OPTDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",inputz,"histo_nominal_OPTDown",output)
-#print "   - Opt x up/down"
-#makeHisto("histo_OPTXUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
-#makeHisto("histo_OPTXDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal",inputz,"histo_nominal",output)
-#print "   - Opt y up/down"
-#makeHisto("histo_OPTYUp",inputx,"histo_nominal",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
-#makeHisto("histo_OPTYDown",inputx,"histo_nominal",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
-#print "   - Opt2 x,y,z up/down"
-#makeHisto("histo_OPT2Up",inputx,"histo_nominal_OPT2Up",inputy,"histo_nominal_OPT2Up",inputz,"histo_nominal_OPT2Up",output)
-#makeHisto("histo_OPT2Down",inputx,"histo_nominal_OPT2Down",inputy,"histo_nominal_OPT2Down",inputz,"histo_nominal_OPT2Down",output)
+print "   - nominal"
+makeHisto("histo",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal",output)
+print "   - pt (x,y) up/down"
+makeHisto("histo_PTXYUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
+makeHisto("histo_PTXYDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTDown",inputz,"histo_nominal",output)
+print "   - pt z up/down"
+makeHisto("histo_PTZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PTUp",output)
+makeHisto("histo_PTZDown",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_PTDown",output)
+print "   - pt x up/down"
+makeHisto("histo_PTXUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
+makeHisto("histo_PTXDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal",inputz,"histo_nominal",output)
+print "   - pt y up/down"
+makeHisto("histo_PTYUp",inputx,"histo_nominal",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
+makeHisto("histo_PTYDown",inputx,"histo_nominal",inputy,"histo_nominal_PTUp",inputz,"histo_nominal",output)
+print "   - Opt (x,y) up/down"
+makeHisto("histo_OPTXYUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
+makeHisto("histo_OPTXYDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",inputz,"histo_nominal",output)
+print "   - Opt z up/down"
+makeHisto("histo_OPTZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_OPTUp",output)
+makeHisto("histo_OPTZDown",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_nominal_OPTDown",output)
+print "   - pt x,y,z up/down"
+makeHisto("histo_PTUp",inputx,"histo_nominal_PTUp",inputy,"histo_nominal_PTUp",inputz,"histo_nominal_PTUp",output)
+makeHisto("histo_PTDown",inputx,"histo_nominal_PTDown",inputy,"histo_nominal_PTDown",inputz,"histo_nominal_PTDown",output)
+print "   - Opt x,y,z up/down"
+makeHisto("histo_OPTUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal_OPTUp",output)
+makeHisto("histo_OPTDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal_OPTDown",inputz,"histo_nominal_OPTDown",output)
+print "   - Opt x up/down"
+makeHisto("histo_OPTXUp",inputx,"histo_nominal_OPTUp",inputy,"histo_nominal",inputz,"histo_nominal",output)
+makeHisto("histo_OPTXDown",inputx,"histo_nominal_OPTDown",inputy,"histo_nominal",inputz,"histo_nominal",output)
+print "   - Opt y up/down"
+makeHisto("histo_OPTYUp",inputx,"histo_nominal",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
+makeHisto("histo_OPTYDown",inputx,"histo_nominal",inputy,"histo_nominal_OPTUp",inputz,"histo_nominal",output)
+print "   - Opt2 x,y,z up/down"
+makeHisto("histo_OPT2Up",inputx,"histo_nominal_OPT2Up",inputy,"histo_nominal_OPT2Up",inputz,"histo_nominal_OPT2Up",output)
+makeHisto("histo_OPT2Down",inputx,"histo_nominal_OPT2Down",inputy,"histo_nominal_OPT2Down",inputz,"histo_nominal_OPT2Down",output)
 
 #print "   - herwig z"
 #makeHisto("histo_altshapeZUp",inputx,"histo_nominal",inputy,"histo_nominal",inputz,"histo_altshapeUp",output)
