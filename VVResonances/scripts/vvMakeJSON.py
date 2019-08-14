@@ -7,15 +7,10 @@ ROOT.gROOT.SetBatch(True)
 
 def returnString(func,ftype):
     if func.GetName().find("corr")!=-1:
-        #st ="("+str(pow(func.GetParameter(0),2)) +" + " + str(pow(func.GetParameter(1),2))+"*MJ1*MJ2 + 2*"+str(func.GetParameter(0)*func.GetParameter(1))+ "*(MJ1+MJ2))"
-        #st = "("+str(func.GetParameter(0))+" + "+str(func.GetParameter(1))+"*(MJ1+MJ2)/2.)"
         st = "("+str(func.GetParameter(0))+" + "+str(func.GetParameter(1))+"*MJ1 + "+str(func.GetParameter(2))+"*MJ2  + ("+str(func.GetParameter(3))+")*MJ1*MJ2)"
         if func.GetName().find("sigma")!=-1:
             st = "("+str(func.GetParameter(0))+" + "+str(func.GetParameter(1))+"*MJ1 + "+str(func.GetParameter(2))+"*MJ2 )"
         return st
-    elif func.GetName().find("gorr")!=-1:
-         st = "("+str(func.GetParameter(0))+" + "+str(func.GetParameter(1))+"*(MJ1+MJ2)/2.)"
-         return st
     else:
         if ftype.find("pol")!=-1:
             st='(0'
