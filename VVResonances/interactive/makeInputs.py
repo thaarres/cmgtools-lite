@@ -211,7 +211,6 @@ fixParsSigMVV={"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"MEAN:pol1,SI
 ,"WprimeWZ":{"fixPars":"N1:7,N2:4","pol": "MEAN:pol1,SIGMA:pol3,N1:pol0,ALPHA1:pol7,N2:pol0,ALPHA2:pol5"}}
 
 
-fixParsSigMVVtest = {"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"corr_mean_M4500.0:pol1"}}
 
 if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
     print "run signal"
@@ -234,29 +233,16 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
                 f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l2',fixParsSig[signal_inuse])
     if options.run.find("all")!=-1 or options.run.find("mvv")!=-1:
         print "mjj fit for signal "
-        f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass <= 150 && jj_l1_softDrop_mass > 105 && jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass > 65 ")#,cuts["VV_HPLP"])
-        ###print "opened this function"
-        f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 150 && jj_l2_softDrop_mass > 105 && jj_l1_softDrop_mass <= 105 && jj_l1_softDrop_mass > 65")
+        if signal_inuse.find("H")!=-1:
+            f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass <= 150 && jj_l1_softDrop_mass > 105 && jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass > 65 ")
+            f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 150 && jj_l2_softDrop_mass > 105 && jj_l1_softDrop_mass <= 105 && jj_l1_softDrop_mass > 65")
+        else:
+            f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])
         
-        #f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass >= 65 && jj_l1_softDrop_mass <= 105 && jj_l2_softDrop_mass > 105 && jj_l2_softDrop_mass < 150")#,cuts["VV_HPLP"])
-        ####print "opened this function"
-        #f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass >= 65 && jj_l1_softDrop_mass > 105 && jj_l1_softDrop_mass <= 150")
-        
-        #f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])#,cuts["VV_HPLP"])
-        #f.makeNormalizations("ZprimeZH","JJ_M1200_"+str(period),"ZprimeToZhToZhadhbb_narrow_1200",0,cuts['nonres'],"sig")
-        #f.makeNormalizations("ZprimeZH","JJ_M3000"+str(period),"ZprimeToZhToZhadhbb_narrow_3000",0,cuts['nonres'],"sig")
-        #f.makeNormalizations("ZprimeZH","JJ_M1400"+str(period),"ZprimeToZhToZhadhbb_narrow_1400",0,cuts['nonres'],"sig")
-        f.makeNormalizations("ZprimeZH","JJ_M4500"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['VH_HPHP'],"sig")
-        
-        print "opened this function"
                 
     if options.run.find("all")!=-1 or options.run.find("norm")!=-1:
         print "fit signal norm "
         f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF,'VH_all':HPSF*HPSF+HPSF*LPSF})
-    
-        #f.makeNormalizations("ZprimeZH","JJ_gen"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
-        #f.makeNormalizations("WprimeWZ","JJ_"+str(period),"WprimeToWZToWhadZhad_narrow_4500",0,cuts['nonres'],"sig")
-        #f.makeNormalizations("ZprimeZH","JJ_M4500"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['VH_HPHP'],"sig")
 
 if options.run.find("all")!=-1 or options.run.find("detector")!=-1:
     print "make Detector response"
