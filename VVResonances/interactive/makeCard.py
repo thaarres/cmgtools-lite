@@ -13,7 +13,7 @@ lumi = {'2016':35900,'2017':41367}
 lumi_unc = {'2016':1.025,'2017':1.023}
 
 scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
-scales = {"2017" :[1.,1.], "2016":[1.,1.]}
+scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
 
 vtag_unc = {'HPHP':{},'HPLP':{},'LPLP':{}}
 vtag_unc['HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
@@ -79,15 +79,14 @@ for sig in signals:
        card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,dataset+"/JJ_%s_%s_VV_%s_yield.json"%(sig,dataset,p),1,'CMS_tau21_PtDependence',vtag_pt_dependence[p],1.0)             
        card.product3D("%s"%sig,"%s_Wqq1"%sig,"%s_Wqq2"%sig,"%s_MVV"%sig)
       elif sig.find("H")!=-1:
-    # only for test purposes put VH_all only as signal category!!!!!
        card.addMVVSignalParametricShape("%s_MVV_c1"%sig,"MJJ",dataset+"/JJ_j1%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0})
-       card.addMJJSignalParametricShapeHiggs("%s_Wqq1_c1"%sig,"MJ1" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,p),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})
+       card.addMJJSignalParametricShapeHiggs("%s_Wqq1_c1"%sig,"MJ1" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,p),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scalesHiggs[dataset])
        card.addMJJSignalParametricShapeNOEXP("%s_Wqq2_c1"%sig,"MJ2" ,dataset+"/JJ_Vjet_%s_%s_MJrandom_%s.json"%(sig,dataset,p),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
        card.conditionalProduct2("%s_c1"%sig,"%s_Wqq1_c1"%sig,"%s_Wqq2_c1"%sig,"%s_MVV_c1"%sig,"{MJ1,MJ2}")
        
        card.addMVVSignalParametricShape("%s_MVV_c2"%sig,"MJJ",dataset+"/JJ_j2%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0})
        card.addMJJSignalParametricShapeNOEXP("%s_Wqq1_c2"%sig,"MJ1" ,dataset+"/JJ_Vjet_%s_%s_MJrandom_%s.json"%(sig,dataset,p),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scales[dataset])
-       card.addMJJSignalParametricShapeHiggs("%s_Wqq2_c2"%sig,"MJ2" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,p),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})
+       card.addMJJSignalParametricShapeHiggs("%s_Wqq2_c2"%sig,"MJ2" ,dataset+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,p),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},scalesHiggs[dataset])
        card.conditionalProduct2("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig,"{MJ1,MJ2}")
        
        card.sum("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")

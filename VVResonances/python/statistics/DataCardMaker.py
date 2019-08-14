@@ -64,9 +64,8 @@ class DataCardMaker:
         N2Var="_".join(["N2",name,self.tag])
         N1Var="_".join(["N1",name,self.tag])
         if name.find("H")!=-1:
-            #fix the uncertainties here!!!!
-            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"*(1+"+scaleStr+")',{MH,MJ1,MJ2})") 
-            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*"+info['corr_mean']+"',{MH,MJ1,MJ2})") 
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+resolutionSysts+")")
+            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*"+info['corr_mean']+"*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+scaleSysts+")")
             
             self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
             self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
