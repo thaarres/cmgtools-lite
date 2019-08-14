@@ -345,5 +345,5 @@ def doAll():
         c1.SaveAs(path+"signalShapes_%s_All.root" %(options.var))
       
 if __name__ == '__main__':
-    #doSingle()
+    doSingle()
     doAll()
