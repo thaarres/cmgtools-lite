@@ -148,7 +148,10 @@ for filename in os.listdir(args[0]):
 N=0
 allgraphs = {}
 for mass in samples.keys():
-    h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[85,105,145]),2,array("f",[85,105,145]))
+    if samples[mass].find("WH")!=-1:
+        h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[65,105,145]),2,array("f",[65,105,145]))
+    else:
+        h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[85,105,145]),2,array("f",[85,105,145]))
     allgraphs[mass] = h
 allgraphs_sigma = {}
 for mass in samples.keys():
@@ -156,7 +159,10 @@ for mass in samples.keys():
     allgraphs_sigma[mass] = h
 
 graph_sum_sigma = ROOT.TH2F("corr_sigma","corr_sigma",2,array("f",[55,105,215]),2,array("f",[55,105,215]))
-graph_sum_mean  = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[85,105,145]),2,array("f",[85,105,145]))
+if options.sample.find("WH")!=-1:
+    graph_sum_mean  = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[65,105,145]),2,array("f",[65,105,145]))
+else:
+    graph_sum_mean  = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[85,105,145]),2,array("f",[85,105,145]))
 
 for mass in sorted(samples.keys()):
     print 'fitting',str(mass) 
