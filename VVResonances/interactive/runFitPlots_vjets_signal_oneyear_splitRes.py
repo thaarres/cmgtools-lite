@@ -339,7 +339,9 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
         errors[0].SetLineWidth(0)
         errors[0].SetMarkerSize(0)
     
-    scaling = 100.
+    
+    #change this scaling in case you don't just want to plot signal! has to match number of generated signal events
+    scaling = 500.
     eff = 0.1
     if purity =="HPHP":
         scaling = 5
@@ -347,17 +349,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     
     if hsig:
       if hsig.Integral()!=0.:   
-        #hsig.Scale(1/hsig.Integral())
-        #hsig.Scale(histos[2].Integral()*0.4)
-        #hsig.Scale(scaling/hsig.Integral()*0.013146*77300.*eff)
-        print "signal integral "+str( hsig.Integral())
-        #hsig.Scale(scaling/0.270828488383)
-        #hsig.Scale(scaling/0.140811334131)
-        #hsig.Scale(scaling/0.140407936208)
         hsig.Scale(scaling/normsig)
-        #hsig.Scale(scaling/1.12624917194)
-        #hsig.Scale(scaling/7.8149570876e-09)
-        #hsig.Scale(scaling/1.00314421757)
       hsig.SetFillColor(ROOT.kGreen-6)
       hsig.SetLineColor(ROOT.kBlack)
       hsig.SetLineStyle(1)

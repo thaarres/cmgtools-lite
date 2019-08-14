@@ -205,8 +205,8 @@ fixParsSig={"ZprimeZH":{ "VV_HPLP": {"fixPars":"mean:91.5,n:1.83,n2:4.22,alphaH:
 
 
 
-fixParsSigMVV={"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol3,ALPHA2:pol0,corr_mean:pol1,corr_sigma:pol1,corr_mean_M4500.0:pol1,corr_sigma_M4500.0:pol1,corr_mean_M2000.0:pol1,corr_sigma_M2000.0:pol1,gorr_mean_M4500.0:pol1,gorr_sigma_M4500.0:pol1"},
-"ZprimeZHHjet":{"fixPars":"N1:100.,ALPHA2:1.18", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol5,ALPHA2:pol0,corr_mean_M4500.0:pol1,corr_sigma_M4500.0:pol1,corr_n_M4500.0:pol1,corr_alpha_M4500.0:pol1,corr_n2_M4500.0:pol1,corr_alpha2_M4500.0:pol1"},
+fixParsSigMVV={"ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol3,ALPHA2:pol0,corr_mean:pol1,corr_sigma:pol1"},
+"ZprimeZHHjet":{"fixPars":"N1:100.,ALPHA2:1.18", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol5,ALPHA2:pol0"},
 "ZprimeZHVjet":{"fixPars":"N1:123.1,ALPHA1:0.5,N2:0.6", "pol":"MEAN:pol1,SIGMA:pol1,N1:pol0,ALPHA1:pol5,N2:pol3,ALPHA2:pol4,corr_mean_M4500.0:pol1,corr_sigma_M4500.0:pol1,corr_n_M4500.0:pol1,corr_alpha_M4500.0:pol1,corr_n2_M4500.0:pol1,corr_alpha2_M4500.0:pol1"}               
 ,"WprimeWZ":{"fixPars":"N1:7,N2:4","pol": "MEAN:pol1,SIGMA:pol3,N1:pol0,ALPHA1:pol7,N2:pol0,ALPHA2:pol5"}}
 
@@ -246,7 +246,7 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
         #f.makeNormalizations("ZprimeZH","JJ_M1200_"+str(period),"ZprimeToZhToZhadhbb_narrow_1200",0,cuts['nonres'],"sig")
         #f.makeNormalizations("ZprimeZH","JJ_M3000"+str(period),"ZprimeToZhToZhadhbb_narrow_3000",0,cuts['nonres'],"sig")
         #f.makeNormalizations("ZprimeZH","JJ_M1400"+str(period),"ZprimeToZhToZhadhbb_narrow_1400",0,cuts['nonres'],"sig")
-        f.makeNormalizations("ZprimeZH","JJ_M4500"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
+        f.makeNormalizations("ZprimeZH","JJ_M4500"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['VH_HPHP'],"sig")
         
         print "opened this function"
                 
@@ -254,9 +254,9 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
         print "fit signal norm "
         f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF,'VH_all':HPSF*HPSF+HPSF*LPSF})
     
-        f.makeNormalizations("ZprimeZH","JJ_gen"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
+        #f.makeNormalizations("ZprimeZH","JJ_gen"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['nonres'],"sig")
         #f.makeNormalizations("WprimeWZ","JJ_"+str(period),"WprimeToWZToWhadZhad_narrow_4500",0,cuts['nonres'],"sig")
-
+        #f.makeNormalizations("ZprimeZH","JJ_M4500"+str(period),"ZprimeToZhToZhadhbb_narrow_4500",0,cuts['VH_HPHP'],"sig")
 
 if options.run.find("all")!=-1 or options.run.find("detector")!=-1:
     print "make Detector response"

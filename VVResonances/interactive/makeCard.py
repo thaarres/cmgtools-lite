@@ -174,7 +174,7 @@ for sig in signals:
         card.importBinnedData(dataset+"/JJ_"+p+".root","data",["MJ1","MJ2","MJJ"]) 
       if pseudodata=="ZprimeZH":
           #card.importBinnedData(dataset+"/JJ_ZprimeZH_VH_all_M4500.root","data_obs",["MJ1","MJ2","MJJ"])
-          card.importBinnedData(dataset+"/JJ_ZprimeZH_VH_all_M"+outlabel.split("_M")[1]+".root","data_obs",["MJ1","MJ2","MJJ"])
+          card.importBinnedData(dataset+"/JJ_ZprimeZH_VH_HPHP_M"+outlabel.split("_M")[1]+".root","data_obs",["MJ1","MJ2","MJJ"])
       if pseudodata=="WprimeWZ":
           card.importBinnedData(dataset+"/JJ_WprimeWZ_VV_HPLP_M4500.root","data_obs",["MJ1","MJ2","MJJ"])
       
