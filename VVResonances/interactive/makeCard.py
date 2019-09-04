@@ -6,12 +6,12 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 sf_qcd = 1.0
-pseudodata = "ZprimeZH"
-outlabel = "sigonly_ZprimeZH_M2000"
+pseudodata = ""#"ZprimeZH"
+outlabel = ""#"sigonly_ZprimeZH_M2000"
 
 datasets=['2016']#,'2017']
 
-resultsDir = {'2016':'/portal/ekpbms2/home/dschaefer/CMGToolsForStat10X/CMSSW_10_2_10/src/CMGTools/VVResonances/interactive/results_2016','2017':'results_2017'}
+resultsDir = {'2016':'results_2016','2017':'results_2017'}
 
 lumi = {'2016':35900,'2017':41367}
 lumi_unc = {'2016':1.025,'2017':1.023}
