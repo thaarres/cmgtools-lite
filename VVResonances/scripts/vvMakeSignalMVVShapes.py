@@ -118,7 +118,7 @@ samples={}
 graphs={'MEAN':ROOT.TGraphErrors(),'SIGMA':ROOT.TGraphErrors(),'ALPHA1':ROOT.TGraphErrors(),'N1':ROOT.TGraphErrors(),'ALPHA2':ROOT.TGraphErrors(),'N2':ROOT.TGraphErrors()}
 
 testcorr= False
-if options.sample.find("ZH")!=-1:
+if options.sample.find("ZH")!=-1 or options.sample.find("WZ")!=-1:
     testcorr = True
 
 for filename in os.listdir(args[0]):
@@ -147,22 +147,45 @@ for filename in os.listdir(args[0]):
 #Now we have the samples: Sort the masses and run the fits
 N=0
 allgraphs = {}
-for mass in samples.keys():
-    if samples[mass].find("WH")!=-1:
-        h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[65,105,145]),2,array("f",[65,105,145]))
-    else:
-        h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[85,105,145]),2,array("f",[85,105,145]))
-    allgraphs[mass] = h
-allgraphs_sigma = {}
-for mass in samples.keys():
-    h = ROOT.TH2F("corr_sigma_M"+str(mass),"corr_sigma_M"+str(mass),2,array("f",[55,105,215]),2,array("f",[55,105,215]))
-    allgraphs_sigma[mass] = h
 
-graph_sum_sigma = ROOT.TH2F("corr_sigma","corr_sigma",2,array("f",[55,105,215]),2,array("f",[55,105,215]))
-if options.sample.find("WH")!=-1:
-    graph_sum_mean  = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[65,105,145]),2,array("f",[65,105,145]))
-else:
-    graph_sum_mean  = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[85,105,145]),2,array("f",[85,105,145]))
+if options.sample.find("ZH")!=-1 or options.sample.find("WZ")!=-1:
+    for mass in samples.keys():
+        if samples[mass].find("WH")!=-1:
+            h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[65,105,145]),2,array("f",[65,105,145]))
+        if samples[mass].find("ZH")!=-1:
+            h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[85,105,145]),2,array("f",[85,105,145]))
+        if samples[mass].find("WZ")!=-1:
+            h = ROOT.TH2F("corr_mean_M"+str(mass),"corr_mean_M"+str(mass),2,array("f",[76,86,94]),2,array("f",[76,86,94]))
+        allgraphs[mass] = h
+    allgraphs_sigma = {}
+    for mass in samples.keys():
+        h = ROOT.TH2F("corr_sigma_M"+str(mass),"corr_sigma_M"+str(mass),2,array("f",[55,105,215]),2,array("f",[55,105,215]))
+        if samples[mass].find("WZ")!=-1:
+             h = ROOT.TH2F("corr_sigma_M"+str(mass),"corr_sigma_M"+str(mass),2,array("f",[55,85,215]),2,array("f",[55,85,215]))
+        allgraphs_sigma[mass] = h
+
+    graph_sum_sigma = ROOT.TH2F("corr_sigma","corr_sigma",2,array("f",[55,105,215]),2,array("f",[55,105,215]))
+    if samples[mass].find("WZ")!=-1:
+        graph_sum_sigma = ROOT.TH2F("corr_sigma","corr_sigma",2,array("f",[55,85,215]),2,array("f",[55,85,215]))
+    if options.sample.find("WH")!=-1:
+        graph_sum_mean  = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[65,105,145]),2,array("f",[65,105,145]))
+    if samples[mass].find("ZH")!=-1:
+        graph_sum_mean = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[85,105,145]),2,array("f",[85,105,145]))
+    if samples[mass].find("WZ")!=-1:
+        graph_sum_mean = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[76,86,94]),2,array("f",[76,86,94]))
+    minmjet = 55
+    maxmjet = 215 
+    binsmjet = 80
+    bins_all = [[5,25],[25,50]]
+    binmidpoint = 25
+    if options.sample.find("WH")!=-1:
+        bins_all = [[5,15],[15,50]]
+        binmidpoint = 15
+    if options.sample.find("WZ")!=-1:
+        bins_all = [[5,15],[15,25]]
+        binmidpoint = 15
+
+
 
 for mass in sorted(samples.keys()):
     print 'fitting',str(mass) 
@@ -184,17 +207,18 @@ for mass in sorted(samples.keys()):
     fitter.importBinnedData(histo,['MVV'],'data')
     ps = []
     if testcorr==True:
-        histos2D = plotter.drawTH2("jj_LV_mass:jj_l2_softDrop_mass",options.cut.replace(options.addcut,"1"),"1",80,55,215,50,1126,5000)
+        histos2D = plotter.drawTH2("jj_LV_mass:jj_l2_softDrop_mass",options.cut.replace(options.addcut,"1"),"1",binsmjet,minmjet,maxmjet,100,options.min,options.max)
         proj = histos2D.ProjectionX("p")
       
-        bins_all = [[5,25],[25,50]]
-        histos3D = plotter.drawTH3("jj_LV_mass:jj_l2_softDrop_mass:jj_l1_softDrop_mass",options.cut.replace(options.addcut,"1")+extra_extra_cut,"1",80,55,215,80,55,215,50,1126,5000)
+        
+        histos3D = plotter.drawTH3("jj_LV_mass:jj_l2_softDrop_mass:jj_l1_softDrop_mass",options.cut.replace(options.addcut,"1")+extra_extra_cut,"1",binsmjet,minmjet,maxmjet,binsmjet,minmjet,maxmjet,100,options.min,options.max)
        
-        hall = histos3D.ProjectionZ("all",0,25,25,80)
+        hall = histos3D.ProjectionZ("all",0,binmidpoint,binmidpoint,binsmjet)
         par = dodCBFits(hall,mass,"all","1")
         mean = par["MEAN"] 
         sigma = par["SIGMA"] 
-        
+        print " mean " +str(mean)
+        n=0
         for bins in bins_all:
           for bins2 in bins_all:
             ps .append( histos3D.ProjectionZ("p2"+str(n+1),bins[0],bins[1],bins2[0],bins2[1]))
@@ -202,13 +226,17 @@ for mass in sorted(samples.keys()):
             par = dodCBFits(ps[-1],mass,str(n+1),"1")
             b1 = proj.GetBinCenter(bins[0])+ (proj.GetBinCenter(bins[1])-proj.GetBinCenter(bins[0]))/2. 
             b2 = proj.GetBinCenter(bins2[0])+ (proj.GetBinCenter(bins2[1])-proj.GetBinCenter(bins2[0]))/2.
-            if b1 <105: b1 = 90
-            if b2 < 105: b2 = 90
+            if b1 < 105 and b1 > 85: b1 = 90
+            if b2 < 105 and b2 > 85: b2 = 90
+            if b1 < 85 and b1 > 65: b1 = 80
+            if b2 < 85 and b2 > 65: b2 = 80
             if b1 > 105: b1 = 120
             if b2 > 105: b2 = 120
+            print "mean ratio "+str(par["MEAN"])+" / "+str(mean)
             
             allgraphs[mass].Fill(b1 ,b2 , par['MEAN']/mean)
             allgraphs_sigma[mass].Fill(b1 ,b2 , par['SIGMA']/sigma)
+            n+=1
        
    
     roobins = ROOT.RooBinning(len(binning)-1,array("d",binning))
@@ -253,6 +281,7 @@ if testcorr==True:
     graph_sum_mean .Scale(1/float(N))
     graph_sum_sigma.Write()
     graph_sum_mean .Write()
+    print graph_sum_mean.Integral()
 
 F.Close()
 
