@@ -9,9 +9,9 @@ from  CMGTools.VVResonances.plotting.CMS_lumi import *
 
 # ROOT.gROOT.SetBatch(True)
 
-def getLegend(x1=0.70010112,y1=0.693362,x2=0.90202143,y2=0.829833):
+def getLegend(x1=0.5809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
   legend = ROOT.TLegend(x1,y1,x2,y2)
-  legend.SetTextSize(0.032)
+  legend.SetTextSize(0.04)
   legend.SetLineColor(0)
   legend.SetShadowColor(0)
   legend.SetLineStyle(1)
@@ -19,6 +19,7 @@ def getLegend(x1=0.70010112,y1=0.693362,x2=0.90202143,y2=0.829833):
   legend.SetFillColor(0)
   legend.SetFillStyle(0)
   legend.SetMargin(0.35)
+  legend.SetTextFont(42)
   return legend
   
 def getCanvasPaper(cname):
@@ -58,6 +59,7 @@ def getCanvasPaper(cname):
  
  
  return canvas, legend, pt
+
 	
 def getMVVPdf(j,MH,postfix=""):
 
@@ -93,40 +95,95 @@ def getMVVPdf(j,MH,postfix=""):
         function = ROOT.RooDoubleCB(pdfName, pdfName,var, mean,sigma,alpha1,n1,alpha2,n2)
         getattr(w,'import')(function,ROOT.RooFit.Rename(pdfName))
 
-def getMJPdf(j,MH,postfix=""):
- 
-        var = w.var(options.var)
-	
-        pdfName 	= "signal_%d%s" %(MH,postfix)
-        Jmean 		= eval(j['mean'])
-        Jsigma		= eval(j['sigma'])
-        Jalpha 		= eval(j['alpha'])
-        Jalpha2 	= eval(j['alpha2'])
-        Jn 		= eval(j['n'])
-        Jn2 		= eval(j['n2'])
-
-        mean        = ROOT.RooRealVar("mean_%d%s"%(MH,postfix),"mean_%d%s"%(MH,postfix),Jmean)
-        sigma       = ROOT.RooRealVar("sigma_%d%s"%(MH,postfix),"sigma_%d%s"%(MH,postfix),Jsigma)
-        alpha       = ROOT.RooRealVar("alpha_%d%s"%(MH,postfix),"alpha_%d%s"%(MH,postfix),Jalpha)
-        alpha2      = ROOT.RooRealVar("alpha2_%d%s"%(MH,postfix),"alpha2_%d%s"%(MH,postfix),Jalpha2)
-        sign        = ROOT.RooRealVar("sign_%d%s"%(MH,postfix),"sign_%d%s"%(MH,postfix),Jn)
-        sign2        = ROOT.RooRealVar("sign2_%d%s"%(MH,postfix),"sign2_%d%s"%(MH,postfix),Jn2)        
-
-        alpha.setConstant(ROOT.kTRUE)
-        sign.setConstant(ROOT.kTRUE)
-        alpha2.setConstant(ROOT.kTRUE)
-        sign2.setConstant(ROOT.kTRUE)
-        mean.setConstant(ROOT.kTRUE)
-        sigma.setConstant(ROOT.kTRUE)
+def getMJPdf(j,MH,postfix="",jH=None):
         
-	function = ROOT.RooDoubleCB(pdfName, pdfName, var, mean, sigma, alpha, sign,  alpha2, sign2)  
-	getattr(w,'import')(function,ROOT.RooFit.Rename(pdfName))
+        var = w.var(options.var)
+	if postfix.find("H")==-1:
+            pdfName 	= "signal_%d%s" %(MH,postfix)
+            Jmean 		= eval(j['mean'])
+            Jsigma		= eval(j['sigma'])
+            Jalpha 		= eval(j['alpha'])
+            Jalpha2 	= eval(j['alpha2'])
+            Jn 		= eval(j['n'])
+            Jn2 		= eval(j['n2'])
+
+            mean        = ROOT.RooRealVar("mean_%d%s"%(MH,postfix),"mean_%d%s"%(MH,postfix),Jmean)
+            sigma       = ROOT.RooRealVar("sigma_%d%s"%(MH,postfix),"sigma_%d%s"%(MH,postfix),Jsigma)
+            alpha       = ROOT.RooRealVar("alpha_%d%s"%(MH,postfix),"alpha_%d%s"%(MH,postfix),Jalpha)
+            alpha2      = ROOT.RooRealVar("alpha2_%d%s"%(MH,postfix),"alpha2_%d%s"%(MH,postfix),Jalpha2)
+            sign        = ROOT.RooRealVar("sign_%d%s"%(MH,postfix),"sign_%d%s"%(MH,postfix),Jn)
+            sign2        = ROOT.RooRealVar("sign2_%d%s"%(MH,postfix),"sign2_%d%s"%(MH,postfix),Jn2)        
+
+            alpha.setConstant(ROOT.kTRUE)
+            sign.setConstant(ROOT.kTRUE)
+            alpha2.setConstant(ROOT.kTRUE)
+            sign2.setConstant(ROOT.kTRUE)
+            mean.setConstant(ROOT.kTRUE)
+            sigma.setConstant(ROOT.kTRUE)
+            
+            function = ROOT.RooDoubleCB(pdfName, pdfName, var, mean, sigma, alpha, sign,  alpha2, sign2)  
+            getattr(w,'import')(function,ROOT.RooFit.Rename(pdfName))
+        else:
+            if postfix =="H": postfix = ""
+            pdfName 	= "signal_%d%s" %(MH,postfix)
+            Jmean 		= eval(j['mean'])
+            Jsigma		= eval(j['sigma'])
+            Jalpha 		= eval(j['alpha'])
+            Jalpha2 	= eval(j['alpha2'])
+            Jn 		= eval(j['n'])
+            Jn2 		= eval(j['n2'])
+            
+            JmeanH 		= eval(jH['meanH'])
+            JsigmaH		= eval(jH['sigmaH'])
+            JalphaH 		= eval(jH['alphaH'])
+            Jalpha2H 	= eval(jH['alpha2H'])
+            JnH 		= eval(jH['nH'])
+            Jn2H 		= eval(jH['n2H'])
+            
+            
+
+            mean        = ROOT.RooRealVar("mean_%d%s"%(MH,postfix),"mean_%d%s"%(MH,postfix),Jmean)
+            sigma       = ROOT.RooRealVar("sigma_%d%s"%(MH,postfix),"sigma_%d%s"%(MH,postfix),Jsigma)
+            alpha       = ROOT.RooRealVar("alpha_%d%s"%(MH,postfix),"alpha_%d%s"%(MH,postfix),Jalpha)
+            alpha2      = ROOT.RooRealVar("alpha2_%d%s"%(MH,postfix),"alpha2_%d%s"%(MH,postfix),Jalpha2)
+            sign        = ROOT.RooRealVar("sign_%d%s"%(MH,postfix),"sign_%d%s"%(MH,postfix),Jn)
+            sign2        = ROOT.RooRealVar("sign2_%d%s"%(MH,postfix),"sign2_%d%s"%(MH,postfix),Jn2)
+            
+            meanH        = ROOT.RooRealVar("Hmean_%d%s"%(MH,postfix),"Hmean_%d%s"%(MH,postfix),JmeanH)
+            sigmaH       = ROOT.RooRealVar("Hsigma_%d%s"%(MH,postfix),"Hsigma_%d%s"%(MH,postfix),JsigmaH)
+            alphaH       = ROOT.RooRealVar("Halpha_%d%s"%(MH,postfix),"Halpha_%d%s"%(MH,postfix),JalphaH)
+            alpha2H      = ROOT.RooRealVar("Halpha2_%d%s"%(MH,postfix),"Halpha2_%d%s"%(MH,postfix),Jalpha2H)
+            signH        = ROOT.RooRealVar("Hsign_%d%s"%(MH,postfix),"Hsign_%d%s"%(MH,postfix),JnH)
+            sign2H        = ROOT.RooRealVar("Hsign2_%d%s"%(MH,postfix),"Hsign2_%d%s"%(MH,postfix),Jn2H)
+            
+            ratio        = ROOT.RooRealVar("ratio_%d%s"%(MH,postfix),"ratio_%d%s"%(MH,postfix),0.5)
+
+            alpha.setConstant(ROOT.kTRUE)
+            sign.setConstant(ROOT.kTRUE)
+            alpha2.setConstant(ROOT.kTRUE)
+            sign2.setConstant(ROOT.kTRUE)
+            mean.setConstant(ROOT.kTRUE)
+            sigma.setConstant(ROOT.kTRUE)
+            
+            alphaH.setConstant(ROOT.kTRUE)
+            signH.setConstant(ROOT.kTRUE)
+            alpha2H.setConstant(ROOT.kTRUE)
+            sign2H.setConstant(ROOT.kTRUE)
+            meanH.setConstant(ROOT.kTRUE)
+            sigmaH.setConstant(ROOT.kTRUE)
+            
+            function1 = ROOT.RooDoubleCB(pdfName+"1", pdfName+"1", var, mean, sigma, alpha, sign,  alpha2, sign2) 
+            function2 = ROOT.RooDoubleCB(pdfName+"2", pdfName+"2", var, meanH, sigmaH, alphaH, signH,  alpha2H, sign2H)
+            function =  ROOT.RooAddPdf(pdfName,pdfName,function1,function2,ratio)
+            getattr(w,'import')(function,ROOT.RooFit.Rename(pdfName))
+            
 		
 parser = optparse.OptionParser()
 parser.add_option("-f","--file",dest="file",default='JJ_BulkGWW_2016_MVV.json',help="input file (JJ_{sig}_2016_MVV.json,JJ_{sig}_2016_MJl1_VV_HPLP.json,JJ_{sig}_2016_MJl2_VV_HPLP.json)")
 parser.add_option("-v","--var",dest="var",help="mVV or mJ",default='mVV')
 parser.add_option("-l","--leg",dest="leg",help="mVV or mJ",default='l1')
 parser.add_option("-o","--outdir",dest="outdir",help="output directory",default='./')
+parser.add_option("-p","--prelim",dest="prelim",help="with label preliminary or not",default=0)
 (options,args) = parser.parse_args()
 
 path = options.outdir
@@ -143,21 +200,34 @@ w=ROOT.RooWorkspace("w","w")
 w.factory(options.var+varBins[options.var])
 w.var(options.var).SetTitle(varName[options.var])
 colors= []
-colors.append(["#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]*3)   
-colors.append(["#e5f5e0","#c7e9c0","#a1d99b","#74c476","#41ab5d","#238b45","#006d2c","#00441b"]*3)       
-colors.append(["#fee0d2","#fcbba1","#fc9272","#fb6a4a","#ef3b2c","#cb181d","#a50f15","#67000d"]*3) 
+colors.append(["#f9c677","#f9d077","#f9f577","#ffd300","#f9fe77","#f9fe64","#f9fe43","#f9fe17"]*3)  
+colors.append(["#fee0d2","#fcbba1","#fc9272","#ef3b2c","#ef3b2c","#cb181d","#a50f15","#67000d"]*3)       
+colors.append(["#e5f5e0","#c7e9c0","#a1d99b","#41ab5d","#41ab5d","#238b45","#006d2c","#00441b"]*3) 
+colors.append(["#02fefe","#02e5fe","#02d7fe","#4292c6","#02b5fe","#02a8fe","#0282fe","#0300fc",]*3)
+colors.append(["#EE82EE","#FF00FF","#D02090","#C71585","#B03060 ","#DB7093","#FFB6C1","#FFC0CB"]*3)
 def doSingle():
     with open(inFileName) as jsonFile:
       j = json.load(jsonFile)
     
-      c1 = getCanvas()
+      c1 = getCanvasPaper("c1")[0]
       c1.Draw()
       leg = ROOT.TLegend(0.8, 0.2, 0.95, 0.8)
       frame = w.var(options.var).frame()   
       
       for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
         if options.var == 'mVV': getMVVPdf(j,MH)
-        else: getMJPdf(j,MH)
+        else: 
+            if inFileName.find("H")==-1:
+                getMJPdf(j,MH)
+            if inFileName.find("Vjet")!=-1:
+                with open(inFileName.replace("Vjet","Hjet")) as jsonFileH:
+                    jH = json.load(jsonFileH)
+                getMJPdf(j,MH,"H",jH)
+            if inFileName.find("Hjet")!=-1:
+                with open(inFileName.replace("Hjet","Vjet")) as jsonFileV:
+                    jV = json.load(jsonFileV)
+                getMJPdf(jV,MH,"H",j)
+                
         w.pdf('signal_%d'%MH).plotOn(frame, ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[0][i])),ROOT.RooFit.Name(str(MH)))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
         leg.AddEntry(frame.findObject(str(MH)), "%d GeV" % MH, "L")
       frame.GetYaxis().SetTitle("A.U")
@@ -196,9 +266,9 @@ def doSingle():
       c1.SaveAs(path+"signalShapes%s_%s.root" %(options.var, inFileName.rsplit(".", 1)[0]))
   
 def doAll():
-    if options.var == 'mJ':  jsons = [path+"JJ_BulkGZZ_MJl1_HPHP.json",path+"JJ_WprimeWZ_MJl1_HPHP.json",path+"JJ_BulkGWW_MJl1_HPHP.json",path+"JJ_ZprimeWW_MJl1_HPHP.json"]
-    if options.var == 'mVV': jsons = [path+"JJ_BulkGZZ_MVV.json",path+"JJ_WprimeWZ_MVV.json",path+"JJ_BulkGWW_MVV.json",path+"JJ_ZprimeWW_MVV.json"]
-    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW"]
+    if options.var == 'mJ':  jsons = [path+"JJ_BulkGZZ_MJl1_HPHP.json",path+"JJ_WprimeWZ_MJl1_HPHP.json",path+"JJ_BulkGWW_MJl1_HPHP.json",path+"JJ_ZprimeWW_MJl1_HPHP.json","JJ_Hjet_ZprimeZH_2016_MJrandom_VH_all.json"]
+    if options.var == 'mVV': jsons = [path+"JJ_BulkGZZ_MVV.json",path+"JJ_WprimeWZ_MVV.json",path+"JJ_BulkGWW_MVV.json",path+"JJ_ZprimeWW_MVV.json","JJ_j1ZprimeZH_2016_MVV.json"]
+    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
     c1,leg,pt = getCanvasPaper("c1")
     c1.Draw()
     #leg = getLegend()
@@ -211,7 +281,18 @@ def doAll():
           j = json.load(jsonFile)
           for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
             if options.var == 'mVV': getMVVPdf(j,MH,name)
-            else: getMJPdf(j,MH,name)
+            else: 
+                if f.find("ZH")==-1:
+                    print "no H boson in sample "
+                    getMJPdf(j,MH,name)
+                if f.find("Vjet")!=-1:
+                    with open(f.replace("Vjet","Hjet")) as jsonFileH:
+                        jH = json.load(jsonFileH)
+                    getMJPdf(j,MH,name,jH)
+                if f.find("Hjet")!=-1:
+                    with open(f.replace("Hjet","Vjet")) as jsonFileV:
+                        jV = json.load(jsonFileV)
+                    getMJPdf(jV,MH,name,j)
             print i
             print ii
             print colors[ii][i]
@@ -246,10 +327,23 @@ def doAll():
     pt2.SetFillStyle(0)
     if options.var == 'mJ': pt2.AddText("HPHP category")
     pt2.Draw()
-
-    w.Print()
-    # sleep(1000)
+    if options.prelim=="1":
+        cmslabel_sim_prelim(c1,'sim',11)
+        c1.Update()
+      
+        c1.SaveAs(path+"signalShapes_%s_All_prelim.png"  %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All_prelim.pdf"  %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All_prelim.C"    %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All_prelim.root" %(options.var))
+    else:
+        cmslabel_sim(c1,'sim',11)
+        c1.Update()
+        
+        c1.SaveAs(path+"signalShapes_%s_All.png"  %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All.pdf"  %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All.C"    %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All.root" %(options.var))
       
 if __name__ == '__main__':
     doSingle()
-    #doAll()
+    doAll()

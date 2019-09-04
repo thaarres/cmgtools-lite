@@ -59,26 +59,30 @@ class DataCardMaker:
 
         SCALEVar="_".join(["MEAN",name,self.tag])
         SIGMAVar="_".join(["SIGMA",name,self.tag])
+        ALPHA1Var="_".join(["ALPHA1",name,self.tag])
+        ALPHA2Var="_".join(["ALPHA2",name,self.tag])
+        N2Var="_".join(["N2",name,self.tag])
+        N1Var="_".join(["N1",name,self.tag])
         if name.find("H")!=-1:
-            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+','.join(scaleSysts)+")")
-            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+','.join(resolutionSysts)+")") 
+            self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+resolutionSysts+")")
+            self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*"+info['corr_mean']+"*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+scaleSysts+")")
+            
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))  
         else:    
             self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
             self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
+            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))     
+                
+            
+
         
         
-
-        ALPHA1Var="_".join(["ALPHA1",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
-
-        ALPHA2Var="_".join(["ALPHA2",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
-
-        N1Var="_".join(["N1",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
-
-        N2Var="_".join(["N2",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))        
 
         pdfName="_".join([name,self.tag])
         vvMass = ROOT.RooDoubleCB(pdfName,pdfName,self.w.var(MVV),self.w.function(SCALEVar),self.w.function(SIGMAVar),self.w.function(ALPHA1Var),self.w.function(N1Var),self.w.function(ALPHA2Var),self.w.function(N2Var))
@@ -400,9 +404,9 @@ class DataCardMaker:
         
     def addMJJSignalParametricShapeHiggs(self,name,variable,jsonFile,scale ={},resolution={},scales=[1,1],varToReplace="MH"):
 
-        if self.w.var("MH") == None: self.w.factory("MH[2000]")
-	self.w.var("MH").setVal(2000.)
-        self.w.var("MH").setConstant(1)
+        #if self.w.var("MH") == None: self.w.factory("MH[2000]")
+	#self.w.var("MH").setVal(2000.)
+        #self.w.var("MH").setConstant(1)
        
         scaleStr='0'
         resolutionStr='0'
@@ -422,7 +426,7 @@ class DataCardMaker:
             resolutionSysts.append(syst)
        
         MJJ=variable            
-        if self.w.var(MJJ) == None: self.w.factory(MJJ+"[0,1000]")
+        if self.w.var(MJJ) == None: self.w.factory(MJJ+"[0,13000]")
 
         f=open(jsonFile)
         info=json.load(f)
@@ -433,7 +437,7 @@ class DataCardMaker:
         SCALEVar="_".join(["meanH",name,self.tag])
         self.w.factory("expr::{name}('({param}*{sc})*(1+{vv_syst})',MH,{vv_systs})".format(name=SCALEVar,param=info['meanH'],sc=scales[0],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace))
 
-        
+        print info['meanH']
         SIGMAVar="_".join(["sigmaH",name,self.tag])
         self.w.factory("expr::{name}('({param}*{res})*(1+{vv_syst})',MH,{vv_systs})".format(name=SIGMAVar,param=info['sigmaH'],res=scales[1],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)).replace("MH",varToReplace))
 
