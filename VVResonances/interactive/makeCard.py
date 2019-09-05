@@ -6,8 +6,8 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 sf_qcd = 1.0
-pseudodata = ""
-outlabel = ""
+pseudodata = ""#"ZprimeZH"
+outlabel = ""#"sigonly_ZprimeZH_M2000"
 
 datasets=['2016']#,'2017']
 
@@ -29,7 +29,7 @@ vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))
 purities= ['VV_HPLP']
 #purities= ['VV_HPLP','VV_HPHP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
-signals = ["BulkGVV"]
+signals = ["ZprimeZH"]
 
 Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sf_qcd,pseudodata,outlabel)
 
@@ -78,7 +78,7 @@ for sig in signals:
        histName="data_obs"
        scaleData=1.0
       if pseudodata=="WprimeWZ":
-       rootFileData = resultsDir[dataset]+"/JJ_WprimeWZ_VV_HPLP_M2000.root" 
+       rootFileData = resultsDir[dataset]+"/JJ_WprimeWZ_VV_HPLP_M4500.root" 
        histName="data_obs"    
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
@@ -117,7 +117,5 @@ for sig in signals:
   t2wcmd = "text2workspace.py %s -o %s"%(combo_card,combo_workspace)
   print t2wcmd
   os.system(t2wcmd)
-  
-  
-  
+
 
