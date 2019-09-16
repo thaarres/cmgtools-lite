@@ -43,9 +43,20 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
 #colors = [ROOT.kBlack,ROOT.kPink-1,ROOT.kAzure+1,ROOT.kAzure+1,210,210,ROOT.kMagenta,ROOT.kMagenta,ROOT.kOrange,ROOT.kOrange,ROOT.kViolet,ROOT.kViolet]
 colors = [ROOT.kGray+2,ROOT.kRed,ROOT.kBlue,ROOT.kGray+1,210,210,ROOT.kMagenta,ROOT.kMagenta,ROOT.kOrange,ROOT.kOrange,ROOT.kViolet,ROOT.kViolet]
 
-signalName = "BulkGWW"
+signalName = "ZprimeZH"
+if options.name.find("WZ")!=-1:
+    signalName="WprimeWZ"
+if options.name.find("ZprimeWW")!=-1:
+    signalName="ZprimeWW"
+if options.name.find("BulkGWW")!=-1:
+    signalName="BulkGWW"
+if options.name.find("BulkGZZ")!=-1:
+    signalName="BulkGZZ"
 period = "2016"
 if options.name.find("2017")!=-1: period = "2017"
+
+if options.label.find("sigonly")!=-1:
+    doFit=False
 
 
 def calculateChi2ForSig(hsig,pred,axis,logfile,label):
@@ -344,13 +355,14 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     #change this scaling in case you don't just want to plot signal! has to match number of generated signal events
 
 
-    scaling = 500.
+    scaling = 1000.
     eff = 0.1
     if purity.find("HPHP") != -1:
         scaling = 5
         eff = 0.02
     
     if hsig:
+      print hsig.Integral()
       if hsig.Integral()!=0.:   
         hsig.Scale(scaling/normsig)
 #        print "sig integral ",hsig.Integral()
@@ -581,6 +593,9 @@ def doZprojection(pdfs,data,norm_nonres,norm_Wres,pdf_sig,norm_sig,norm_Zres,nor
     if options.addTop: htot.Add(htot_TThad)
     htot.Add(htot_sig)
 
+    print htot_sig
+    print " event for signal " +str(htot_sig.Integral())
+    print " norm sig "+str(norm_sig[0])
     hfinals = []
     hfinals.append(htot)
     hfinals.append(htot_Wres)
@@ -1218,42 +1233,48 @@ if __name__=="__main__":
      norm1_Zres[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Zjets"].getVal()
      norm1_TThad = [0,0]
      norm1_sig = [0,0]
-     if doFit: 
-        print
-        (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_nonRes"].dump()     
+      
+     print
+     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_nonRes"].dump() 
+     if doFit:
         norm1_nonres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_nonRes"].getPropagatedError(fitresult)
         
                     
-        print
-        (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Wjets"].dump()
+     print
+     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Wjets"].dump()
+     if doFit:
         norm1_Wres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Wjets"].getPropagatedError(fitresult)
         
-        print
-        (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Zjets"].dump()
+     print
+     (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Zjets"].dump()
+     if doFit:
         norm1_Zres[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_Zjets"].getPropagatedError(fitresult)
         
         
-        if options.addTop:
-            print
-            (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_TThad"].dump()
-            norm1_TThad[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_TThad"].getVal()
+     if options.addTop:
+        print
+        (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_TThad"].dump()
+        norm1_TThad[0] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_TThad"].getVal()
+        if doFit:
             norm1_TThad[1] = (args[pdf1Name].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_TThad"].getPropagatedError(fitresult)
         
-        else:
-            norm1_TThad    = [0,0]
-            norm1_TThad[0] = 1.
-            norm1_TThad[1] = 1.
-            norm2_TThad    = [0,0]
-            norm2_TThad[0] = 1.
-            norm2_TThad[1] = 1.
+     else:
+        norm1_TThad    = [0,0]
+        norm1_TThad[0] = 1.
+        norm1_TThad[1] = 1.
+        norm2_TThad    = [0,0]
+        norm2_TThad[0] = 1.
+        norm2_TThad[1] = 1.
         
-        if options.fitSignal:
-            print
-            #(args[pdfName].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_proc_"+signalName+""].dump()
-            norm1_sig[0] = (args[pdf1Name].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_"+period+"_proc_"+signalName+""].getVal() 
+     if options.fitSignal:
+         print
+         #(args[pdfName].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_proc_"+signalName+""].dump()
+         norm1_sig[0] = (args[pdf1Name].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_"+period+"_proc_"+signalName+""].getVal() 
+         if doFit:
             norm1_sig[1] = (args[pdf1Name].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_"+period+"_proc_"+signalName+""].getPropagatedError(fitresult)
+         print "get norm sig "+str(norm1_sig[0])
             
-                    
+     if doFit:                
         print
         print "QCD normalization after fit: ",norm1_nonres[0],"+/-",norm1_nonres[1],"("+period+")"
         print "W+jets normalization after fit: ",norm1_Wres[0],"+/-",norm1_Wres[1],"("+period+")"

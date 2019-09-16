@@ -128,7 +128,7 @@ cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop
 #all categories
 #categories=['VH_HPHP','VH_HPLP','VH_LPHP','VH_LPLP','VV_HPHP','VV_HPLP']
 
-categories=['VV_HPLP'] #,'VV_HPHP']
+categories=['VV_HPLP','VV_HPHP','VH_HPHP','VH_HPLP']
 
 
 #list of signal samples --> nb, radion and vbf samples to be added

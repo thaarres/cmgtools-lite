@@ -9,9 +9,9 @@ from  CMGTools.VVResonances.plotting.CMS_lumi import *
 
 # ROOT.gROOT.SetBatch(True)
 
-def getLegend(x1=0.5809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
+def getLegend(textsize=0.20,x1=0.5809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
   legend = ROOT.TLegend(x1,y1,x2,y2)
-  legend.SetTextSize(0.04)
+  legend.SetTextSize(textsize)
   legend.SetLineColor(0)
   legend.SetShadowColor(0)
   legend.SetLineStyle(1)
@@ -25,16 +25,16 @@ def getLegend(x1=0.5809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
 def getCanvasPaper(cname):
  ROOT.gStyle.SetOptStat(0)
 
- H_ref = 600 
+ H_ref = 700 
  W_ref = 600 
  W = W_ref
  H  = H_ref
  iPeriod = 0
  # references for T, B, L, R
- T = 0.08*H_ref
- B = 0.15*H_ref 
- L = 0.15*W_ref
- R = 0.04*W_ref
+ T = 0.3*H_ref
+ B = 0.35*H_ref 
+ L = 0.10*W_ref
+ R = 0.07*W_ref
  canvas = ROOT.TCanvas(cname,cname,50,50,W,H)
  canvas.SetFillColor(0)
  canvas.SetBorderMode(0)
@@ -46,7 +46,7 @@ def getCanvasPaper(cname):
  canvas.SetBottomMargin( B/H )
  canvas.SetTickx()
  canvas.SetTicky()
- legend = getLegend()
+ #legend = getLegend()
  
  
  pt = ROOT.TPaveText(0.1746231,0.6031469,0.5251256,0.7517483,"NDC")
@@ -58,7 +58,7 @@ def getCanvasPaper(cname):
  pt.SetFillStyle(0)
  
  
- return canvas, legend, pt
+ return canvas, pt
 
 	
 def getMVVPdf(j,MH,postfix=""):
@@ -187,23 +187,23 @@ parser.add_option("-p","--prelim",dest="prelim",help="with label preliminary or 
 (options,args) = parser.parse_args()
 
 path = options.outdir
-
+path = "/portal/ekpbms2/home/dschaefer/DiBoson3D/2016/"
 postfix = "Jet 1 "
 if options.leg == "l2" !=-1: postfix = "Jet 2 "
 
 inFileName = options.file
-massPoints = [1000,1200,1400,1600,1800,2000,2500,3000,3500,4000,4500]
-massPoints = [1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800,4000,4200,4400,4600,4800,5000,5200]
-varName = {'mVV':'M_{VV} (GeV)','mJ':'%ssoftdrop mass (GeV)'%postfix}
+massPoints = [1200,1600,2000,2400,2800,3200,3600,4000,4400]#,4800,5200]
+#massPoints = [1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800,4000,4200,4400,4600,4800,5000,5200]
+varName = {'mVV':'Dijet invariant mass [GeV]','mJ':'%sJet mass [GeV]'%postfix}
 varBins = {'mVV':'[37,1000,5500]','mJ':'[80,55,215]'}
 w=ROOT.RooWorkspace("w","w")
 w.factory(options.var+varBins[options.var])
 w.var(options.var).SetTitle(varName[options.var])
 colors= []
-colors.append(["#f9c677","#f9d077","#f9f577","#ffd300","#f9fe77","#f9fe64","#f9fe43","#f9fe17"]*3)  
-colors.append(["#fee0d2","#fcbba1","#fc9272","#ef3b2c","#ef3b2c","#cb181d","#a50f15","#67000d"]*3)       
-colors.append(["#e5f5e0","#c7e9c0","#a1d99b","#41ab5d","#41ab5d","#238b45","#006d2c","#00441b"]*3) 
-colors.append(["#02fefe","#02e5fe","#02d7fe","#4292c6","#02b5fe","#02a8fe","#0282fe","#0300fc",]*3)
+colors.append(["#000080","#0000CD","#0000FF","#3D59AB","#4169E1","#4876FF","#6495ED","#1E90FF","#63B8FF","#87CEFA","#C6E2FF"]*3)   
+colors.append(["#006400","#308014","#228B22","#32CD32","#00CD00","#00EE00","#00FF00","#7CCD7C","#7CFC00","#ADFF2F","#C0FF3E"]*3)   
+colors.append(["#CD8500","#CD950C","#EE9A00","#EEAD0E","#FFA500","#FFB90F","#FFC125","#EEC900","#FFD700","#FFEC8B","#FFF68F"]*3) 
+colors.append(["#8B2500","#CD3700","#EE4000","#FF4500","#CD4F39","#EE5C42","#EE6A50","#FF7256","#FA8072","#FFA07A","#EEB4B4"]*3)
 colors.append(["#EE82EE","#FF00FF","#D02090","#C71585","#B03060 ","#DB7093","#FFB6C1","#FFC0CB"]*3)
 def doSingle():
     with open(inFileName) as jsonFile:
@@ -267,15 +267,25 @@ def doSingle():
   
 def doAll():
     if options.var == 'mJ':  jsons = [path+"JJ_BulkGZZ_MJl1_HPHP.json",path+"JJ_WprimeWZ_MJl1_HPHP.json",path+"JJ_BulkGWW_MJl1_HPHP.json",path+"JJ_ZprimeWW_MJl1_HPHP.json","JJ_Hjet_ZprimeZH_2016_MJrandom_VH_all.json"]
-    if options.var == 'mVV': jsons = [path+"JJ_BulkGZZ_MVV.json",path+"JJ_WprimeWZ_MVV.json",path+"JJ_BulkGWW_MVV.json",path+"JJ_ZprimeWW_MVV.json","JJ_j1ZprimeZH_2016_MVV.json"]
+    if options.var == 'mVV': jsons = [path+"JJ_BulkGZZ_MVV.json",path+"JJ_WprimeWZ_MVV.json",path+"JJ_BulkGWW_MVV.json",path+"JJ_ZprimeWW_MVV.json","results_2016/JJ_j1ZprimeZH_2016_MVV.json"]
     legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
-    c1,leg,pt = getCanvasPaper("c1")
+    c1,pt = getCanvasPaper("c1")
     c1.Draw()
-    #leg = getLegend()
-    frame = w.var(options.var).frame()  
-    frame.SetTitle("")
+    c1.Divide(1,5,0.0,0.0)
+    leg = []
+    frame = []  
+    #frame.SetTitle("")
     for ii,f in enumerate(jsons):
         print f
+        c1.cd(ii)
+        if ii==len(jsons)-1:
+             leg.append(getLegend(0.15))
+        else:
+            leg.append(getLegend())
+        frame.append( w.var(options.var).frame() ) 
+        if options.var=='mJ':
+            frame[-1].SetAxisRange(55,150)
+        frame[-1].SetTitle("")
         name = f.split("_")[1]
         with open(f) as jsonFile:
           j = json.load(jsonFile)
@@ -296,26 +306,47 @@ def doAll():
             print i
             print ii
             print colors[ii][i]
-            w.pdf('signal_%d%s'%(MH,name)).plotOn(frame, ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[ii][i])),ROOT.RooFit.Name(str(MH)+name))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
+            w.pdf('signal_%d%s'%(MH,name)).plotOn(frame[-1], ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[ii][i])),ROOT.RooFit.Name(str(MH)+name))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
             
     for ii,f in enumerate(jsons):
         print len(jsons)
         print ii
         print "json "+str(jsons[len(jsons)-ii-1])
-        name = jsons[len(jsons)-ii-1].split("_")[1]
-        leg.AddEntry(frame.findObject(str(1800)+name), legs[len(jsons)-ii-1], "L")
-    frame.GetYaxis().SetTitle("a.u.")
-    frame.GetYaxis().SetTitleOffset(1.3)
-    frame.GetYaxis().SetNdivisions(4,5,0)
-    frame.GetXaxis().SetNdivisions(3,5,0)
-    frame.SetMaximum(0.17)
-    frame.GetXaxis().SetTitleSize(0.055)
-    frame.GetYaxis().SetTitleSize(0.055)
-    frame.GetYaxis().SetLabelSize(0.05)
-    frame.GetXaxis().SetLabelSize(0.05)
-    if options.var == 'mVV':frame.SetMaximum(0.45)
-    frame.Draw()
-    leg.Draw("same")
+        name = jsons[ii].split("_")[1]
+        leg[ii].AddEntry(frame[ii].findObject(str(2000)+name), legs[len(jsons)-ii-1], "L")
+  
+   
+    for i in range(1,len(frame)+1):
+        c1.cd(i)
+        c1.cd(i).SetTickx()
+        c1.cd(i).SetTicky()
+      
+      
+        frame[i-1].GetYaxis().SetTitle("a. u.")
+        frame[i-1].GetYaxis().SetTitleOffset(0.25)
+        #frame[i-1].GetYaxis().SetNdivisions(-510,"M")
+        frame[i-1].GetYaxis().SetNdivisions(0,5,0,False)
+        #frame[i-1].GetYaxis().SetMaxDigits(1)
+        frame[i-1].GetXaxis().SetNdivisions(6,5,1)
+        frame[i-1].SetMaximum(0.17)
+        if options.var == 'mVV':frame[i-1].SetMaximum(0.45)
+        frame[i-1].GetXaxis().SetTitleSize(0.20)
+        frame[i-1].GetYaxis().SetTitleSize(0.20)
+        frame[i-1].GetYaxis().SetLabelSize(0.20)
+        frame[i-1].GetXaxis().SetLabelSize(0.20)
+        #frame[i-1].Draw()
+        frame[i-1].GetXaxis().SetTickLength(0.1)
+        frame[-1].GetYaxis().SetLabelSize(0.14) 
+        frame[-1].GetXaxis().SetLabelSize(0.14)
+        frame[-1].GetXaxis().SetTitleSize(0.14)
+        frame[-1].GetYaxis().SetTitleSize(0.14)
+        frame[-1].GetYaxis().SetTitleOffset(0.35)
+        frame[-1].GetXaxis().SetTitleOffset(1.05)
+        frame[-1].GetXaxis().SetLabelOffset(0.05)
+        frame[-1].GetXaxis().SetTickLength(0.08)
+        frame[i-1].Draw()
+        leg[i-1].Draw("same")
+    
  
     
     pt2 = ROOT.TPaveText(0.16,0.62,0.63,0.76,"NDC")
@@ -345,5 +376,5 @@ def doAll():
         c1.SaveAs(path+"signalShapes_%s_All.root" %(options.var))
       
 if __name__ == '__main__':
-    doSingle()
+    #doSingle()
     doAll()

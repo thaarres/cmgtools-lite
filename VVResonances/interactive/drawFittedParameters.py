@@ -797,11 +797,11 @@ def compSignalMVV():
         
 if __name__ == '__main__':
   
-  # doSignalEff()
+  doSignalEff()
   # doJetMass("l1")
   # doJetMass("l2")
   # doMJFit()
-  doMVV()
+  #doMVV()
   # doYield()
   # doResolution()
   # doKernelMVV()
