@@ -31,10 +31,16 @@ def getCanvasPaper(cname):
  H  = H_ref
  iPeriod = 0
  # references for T, B, L, R
- T = 0.3*H_ref
- B = 0.35*H_ref 
- L = 0.10*W_ref
- R = 0.07*W_ref
+ if options.var =="mVV":
+    T = 0.3*H_ref
+    B = 0.35*H_ref 
+    L = 0.10*W_ref
+    R = 0.07*W_ref
+ else:
+    T = 0.08*H_ref
+    B = 0.12*H_ref
+    L = 0.14*W_ref
+    R = 0.04*W_ref
  canvas = ROOT.TCanvas(cname,cname,50,50,W,H)
  canvas.SetFillColor(0)
  canvas.SetBorderMode(0)
@@ -61,7 +67,7 @@ def getCanvasPaper(cname):
  return canvas, pt
 
 	
-def getMVVPdf(j,MH,postfix=""):
+def getMVVPdf(w,j,MH,postfix=""):
 
         var = w.var(options.var)
         
@@ -95,7 +101,7 @@ def getMVVPdf(j,MH,postfix=""):
         function = ROOT.RooDoubleCB(pdfName, pdfName,var, mean,sigma,alpha1,n1,alpha2,n2)
         getattr(w,'import')(function,ROOT.RooFit.Rename(pdfName))
 
-def getMJPdf(j,MH,postfix="",jH=None):
+def getMJPdf(w,j,MH,postfix="",jH=None):
         
         var = w.var(options.var)
 	if postfix.find("H")==-1:
@@ -192,13 +198,13 @@ postfix = "Jet 1 "
 if options.leg == "l2" !=-1: postfix = "Jet 2 "
 
 inFileName = options.file
-massPoints = [1200,1600,2000,2400,2800,3200,3600,4000,4400]#,4800,5200]
+massPoints = [1200,1700,2000,2400,2800,3200,3600,4000]#,4800,5200]
 #massPoints = [1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800,4000,4200,4400,4600,4800,5000,5200]
 varName = {'mVV':'Dijet invariant mass [GeV]','mJ':'%sJet mass [GeV]'%postfix}
 varBins = {'mVV':'[37,1000,5500]','mJ':'[80,55,215]'}
-w=ROOT.RooWorkspace("w","w")
-w.factory(options.var+varBins[options.var])
-w.var(options.var).SetTitle(varName[options.var])
+#w=ROOT.RooWorkspace("w","w")
+#w.factory(options.var+varBins[options.var])
+#w.var(options.var).SetTitle(varName[options.var])
 colors= []
 colors.append(["#000080","#0000CD","#0000FF","#3D59AB","#4169E1","#4876FF","#6495ED","#1E90FF","#63B8FF","#87CEFA","#C6E2FF"]*3)   
 colors.append(["#006400","#308014","#228B22","#32CD32","#00CD00","#00EE00","#00FF00","#7CCD7C","#7CFC00","#ADFF2F","#C0FF3E"]*3)   
@@ -206,6 +212,9 @@ colors.append(["#CD8500","#CD950C","#EE9A00","#EEAD0E","#FFA500","#FFB90F","#FFC
 colors.append(["#8B2500","#CD3700","#EE4000","#FF4500","#CD4F39","#EE5C42","#EE6A50","#FF7256","#FA8072","#FFA07A","#EEB4B4"]*3)
 colors.append(["#EE82EE","#FF00FF","#D02090","#C71585","#B03060 ","#DB7093","#FFB6C1","#FFC0CB"]*3)
 def doSingle():
+    w=ROOT.RooWorkspace("w","w")
+    w.factory(options.var+varBins[options.var])
+    w.var(options.var).SetTitle(varName[options.var])
     with open(inFileName) as jsonFile:
       j = json.load(jsonFile)
     
@@ -215,10 +224,10 @@ def doSingle():
       frame = w.var(options.var).frame()   
       
       for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
-        if options.var == 'mVV': getMVVPdf(j,MH)
+        if options.var == 'mVV': getMVVPdf(w,j,MH)
         else: 
             if inFileName.find("H")==-1:
-                getMJPdf(j,MH)
+                getMJPdf(w,j,MH)
             if inFileName.find("Vjet")!=-1:
                 with open(inFileName.replace("Vjet","Hjet")) as jsonFileH:
                     jH = json.load(jsonFileH)
@@ -226,7 +235,7 @@ def doSingle():
             if inFileName.find("Hjet")!=-1:
                 with open(inFileName.replace("Hjet","Vjet")) as jsonFileV:
                     jV = json.load(jsonFileV)
-                getMJPdf(jV,MH,"H",j)
+                getMJPdf(w,jV,MH,"H",j)
                 
         w.pdf('signal_%d'%MH).plotOn(frame, ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[0][i])),ROOT.RooFit.Name(str(MH)))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
         leg.AddEntry(frame.findObject(str(MH)), "%d GeV" % MH, "L")
@@ -265,24 +274,30 @@ def doSingle():
       c1.SaveAs(path+"signalShapes%s_%s.C" %(options.var, inFileName.rsplit(".", 1)[0]))
       c1.SaveAs(path+"signalShapes%s_%s.root" %(options.var, inFileName.rsplit(".", 1)[0]))
   
-def doAll():
-    if options.var == 'mJ':  jsons = [path+"JJ_BulkGZZ_MJl1_HPHP.json",path+"JJ_WprimeWZ_MJl1_HPHP.json",path+"JJ_BulkGWW_MJl1_HPHP.json",path+"JJ_ZprimeWW_MJl1_HPHP.json","JJ_Hjet_ZprimeZH_2016_MJrandom_VH_all.json"]
-    if options.var == 'mVV': jsons = [path+"JJ_BulkGZZ_MVV.json",path+"JJ_WprimeWZ_MVV.json",path+"JJ_BulkGWW_MVV.json",path+"JJ_ZprimeWW_MVV.json","results_2016/JJ_j1ZprimeZH_2016_MVV.json"]
-    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
+def doAll(category,jsons,legs):
+    w=ROOT.RooWorkspace("w","w")
+    w.factory(options.var+varBins[options.var])
+    w.var(options.var).SetTitle(varName[options.var])
+    #legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
     c1,pt = getCanvasPaper("c1")
     c1.Draw()
-    c1.Divide(1,5,0.0,0.0)
+    if options.var == 'mVV':
+        c1.Divide(1,5,0.0,0.0)
     leg = []
     frame = []  
     #frame.SetTitle("")
     for ii,f in enumerate(jsons):
-        print f
-        c1.cd(ii)
-        if ii==len(jsons)-1:
-             leg.append(getLegend(0.15))
+        if options.var == 'mVV':
+            c1.cd(ii)
+            if ii==len(jsons)-1:
+                leg.append(getLegend(0.15))
+            else:
+                leg.append(getLegend())
+            frame.append( w.var(options.var).frame() ) 
         else:
-            leg.append(getLegend())
-        frame.append( w.var(options.var).frame() ) 
+            if ii ==0:
+                leg.append(getLegend(0.05,0.46))
+                frame.append( w.var(options.var).frame() ) 
         if options.var=='mJ':
             frame[-1].SetAxisRange(55,150)
         frame[-1].SetTitle("")
@@ -290,11 +305,11 @@ def doAll():
         with open(f) as jsonFile:
           j = json.load(jsonFile)
           for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
-            if options.var == 'mVV': getMVVPdf(j,MH,name)
+            if options.var == 'mVV': getMVVPdf(w,j,MH,name)
             else: 
                 if f.find("ZH")==-1:
                     print "no H boson in sample "
-                    getMJPdf(j,MH,name)
+                    getMJPdf(w,j,MH,name)
                 if f.find("Vjet")!=-1:
                     with open(f.replace("Vjet","Hjet")) as jsonFileH:
                         jH = json.load(jsonFileH)
@@ -302,18 +317,22 @@ def doAll():
                 if f.find("Hjet")!=-1:
                     with open(f.replace("Hjet","Vjet")) as jsonFileV:
                         jV = json.load(jsonFileV)
-                    getMJPdf(jV,MH,name,j)
-            print i
-            print ii
-            print colors[ii][i]
+                    getMJPdf(w,jV,MH,name,j)
+  
+  
             w.pdf('signal_%d%s'%(MH,name)).plotOn(frame[-1], ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[ii][i])),ROOT.RooFit.Name(str(MH)+name))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
-            
-    for ii,f in enumerate(jsons):
-        print len(jsons)
-        print ii
-        print "json "+str(jsons[len(jsons)-ii-1])
-        name = jsons[ii].split("_")[1]
-        leg[ii].AddEntry(frame[ii].findObject(str(2000)+name), legs[len(jsons)-ii-1], "L")
+      
+    if options.var == 'mVV': 
+        for ii,f in enumerate(jsons):
+            print len(jsons)
+            print ii
+            print "json "+str(jsons[len(jsons)-ii-1])
+            name = jsons[ii].split("_")[1]
+            leg[ii].AddEntry(frame[ii].findObject(str(2000)+name), legs[ii], "L")
+    else:
+        for ii,f in enumerate(jsons):
+            name = jsons[len(jsons)-ii-1].split("_")[1]
+            leg[-1].AddEntry(frame[0].findObject(str(2000)+name),legs[len(jsons)-ii-1],"L")
   
    
     for i in range(1,len(frame)+1):
@@ -323,27 +342,36 @@ def doAll():
       
       
         frame[i-1].GetYaxis().SetTitle("a. u.")
-        frame[i-1].GetYaxis().SetTitleOffset(0.25)
-        #frame[i-1].GetYaxis().SetNdivisions(-510,"M")
-        frame[i-1].GetYaxis().SetNdivisions(0,5,0,False)
-        #frame[i-1].GetYaxis().SetMaxDigits(1)
+        frame[i-1].GetYaxis().SetTitleOffset(1.18)
+        frame[i-1].GetXaxis().SetTitleOffset(0.9)
+        frame[i-1].GetYaxis().SetNdivisions(6,5,1)
         frame[i-1].GetXaxis().SetNdivisions(6,5,1)
         frame[i-1].SetMaximum(0.17)
-        if options.var == 'mVV':frame[i-1].SetMaximum(0.45)
-        frame[i-1].GetXaxis().SetTitleSize(0.20)
-        frame[i-1].GetYaxis().SetTitleSize(0.20)
-        frame[i-1].GetYaxis().SetLabelSize(0.20)
-        frame[i-1].GetXaxis().SetLabelSize(0.20)
-        #frame[i-1].Draw()
-        frame[i-1].GetXaxis().SetTickLength(0.1)
-        frame[-1].GetYaxis().SetLabelSize(0.14) 
-        frame[-1].GetXaxis().SetLabelSize(0.14)
-        frame[-1].GetXaxis().SetTitleSize(0.14)
-        frame[-1].GetYaxis().SetTitleSize(0.14)
-        frame[-1].GetYaxis().SetTitleOffset(0.35)
-        frame[-1].GetXaxis().SetTitleOffset(1.05)
-        frame[-1].GetXaxis().SetLabelOffset(0.05)
-        frame[-1].GetXaxis().SetTickLength(0.08)
+        if options.var == 'mVV':
+            frame[i-1].SetMaximum(0.45)
+            frame[i-1].GetYaxis().SetNdivisions(0,5,0,False)
+            frame[i-1].GetYaxis().SetTitleOffset(0.25)
+            frame[i-1].GetXaxis().SetTitleSize(0.20)
+            frame[i-1].GetYaxis().SetTitleSize(0.20)
+            frame[i-1].GetYaxis().SetLabelSize(0.20)
+            frame[i-1].GetXaxis().SetLabelSize(0.20)
+            #frame[i-1].Draw()
+            frame[i-1].GetXaxis().SetTickLength(0.1)
+            frame[-1].GetYaxis().SetLabelSize(0.14) 
+            frame[-1].GetXaxis().SetLabelSize(0.14)
+            frame[-1].GetXaxis().SetTitleSize(0.14)
+            frame[-1].GetYaxis().SetTitleSize(0.14)
+            frame[-1].GetYaxis().SetTitleOffset(0.35)
+            frame[-1].GetXaxis().SetTitleOffset(1.05)
+            frame[-1].GetXaxis().SetLabelOffset(0.05)
+            frame[-1].GetXaxis().SetTickLength(0.08)
+        else:    
+            
+            frame[i-1].GetXaxis().SetTitleSize(0.06)
+            frame[i-1].GetYaxis().SetTitleSize(0.06)
+            frame[i-1].GetYaxis().SetLabelSize(0.05)
+            frame[i-1].GetXaxis().SetLabelSize(0.05)
+                
         frame[i-1].Draw()
         leg[i-1].Draw("same")
     
@@ -356,25 +384,39 @@ def doAll():
     pt2.SetFillColor(0)
     pt2.SetBorderSize(0)
     pt2.SetFillStyle(0)
-    if options.var == 'mJ': pt2.AddText("HPHP category")
+    if options.var == 'mJ': pt2.AddText(category)
     pt2.Draw()
+    if options.var =="mVV": category = "Vall"
     if options.prelim=="1":
         cmslabel_sim_prelim(c1,'sim',11)
         c1.Update()
-      
-        c1.SaveAs(path+"signalShapes_%s_All_prelim.png"  %(options.var))
-        c1.SaveAs(path+"signalShapes_%s_All_prelim.pdf"  %(options.var))
-        c1.SaveAs(path+"signalShapes_%s_All_prelim.C"    %(options.var))
-        c1.SaveAs(path+"signalShapes_%s_All_prelim.root" %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.png"  %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.pdf"  %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.C"    %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.root" %(options.var,category))
     else:
         cmslabel_sim(c1,'sim',11)
         c1.Update()
         
-        c1.SaveAs(path+"signalShapes_%s_All.png"  %(options.var))
-        c1.SaveAs(path+"signalShapes_%s_All.pdf"  %(options.var))
-        c1.SaveAs(path+"signalShapes_%s_All.C"    %(options.var))
-        c1.SaveAs(path+"signalShapes_%s_All.root" %(options.var))
+        c1.SaveAs(path+"signalShapes_%s_All_%s.png"  %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_All_%s.pdf"  %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_All_%s.C"    %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_All_%s.root" %(options.var,category))
+    
       
 if __name__ == '__main__':
     #doSingle()
-    doAll()
+    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
+    signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW"]
+    categories = ["VV_HPLP"]#,"VV_HPHP","VH_HPLP","VH_HPHP"]
+    jsons=[]
+    for category in categories:
+        for s in signals:
+            if options.var =="mJ":
+                jsons.append("JJ_"+s+"_2016_MJrandom_"+category+".json")
+            else: jsons.append("JJ_"+s+"_2016_MVV.json")
+        if options.var=="mJ":
+            jsons.append("JJ_Hjet_ZprimeZH_2016_MJrandom_"+category+".json")
+        else:
+            jsons.append("JJ_j1ZprimeZH_2016_MVV.json")
+        doAll(category,jsons,legs)

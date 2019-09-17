@@ -274,6 +274,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     if options.zrange == '0,-1': zrange = '1126,5500'
     if axis=='z':
      htitle = "Z-Proj. x : "+options.xrange+" y : "+options.yrange
+     hhtitle = purity
      xtitle = "Dijet invariant mass [GeV]"
      ymin = 0.2
      ymax = hdata.GetMaximum()*50000
@@ -281,6 +282,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
      extra2 = yrange.split(',')[0]+' < m_{jet2} < '+ yrange.split(',')[1]+' GeV'
     elif axis=='x':
      htitle = "X-Proj. y : "+options.yrange+" z : "+options.zrange
+     hhtitle = purity
      xtitle = " m_{jet1} [GeV]"
      ymin = 0.02
      ymax = hdata.GetMaximum()*1.3
@@ -288,6 +290,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
      extra2 = zrange.split(',')[0]+' < m_{jj} < '+ zrange.split(',')[1]+' GeV'
     elif axis=='y':
      htitle = "Y-Proj. x : "+options.xrange+" z : "+options.zrange
+     hhtitle = purity
      xtitle = " m_{jet2} [GeV]"
      ymin = 0.02
      ymax = hdata.GetMaximum()*1.3
@@ -295,9 +298,9 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
      extra2 = zrange.split(',')[0]+' < m_{jj} < '+ zrange.split(',')[1]+' GeV'
                    
     #leg = ROOT.TLegend(0.450436242,0.5531968,0.7231544,0.8553946)
-    leg = ROOT.TLegend(0.50809045,0.5063636,0.7622613,0.8520979)
+    leg = ROOT.TLegend(0.40809045,0.5063636,0.7622613,0.8520979)
     leg.SetTextSize(0.05)
-    c = ROOT.TCanvas('c')
+    c = get_canvas('c')
     pad1 = get_pad("pad1") #ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1.0)
     if axis == 'z': pad1.SetLogy()
     pad1.SetBottomMargin(0.01)    
@@ -307,7 +310,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
  
     histos[0].SetMinimum(ymin)
     histos[0].SetMaximum(ymax) 
-    histos[0].SetTitle(htitle)
+    histos[0].SetTitle(hhtitle)
     histos[0].SetLineColor(colors[0])
     histos[0].SetLineWidth(2)
     histos[0].GetXaxis().SetTitle(xtitle)
@@ -355,10 +358,10 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     #change this scaling in case you don't just want to plot signal! has to match number of generated signal events
 
 
-    scaling = 1000.
+    scaling = 500.
     eff = 0.1
     if purity.find("HPHP") != -1:
-        scaling = 5
+        scaling = 500.
         eff = 0.02
     
     if hsig:
@@ -434,7 +437,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     #pt.Draw()
 
     #pt2 = ROOT.TPaveText(0.55,0.29,0.99,0.4,"NDC")
-    pt2 = ROOT.TPaveText(0.55,0.39,0.99,0.52,"NDC")
+    pt2 = ROOT.TPaveText(0.55,0.35,0.99,0.52,"NDC")
     pt2.SetTextFont(42)
     pt2.SetTextSize(0.05)
     pt2.SetTextAlign(12)
@@ -479,7 +482,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     
     #for pulls
     if errors ==None: errors=[0,0];
-    if options.name.find('sigonly')!=-1: graphs = addPullPlot(hdata,hsig,nBins,errors[0])
+    if options.name.find('sigOnly')!=-1: graphs = addPullPlot(hdata,hsig,nBins,errors[0])
     else:
         graphs = addPullPlot(hdata,histos[0],nBins,errors[0])
     # graphs = addRatioPlot(hdata,histos[0],nBins,errors[0])
@@ -1036,10 +1039,11 @@ def getChi2proj(histo_pdf,histo_data,minx=-1,maxx=-1):
 if __name__=="__main__":
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
-     purity = options.input.replace('.root','').split('_')[-1]   
-
-     if options.input.find("VV") !=-1: purity="VV_"+purity
-     elif options.input.find("VH") !=-1: purity="VH_"+purity
+     print options.name
+     purity = options.name.split('_')[3]+"_"+ options.name.split('_')[4]
+     print purity
+     #if options.input.find("VV") !=-1: purity="VV_"+purity
+     #elif options.input.find("VH") !=-1: purity="VH_"+purity
                    
      #################################################
      xBins= getListOfBins(hinMC,"x")
@@ -1329,3 +1333,5 @@ if __name__=="__main__":
       doYprojection(allpdfsy,data1,norm1_nonres,norm1_Wres,pdf1_signal_postfit,norm1_sig,norm1_Zres,norm1_TThad)
      
      logfile.close()
+
+     print purity
