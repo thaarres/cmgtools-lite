@@ -72,8 +72,9 @@ catVtag['LP1'] = '(jj_l1_tau2/jj_l1_tau1+(0.080*TMath::Log((jj_l1_softDrop_mass*
 catVtag['LP2'] = '(jj_l2_tau2/jj_l2_tau1+(0.080*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))>0.43&&(jj_l2_tau2/jj_l2_tau1+(0.080*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))<0.79'                                                    
 catVtag['NP1'] = '(jj_l1_tau2/jj_l1_tau1+(0.080*TMath::Log((jj_l1_softDrop_mass*jj_l1_softDrop_mass)/jj_l1_pt)))>0.79'                                                                                                                                                         
 catVtag['NP2'] = '(jj_l2_tau2/jj_l2_tau1+(0.080*TMath::Log((jj_l2_softDrop_mass*jj_l2_softDrop_mass)/jj_l2_pt)))>0.79'                                                                                                                                                         
-#MassDecorrelatedDeepBoosted_WvsQCD                                 
+                              
 '''
+#MassDecorrelatedDeepBoosted_WvsQCD   
 print "################     you are using DeepAK8 WvsQCD  !!!!! #########"                                                                                                                                                                                                     
 catVtag['HP1'] = 'jj_l1_MassDecorrelatedDeepBoosted_WvsQCD>0.8'
 catVtag['HP2'] = 'jj_l2_MassDecorrelatedDeepBoosted_WvsQCD>0.8'
@@ -91,6 +92,7 @@ catHtag['LP2'] = '(jj_l2_MassDecorrelatedDeepBoosted_ZHbbvsQCD>0.5&&jj_l2_MassDe
 catHtag['NP1'] = '(jj_l1_MassDecorrelatedDeepBoosted_ZHbbvsQCD<0.5)'
 catHtag['NP2'] = '(jj_l2_MassDecorrelatedDeepBoosted_ZHbbvsQCD<0.5)'
 '''
+
 print "################     you are using double B  !!!!! #########"  
 valueHP = 0.91
 valueLP = 0.70
@@ -109,18 +111,19 @@ cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(passed_METfilters&&passed_PV
 #signal regions
 if sorting == 'random':
  print "Use random sorting!"
- #Anna's VH
- cuts['VH_HPHP'] = '('+'('+'('+ '&&'.join([catVtag['HP1'],catHtag['HP2']])+')'+'||'+'('+'&&'.join([catHtag['HP1'],catHtag['HP2']]) +')'+')'+ '||' + '(' + '(' + '&&'.join([catVtag['HP2'],catHtag['HP1']]) +')'+ '||' +'(' + '&&'.join([catHtag['HP2'],catHtag['HP1']]) + ')' + ')' + ')' #anna
- cuts['VH_HPLP'] = '(' + '('+  '&&'.join([catVtag['HP1'],catHtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catHtag['LP1']]) + ')' + ')' 
+ cuts['VH_HPHP'] = '('+'('+'('+ '&&'.join([catVtag['HP1'],catHtag['HP2']])+')'+'||'+'('+'&&'.join([catHtag['HP1'],catHtag['HP2']]) +')'+')'+ '||' + '(' + '(' + '&&'.join([catVtag['HP2'],catHtag['HP1']]) +')'+ '||' +'(' + '&&'.join([catHtag['HP2'],catHtag['HP1']]) + ')' + ')' + ')' #anna                                                                                                                        
+ cuts['VH_HPLP'] = '(' + '('+  '&&'.join([catVtag['HP1'],catHtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catHtag['LP1']]) + ')' + ')'
  cuts['VH_LPHP'] = '('+ '('+  '&&'.join([catVtag['LP1'],catHtag['HP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['LP2'],catHtag['HP1']]) + ')' + '||' + '(' + '&&'.join([catHtag['LP2'],catHtag['HP1']]) + ')'+'||'+ '(' + '&&'.join([catHtag['LP1'],catHtag['HP2']]) + ')'+')'
  cuts['VH_LPLP'] = '('+'('+ '&&'.join([catVtag['LP1'],catHtag['LP2']]) + ')'+ '||' +'(' + '&&'.join([catVtag['LP2'],catHtag['LP1']]) + ')' + '||' + '(' + '&&'.join([catVtag['LP2'],catHtag['LP1']]) + ')' +'||' + '(' + '&&'.join([catHtag['LP2'],catHtag['LP1']]) + ')' + ')'
  cuts['VH_all'] =  '('+  '||'.join([cuts['VH_HPHP'],cuts['VH_HPLP'],cuts['VH_LPHP'],cuts['VH_LPLP']]) + ')'
- print " ################ VV orthogonal  VH CATEGORY ############" 
+ print " ################ VV orthogonal  VH CATEGORY ############"
  cuts['VV_HPHP'] = '('+'!'+cuts['VH_all']+'&&'+'(' +  '&&'.join([catVtag['HP1'],catVtag['HP2']]) + ')' + ')'
  cuts['VV_HPLP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')' + ')'
 # print " ################ ONLY VV CATEGORY ############"  
 # cuts['VV_HPHP'] = '('  +  '&&'.join([catVtag['HP1'],catVtag['HP2']]) + ')' 
 # cuts['VV_HPLP'] = '('  + '(' +  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')'
+
+
 else:
  print "Use b-tagging sorting"
  cuts['VH_HPHP'] = '('+  '&&'.join([catHtag['HP1'],catVtag['HP2']]) + ')'
@@ -149,7 +152,6 @@ cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop
 
 #all categories
 categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP']
-#categories=['VV_HPLP']
 
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW_"
@@ -341,7 +343,7 @@ if options.run.find("all")!=-1 or options.run.find("qcd")!=-1:
         f.mergeBackgroundShapes("nonRes","JJ_"+str(period))
         f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],"nRes")
 
-if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
+if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:    
     print "for V+jets"
     print "first we fit"
     f.fitVJets("JJ_WJets",resTemplate,1.,1.)
