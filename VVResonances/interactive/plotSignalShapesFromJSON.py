@@ -417,16 +417,14 @@ if __name__ == '__main__':
     signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW","ZprimeZH"]
     categories = ["VH_LPHP"] #,"VV_HPHP","VH_HPLP","VH_HPHP","VH_LPHP"]
 #    categories = ["VH_LPHP","VV_HPHP","VH_HPLP","VH_HPHP","VH_LPHP"]
-    jsons=[]
     for category in categories:
+        jsons=[]
         for s in signals:
-            if options.var =="mJ" and s != "ZprimeZH":
-                jsons.append("JJ_"+s+"_2016_MJrandom_"+category+".json")
-            else:
-              if s != "ZprimeZH" and s != "WprimeWZ":  jsons.append("JJ_"+s+"_2016_MVV.json")
-        if options.var=="mJ":
-            jsons.append("JJ_Hjet_ZprimeZH_2016_MJrandom_"+category+".json")
-        else:
-          jsons.append("JJ_j1"+s+"_2016_MVV.json")
+	  if options.var =="mJ":
+            if s != "ZprimeZH": jsons.append("JJ_"+s+"_2016_MJrandom_"+category+".json")
+            else : jsons.append("JJ_Hjet_ZprimeZH_2016_MJrandom_"+category+".json")
+          if options.var =="mVV":
+            if s != "ZprimeZH" and s != "WprimeWZ":  jsons.append("JJ_"+s+"_2016_MVV.json")
+            else: jsons.append("JJ_j1"+s+"_2016_MVV.json")
 
         doAll(category,jsons,legs)
