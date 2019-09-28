@@ -1,23 +1,3 @@
-#fit HPLP MC with HPLP kernel
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPLP.root --sample pythia --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root 
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPLP.root --sample herwig --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root 
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPLP.root --sample madgraph --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root 
-#merge 1Dx2Dx2D HPLP kernels
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPLP.root --sample pythia --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root --merge
-#results validation:
-#python Projections3DHisto.py --mc results_2016/JJ_2016_nonRes_VV_HPLP.root,nonRes -k save_new_shapes_2016_pythia_VV_HPLP_3D.root,histo -o control-plots-HPLP-pythia
-#python Projections3DHisto.py --mc results_2016/JJ_2016_nonRes_VV_HPLP_altshapeUp.root,nonRes -k save_new_shapes_2016_pythia_VV_HPLP_3D.root,histo -o control-plots-HPLP-herwig
-#python Projections3DHisto.py --mc results_2016/JJ_2016_nonRes_VV_HPLP_altshape2.root,nonRes -k save_new_shapes_2016_pythia_VV_HPLP_3D.root,histo -o control-plots-HPLP-madgraph
-#fit HPHP MC with post-fit HPLP kernel
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPHP.root --sample pythia --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root 
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPHP.root --sample herwig --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root 
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPHP.root --sample madgraph --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root 
-#merge 1Dx2Dx2D HPHP kernels
-#python transferKernelNew.py -i results_2016/JJ_2016_nonRes_VV_HPHP.root --sample madgraph --year 2016 -p z --pdfIn results_2016/JJ_2016_nonRes_3D_VV_HPLP.root --merge
-#results validation:
-#python Projections3DHisto_HPHP.py --mc results_2016/JJ_2016_nonRes_VV_HPHP.root,nonRes -k save_new_shapes_2016_pythia_VV_HPHP_3D.root,histo -o control-plots-HPHP-pythia
-#python Projections3DHisto_HPHP.py --mc results_2016/JJ_2016_nonRes_VV_HPHP_altshapeUp.root,nonRes -k save_new_shapes_2016_pythia_VV_HPHP_3D.root,histo -o control-plots-HPHP-herwig
-#python Projections3DHisto_HPHP.py --mc results_2016/JJ_2016_nonRes_VV_HPHP_altshape2.root,nonRes -k save_new_shapes_2016_pythia_VV_HPHP_3D.root,histo -o control-plots-HPHP-madgraph
 import ROOT
 ROOT.gROOT.SetBatch(True)
 import os, sys, re, optparse,pickle,shutil,json
@@ -229,57 +209,58 @@ def merge_all():
  print "going to execute "+str(cmd)
  os.system(cmd)
              
-def save_shape(final_shape,norm_nonres,sample="pythia"):
+def save_shape(final_shape,norm_nonres,pTools,sample="pythia"):
 
-    histo = ROOT.TH3F('histo','histo',len(xBinslowedge)-1,xBinslowedge,len(yBinslowedge)-1,yBinslowedge,len(zBinslowedge)-1,zBinslowedge)
-    histo_xz = ROOT.TH2F('histo_xz','histo_xz',len(xBinslowedge)-1,xBinslowedge,len(zBinslowedge)-1,zBinslowedge)
-    histo_yz = ROOT.TH2F('histo_yz','histo_yz',len(yBinslowedge)-1,yBinslowedge,len(zBinslowedge)-1,zBinslowedge)
-    histo_z = ROOT.TH1F('histo_z','histo_z',len(zBinslowedge)-1,zBinslowedge)
+    histo = ROOT.TH3F('histo','histo',len(pTools.xBinslowedge)-1,pTools.xBinslowedge,len(pTools.yBinslowedge)-1,pTools.yBinslowedge,len(pTools.zBinslowedge)-1,pTools.zBinslowedge)
+    histo_xz = ROOT.TH2F('histo_xz','histo_xz',len(pTools.xBinslowedge)-1,pTools.xBinslowedge,len(pTools.zBinslowedge)-1,pTools.zBinslowedge)
+    histo_yz = ROOT.TH2F('histo_yz','histo_yz',len(pTools.yBinslowedge)-1,pTools.yBinslowedge,len(pTools.zBinslowedge)-1,pTools.zBinslowedge)
+    histo_z = ROOT.TH1F('histo_z','histo_z',len(pTools.zBinslowedge)-1,pTools.zBinslowedge)
     print "Done creating out histos"
-    lv = {}
-    for xk, xv in xBins.iteritems():
-        lv[xv] = {}
-        for yk, yv in yBins.iteritems():
-          lv[xv][yv] = {}
-          for zk,zv in zBins.iteritems():
-            lv[xv][yv][zv] = 0
 
+    lv = {}
+    for xk, xv in pTools.xBins.iteritems():
+        lv[xv] = {}
+        for yk, yv in pTools.yBins.iteritems():
+          lv[xv][yv] = {}
+          for zk,zv in pTools.zBins.iteritems():
+            lv[xv][yv][zv] = 0
+  
     lv_xz = {}
     lv_yz = {}
-    for xk, xv in xBins.iteritems():
+    for xk, xv in pTools.xBins.iteritems():
         lv_xz[xv] = {}
         lv_yz[xv] = {}
-        for zk,zv in zBins.iteritems():
+        for zk,zv in pTools.zBins.iteritems():
           lv_xz[xv][zv] = 0
           lv_yz[xv][zv] = 0
 
     lv_z = []
-    for zk,zv in zBins.iteritems():
+    for zk,zv in pTools.zBins.iteritems():
       lv_z.append(0)
                                
-    for xk, xv in xBins.iteritems():
+    for xk, xv in pTools.xBins.iteritems():
          MJ1.setVal(xv)
-         for yk, yv in yBins.iteritems():
+         for yk, yv in pTools.yBins.iteritems():
              MJ2.setVal(yv)
-             for zk,zv in zBins.iteritems():
+             for zk,zv in pTools.zBins.iteritems():
                  MJJ.setVal(zv)
-                 binV = zBinsWidth[zk]*xBinsWidth[xk]*yBinsWidth[yk]
+                 binV = pTools.zBinsWidth[zk]*pTools.xBinsWidth[xk]*pTools.yBinsWidth[yk]
                  lv[xv][yv][zv] = final_shape.getVal(argset)*binV
                  lv_xz[xv][zv] += final_shape.getVal(argset)*binV
                  lv_yz[yv][zv] += final_shape.getVal(argset)*binV
                  lv_z[zk-1] += final_shape.getVal(argset)*binV
 
-    for xk, xv in xBins.iteritems():
-     for yk, yv in yBins.iteritems():
-      for zk,zv in zBins.iteritems():
+    for xk, xv in pTools.xBins.iteritems():
+     for yk, yv in pTools.yBins.iteritems():
+      for zk,zv in pTools.zBins.iteritems():
        histo.Fill(xv,yv,zv,lv[xv][yv][zv]*norm_nonres[0])
 
-    for xk, xv in xBins.iteritems():
-      for zk,zv in zBins.iteritems():
+    for xk, xv in pTools.xBins.iteritems():
+      for zk,zv in pTools.zBins.iteritems():
        histo_xz.Fill(xv,zv,lv_xz[xv][zv]*norm_nonres[0])
        histo_yz.Fill(xv,zv,lv_yz[xv][zv]*norm_nonres[0])
     
-    for zk,zv in zBins.iteritems(): histo_z.Fill(zv,lv_z[zk-1]*norm_nonres[0])    
+    for zk,zv in pTools.zBins.iteritems(): histo_z.Fill(zv,lv_z[zk-1]*norm_nonres[0])    
        
     fout_z = ROOT.TFile.Open('save_new_shapes_%s_%s_%s_1D.root'%(options.year,sample,purity),'RECREATE')
     fout_z.cd()
@@ -288,8 +269,8 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histo_z.SetName('histo_nominal')
     histo_z.Write('histo_nominal')
 
-    print "Now PT 1D",zBinslowedge[-1],zBinslowedge[0],xBinslowedge[-1],xBinslowedge[0]
-    alpha=1.5/float(zBinslowedge[-1])    
+    print "Now PT 1D",pTools.zBinslowedge[-1],pTools.zBinslowedge[0],pTools.xBinslowedge[-1],pTools.xBinslowedge[0]
+    alpha=1.5/float(pTools.zBinslowedge[-1])    
     histogram_pt_up,histogram_pt_down=unequalScale(histo_z,"histo_nominal_PT",alpha,1)
     histogram_pt_down.SetName('histo_nominal_PTDown')
     histogram_pt_down.SetTitle('histo_nominal_PTDown')
@@ -299,7 +280,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histogram_pt_up.Write('histo_nominal_PTUp')
 
     print "Now OPT 1D"
-    alpha=1.5*float(zBinslowedge[0])
+    alpha=1.5*float(pTools.zBinslowedge[0])
     histogram_opt_up,histogram_opt_down=unequalScale(histo_z,"histo_nominal_OPT",alpha,-1)
     histogram_opt_down.SetName('histo_nominal_OPTDown')
     histogram_opt_down.SetTitle('histo_nominal_OPTDown')
@@ -318,7 +299,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histo_xz.Write('histo_nominal')
 
     print "Now PT 2D l1"
-    alpha=1.5/float(xBinslowedge[-1])
+    alpha=1.5/float(pTools.xBinslowedge[-1])
     histogram_pt_up,histogram_pt_down=unequalScale(histo_xz,"histo_nominal_PT",alpha,1,2)
     conditional(histogram_pt_down)
     histogram_pt_down.SetName('histo_nominal_PTDown')
@@ -330,7 +311,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histogram_pt_up.Write('histo_nominal_PTUp')
 
     print "Now OPT 2D l1"
-    alpha=1.5*float(xBinslowedge[0])
+    alpha=1.5*float(pTools.xBinslowedge[0])
     h1,h2=unequalScale(histo_xz,"histo_nominal_OPT",alpha,-1,2)
     conditional(h1)
     h1.SetName('histo_nominal_OPTUp')
@@ -351,7 +332,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histo_yz.Write('histo_nominal')
 
     print "Now PT 2D l2"
-    alpha=1.5/float(xBinslowedge[-1])
+    alpha=1.5/float(pTools.xBinslowedge[-1])
     histogram_pt_up,histogram_pt_down=unequalScale(histo_yz,"histo_nominal_PT",alpha,1,2)
     conditional(histogram_pt_down)
     histogram_pt_down.SetName('histo_nominal_PTDown')
@@ -363,7 +344,7 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     histogram_pt_up.Write('histo_nominal_PTUp')
 
     print "Now OPT 2D l2"
-    alpha=1.5*float(xBinslowedge[0])
+    alpha=1.5*float(pTools.xBinslowedge[0])
     h1,h2=unequalScale(histo_yz,"histo_nominal_OPT",alpha,-1,2)
     conditional(h1)
     h1.SetName('histo_nominal_OPTUp')
@@ -376,6 +357,21 @@ def save_shape(final_shape,norm_nonres,sample="pythia"):
     
     fout_yz.Close()    
 
+    if sample != 'pythia':
+     inputx=fout_xz.GetName()
+     inputy=fout_yz.GetName()
+     inputz=fout_z.GetName()     
+     rootFile="save_new_shapes_%s_%s_"%(options.year,sample)+purity+"_3D.root"
+   
+     print "Reading " ,inputx
+     print "Reading " ,inputy
+     print "Reading " ,inputz
+     print "Saving to ",rootFile 
+   
+     cmd='vvMergeHistosToPDF3D.py -i "{inputx}" -I "{inputy}" -z "{inputz}" -o "{rootFile}"'.format(rootFile=rootFile,inputx=inputx,inputy=inputy,inputz=inputz)
+     print "going to execute "+str(cmd)
+     os.system(cmd)
+     
 def makeNonResCard():
 
  if options.pdfIn.find("HPHP")!=-1: category_pdf = "VV_HPHP"
@@ -384,19 +380,25 @@ def makeNonResCard():
      
  dataset = options.year
  sig = 'BulkGWW'
+ if 'VBF' in purity: sig = 'VBF_BulkGWW'
  
  lumi = {'2016':35900,'2017':41367}
  lumi_unc = {'2016':1.025,'2017':1.023}
  scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
+ scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
 
  vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{}}
  vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
  vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
  vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
-
- vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))'}
+ vtag_unc['VBF_VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
+ vtag_unc['VBF_VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
+ vtag_unc['VBF_VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
  
- DTools = DatacardTools(scales,vtag_pt_dependence,lumi_unc,vtag_unc,1.0,"","")
+ vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))',
+                       'VBF_VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VBF_VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))'}
+ 
+ DTools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,1.0,"","")
  
  cat='_'.join(['JJ',sig,purity,'13TeV_'+dataset])
  card=DataCardMaker('',purity,'13TeV_'+dataset,lumi[dataset],'JJ',cat)
@@ -412,9 +414,9 @@ def makeNonResCard():
  DTools.AddSigSystematics(card,sig,dataset,purity,0)
 
  card.addSystematic("CMS_VV_JJ_nonRes_norm","lnN",{'nonRes':1.5}) 
- card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.0,0.333])
- card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,0.333])
- card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,0.333])
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.0,1.0])
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,1.0])
+ card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,1.0])
       
  card.makeCard()
 
@@ -432,14 +434,20 @@ if __name__=="__main__":
      # if answer=='YES': 
      #  os.system('rm -rf %s'%options.output) 
      #  os.mkdir(options.output)     
-              
+
+     #################################################
+                              
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
      if options.input.find("HPHP")!=-1: purity = "VV_HPHP"
      elif options.input.find("HPLP")!=-1: purity = "VV_HPLP"
-     else: purity = "VV_LPLP"  
+     else: purity = "VV_LPLP" 
+     if options.input.find('VBF')!=-1: purity = 'VBF_'+purity    
      print "Using purity: " ,purity    
-
+     if options.merge:
+      merge_all()
+      sys.exit()
+      
      w_name = makeNonResCard()
 
      print 
@@ -458,49 +466,41 @@ if __name__=="__main__":
      argset.add(MJ2);
      argset.add(MJ1);
 
+     data = workspace.data("data_obs")
+     data.Print()  
+     print
+     print "Observed number of events:",data.sumEntries()
+          
      #################################################
                
-     Tools = PostFitTools(hinMC,argset,options.xrange,options.yrange,options.zrange,purity+'_'+options.sample,options.output)
-     xBins,xBinslowedge,xBinsWidth,yBins,yBinslowedge,yBinsWidth,zBins,zBinslowedge,zBinsWidth = Tools.getBins()
+     Tools = PostFitTools(hinMC,argset,options.xrange,options.yrange,options.zrange,purity+'_'+options.sample,options.output,data)
      
      print "x bins:"
-     print xBins
+     print Tools.xBins
      print "x bins low edge:"
-     print xBinslowedge
+     print Tools.xBinslowedge
      print "x bins width:"
-     print xBinsWidth
+     print Tools.xBinsWidth
      
      print
      print "y bins:"
-     print yBins
+     print Tools.yBins
      print "y bins low edge:"
-     print yBinslowedge
+     print Tools.yBinslowedge
      print "y bins width:"
-     print yBinsWidth
+     print Tools.yBinsWidth
      
      print 
      print "z bins:"
-     print zBins
+     print Tools.zBins
      print "z bins low edge:"
-     print zBinslowedge
+     print Tools.zBinslowedge
      print "z bins width:"
-     print zBinsWidth
-
-     #################################################
-     
-     if options.merge:
-      merge_all()
-      sys.exit()
+     print Tools.zBinsWidth
                   
      #################################################                
      model = workspace.pdf("model_b") 
-     data = workspace.data("data_obs")
-     #del workspace
-     data.Print()     
-          
-     print
-     print "Observed number of events:",data.sumEntries()
-     
+                  
      args  = model.getComponents()
      pdfName = "pdf_binJJ_"+purity+"_13TeV_%s_bonly"%options.year
 
@@ -565,20 +565,19 @@ if __name__=="__main__":
      print "QCD normalization after fit",norm_nonres[0],"+/-",norm_nonres[1]
                    
      #################################################     
+     save_shape(pdf_nonres_shape_postfit,norm_nonres,Tools,options.sample)
+
      #make projections onto MJJ axis
-     if options.projection =="z": Tools.doZprojection(allpdfsz,data,norm_nonres[0])
+     if options.projection =="z": Tools.doZprojection2(allpdfsz,data,norm_nonres[0])
          
      #make projections onto MJ1 axis
-     if options.projection =="x":  Tools.doXprojection(allpdfsx,data,norm_nonres[0])
+     if options.projection =="x":  Tools.doXprojection2(allpdfsx,data,norm_nonres[0])
                   
      #make projections onto MJ2 axis
-     if options.projection =="y":  Tools.doYprojection(allpdfsy,data,norm_nonres[0])
+     if options.projection =="y":  Tools.doYprojection2(allpdfsy,data,norm_nonres[0])
          
      if options.projection =="xyz":
-         Tools.doZprojection(allpdfsz,data,norm_nonres[0])
-         Tools.doXprojection(allpdfsx,data,norm_nonres[0])
-         Tools.doYprojection(allpdfsy,data,norm_nonres[0])
+         Tools.doZprojection2(allpdfsz,data,norm_nonres[0])
+         Tools.doXprojection2(allpdfsx,data,norm_nonres[0])
+         Tools.doYprojection2(allpdfsy,data,norm_nonres[0])
      
-     #################################################   
-
-     save_shape(pdf_nonres_shape_postfit,norm_nonres,options.sample)
