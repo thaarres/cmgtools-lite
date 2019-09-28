@@ -252,11 +252,11 @@ def save_shape(final_shape,norm_nonres,pTools,sample="pythia"):
 
     for xk, xv in pTools.xBins.iteritems():
      for yk, yv in pTools.yBins.iteritems():
-      for zk,zv in pTools.zBins.iteritems():
+      for zk, zv in pTools.zBins.iteritems():
        histo.Fill(xv,yv,zv,lv[xv][yv][zv]*norm_nonres[0])
 
     for xk, xv in pTools.xBins.iteritems():
-      for zk,zv in pTools.zBins.iteritems():
+      for zk, zv in pTools.zBins.iteritems():
        histo_xz.Fill(xv,zv,lv_xz[xv][zv]*norm_nonres[0])
        histo_yz.Fill(xv,zv,lv_yz[xv][zv]*norm_nonres[0])
     
@@ -371,11 +371,14 @@ def save_shape(final_shape,norm_nonres,pTools,sample="pythia"):
      cmd='vvMergeHistosToPDF3D.py -i "{inputx}" -I "{inputy}" -z "{inputz}" -o "{rootFile}"'.format(rootFile=rootFile,inputx=inputx,inputy=inputy,inputz=inputz)
      print "going to execute "+str(cmd)
      os.system(cmd)
-     
+
 def makeNonResCard():
 
- if options.pdfIn.find("HPHP")!=-1: category_pdf = "VV_HPHP"
- elif options.input.find("HPLP")!=-1: category_pdf = "VV_HPLP"
+ if options.pdfIn.find("VV_HPHP")!=-1: category_pdf = "VV_HPHP"
+ elif options.pdfIn.find("VV_HPLP")!=-1: category_pdf = "VV_HPLP"
+ if options.pdfIn.find("VH_HPHP")!=-1: category_pdf = "VH_HPHP" 
+ elif options.pdfIn.find("VH_HPLP")!=-1: category_pdf = "VH_HPLP"
+ elif options.pdfIn.find("VH_LPHP")!=-1: category_pdf = "VH_LPHP"
  else: category_pdf = "VV_LPLP"  
      
  dataset = options.year
@@ -387,7 +390,7 @@ def makeNonResCard():
  scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
  scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
 
- vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{}}
+ vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{},'VH_HPHP':{},'VH_HPLP':{},'VH_LPHP':{} }
  vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
  vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
  vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
@@ -405,19 +408,48 @@ def makeNonResCard():
  cardName='datacard_'+cat+'.txt'
  workspaceName='workspace_'+cat+'.root'
       
- DTools.AddSignal(card,dataset,purity,sig,'results_2016',0)
+# DTools.AddSignal(card,dataset,purity,sig,'results_2016',0)
+ print "Adding Signal"
+ DTools.AddSignal(card,dataset,purity,sig,'results_%s'%options.year,0)
+ print "Signal Added 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
  hname = 'histo'
  if options.sample!='pythia': hname+=('_'+options.sample)
- card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],options.pdfIn,hname,['OPTXY:CMS_VV_JJ_nonRes_OPTXY_'+category_pdf,'OPTZ:CMS_VV_JJ_nonRes_OPTZ_'+category_pdf,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+category_pdf],False,0) ,    
+ fin = ROOT.TFile.Open(options.pdfIn)
+ if not fin.Get(hname):
+  print "WARNING: histogram",hname,"NOT FOUND in file",options.pdfIn,". This is probably expected. Use instead histogram histo"
+  hname = 'histo'
+ fin.Close() 
+ print "adding shapes bkg"
+ card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],options.pdfIn,hname,['OPTXY:CMS_VV_JJ_nonRes_OPTXY_'+category_pdf,'OPTZ:CMS_VV_JJ_nonRes_OPTZ_'+category_pdf,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+category_pdf],False,0) 
+ print "adding yield"
  card.addFixedYieldFromFile("nonRes",1,options.input,"nonRes",1)
+ print "adding data"
  DTools.AddData(card,options.input,"nonRes",lumi[dataset] )
+ print "adding sig sys for purity", purity
  DTools.AddSigSystematics(card,sig,dataset,purity,0)
 
+ print "Adding systematics to card"
+ print "norm"
  card.addSystematic("CMS_VV_JJ_nonRes_norm","lnN",{'nonRes':1.5}) 
- card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.0,1.0])
- card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,1.0])
- card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,1.0])
-      
+ print "OPTZ"
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.,2.]) #test for VH_LPHP 
+# card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.0,1.]) 
+ #card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.0,0.5])
+ print "OPTXY"
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,2.]) #test for VH_HPHP
+# card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,1.]) #orig
+# card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,0.5])
+ print "OPT3"
+# card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,0.333]) #orig
+# card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,1.]) #good
+ card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,1.]) #test for VH_HPHP  
+ #card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[10.,20.])
+# print "PT"
+# card.addSystematic("CMS_VV_JJ_nonRes_PT_"+category_pdf,"param",[0.0,0.333]) #orig
+# print "PTZ"
+# card.addSystematic("CMS_VV_JJ_nonRes_PTZ_"+category_pdf,"param",[0.0,2.]) 
+ 
+ print " and now make card"     
  card.makeCard()
 
  t2wcmd = "text2workspace.py %s -o %s"%(cardName,workspaceName)
@@ -439,17 +471,21 @@ if __name__=="__main__":
                               
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
-     if options.input.find("HPHP")!=-1: purity = "VV_HPHP"
-     elif options.input.find("HPLP")!=-1: purity = "VV_HPLP"
-     else: purity = "VV_LPLP" 
+     if options.input.find("HPHP")!=-1: purity = "HPHP"
+     elif options.input.find("HPLP")!=-1: purity = "HPLP"
+     elif options.input.find("LPHP")!=-1: purity = "LPHP"
+     else: purity = "LPLP" 
+     if 'VH' in purity: purity = 'VH_'+purity
+     else: purity = 'VV_'+purity
      if options.input.find('VBF')!=-1: purity = 'VBF_'+purity    
      print "Using purity: " ,purity    
      if options.merge:
       merge_all()
-      sys.exit()
-      
-     w_name = makeNonResCard()
+      sys.exit()       
 
+     print " ########################       makeNonResCard      ###"
+     w_name = makeNonResCard()
+     print " ########################   DONE    makeNonResCard      ###"
      print 
      print "open file " +w_name
      f = ROOT.TFile(w_name,"READ")
@@ -460,6 +496,7 @@ if __name__=="__main__":
      MJ1= workspace.var("MJ1");
      MJ2= workspace.var("MJ2");
      MJJ= workspace.var("MJJ");
+     data = workspace.data("data_obs")
     
      argset = ROOT.RooArgSet();
      argset.add(MJJ);
@@ -472,7 +509,7 @@ if __name__=="__main__":
      print "Observed number of events:",data.sumEntries()
           
      #################################################
-               
+     print " ########################       PostFitTools      ###"                         
      Tools = PostFitTools(hinMC,argset,options.xrange,options.yrange,options.zrange,purity+'_'+options.sample,options.output,data)
      
      print "x bins:"
@@ -502,14 +539,20 @@ if __name__=="__main__":
      model = workspace.pdf("model_b") 
                   
      args  = model.getComponents()
+     print "model ",model.Print()
+     print "args = model comp[onents ",args.Print()
      pdfName = "pdf_binJJ_"+purity+"_13TeV_%s_bonly"%options.year
 
      print "Expected number of QCD events:",(args[pdfName].getComponents())["n_exp_binJJ_"+purity+"_13TeV_%s_proc_nonRes"%options.year].getVal()
     
      #################################################
-     print "Fitting:"
+     print "###########        Fitting:            ################"
      fitresult = model.fitTo(data,ROOT.RooFit.SumW2Error(1),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1),ROOT.RooFit.NumCPU(8))#,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+     print "#####   Fitting results ###########" 
      fitresult.Print()
+     print "###########        Fitting DONE            ################"
+     print "model ",model.Print()
+
      #################################################
      print            
             

@@ -173,12 +173,12 @@ print "   - powheg pdf"
 makeHisto("histo_altshape3Up",inputx,"histo_NLO",inputy,"histo_NLO",inputz,"histo_NLO",output)
 makeHisto("histo_altshape3Down",inputx,"histo_NLODown",inputy,"histo_NLODown",inputz,"histo_NLODown",output)
 
-#print "   - Scale (x,y,z) up/down"
-#makeHisto("histo_ScaleUp",inputx,"histo_nominal_ScaleXUp",inputy,"histo_nominal_ScaleXUp",inputz,"histo_nominal_scale_up",output)
-#makeHisto("histo_ScaleDown",inputx,"histo_nominal_ScaleXDown",inputy,"histo_nominal_ScaleXDown",inputz,"histo_nominal_scale_down",output)
-#print "   - Res (x,y,z) up/down"
-#makeHisto("histo_ResUp",inputx,"histo_nominal_ResXUp",inputy,"histo_nominal_ResXUp",inputz,"histo_nominal_res_up",output)
-#makeHisto("histo_ResDown",inputx,"histo_nominal_ResXDown",inputy,"histo_nominal_ResXDown",inputz,"histo_nominal_res_down",output)
+print "   - Scale (x,y,z) up/down"
+makeHisto("histo_ScaleUp",inputx,"histo_nominal_ScaleXUp",inputy,"histo_nominal_ScaleXUp",inputz,"histo_nominal_scale_up",output)
+makeHisto("histo_ScaleDown",inputx,"histo_nominal_ScaleXDown",inputy,"histo_nominal_ScaleXDown",inputz,"histo_nominal_scale_down",output)
+print "   - Res (x,y,z) up/down"
+makeHisto("histo_ResUp",inputx,"histo_nominal_ResXUp",inputy,"histo_nominal_ResXUp",inputz,"histo_nominal_res_up",output)
+makeHisto("histo_ResDown",inputx,"histo_nominal_ResXDown",inputy,"histo_nominal_ResXDown",inputz,"histo_nominal_res_down",output)
 
 print "   - nominal (herwig)"
 makeHisto("histo_herwig",inputx,"histo_altshapeUp",inputy,"histo_altshapeUp",inputz,"histo_altshapeUp",output)

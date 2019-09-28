@@ -1,7 +1,7 @@
 import ROOT
 from ROOT import *
 from array import array
-import math
+import sys, math
 
 class PostFitTools():
 
@@ -44,7 +44,7 @@ class PostFitTools():
     data_.weightError(lo,hi)
     self.errdata_lo[mj1][mj2][mjj] = lo
     self.errdata_hi[mj1][mj2][mjj] = hi
-     
+
  def setBins(self,hist):
  
      self.xBins = self.getListOfBins(hist,"x")
@@ -391,7 +391,7 @@ class PostFitTools():
      proj.SetBinContent(b+1,e)           
      proj.SetBinError(b+1,math.sqrt(errPerBin[b]))
     self.MakePlots(h,proj,'y',self.yBinslowedge) 
-
+        
  def addPullPlot(self,hdata,hprefit,hpostfit,nBins):
     #print "make pull plots: (data-fit)/sigma_data"
     N = hdata.GetNbinsX()
@@ -501,9 +501,8 @@ class PostFitTools():
     gt.GetYaxis().SetTitleOffset(0.4);
     gt.GetYaxis().SetTitleFont(42);
     gt.GetXaxis().SetNdivisions(505)
-    #gpre.SetHistogram(gt);
-    gpost.SetHistogram(gt);       
-    return [gpre,gpost] 
+    gpost.SetHistogram(gt);     
+    return [gpost] 
 
  def MakePlots(self,histos,hdata,axis,nBins):
    
@@ -606,9 +605,10 @@ class PostFitTools():
     pad2.cd()
     graphs = self.addRatioPlot(hdata,histos[0],histos[1],nBins)
     #graphs[0].Draw("AP")
-    graphs[1].Draw("AP")
+    graphs[0].Draw("AP")
     c.SaveAs(self.output+"PostFit_"+htitle.replace(' ','_')+"_"+self.label+".png")
     c.SaveAs(self.output+"PostFit_"+htitle.replace(' ','_')+"_"+self.label+".root")
+    c.SaveAs(self.output+"PostFit_"+htitle.replace(' ','_')+"_"+self.label+".pdf")
     
  def getChi2fullModel(self,pdf,data,norm):
     pr=[]

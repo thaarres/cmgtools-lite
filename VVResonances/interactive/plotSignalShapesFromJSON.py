@@ -1,4 +1,4 @@
-3#!/bin/env python
+#!/bin/env python
 import ROOT
 import json
 import math
@@ -70,7 +70,7 @@ def getCanvasPaper(cname):
 def getMVVPdf(w,j,MH,postfix=""):
 
         var = w.var(options.var)
-        
+
         pdfName 	= "signal_%d%s" %(MH,postfix)
         Jmean 		= eval(j['MEAN'])
         Jsigma		= eval(j['SIGMA'])
@@ -93,8 +93,7 @@ def getMVVPdf(w,j,MH,postfix=""):
         n1.setConstant(ROOT.kTRUE)
         mean.setConstant(ROOT.kTRUE)
         sigma.setConstant(ROOT.kTRUE)
-        
-        
+                
         # gauss     = ROOT.RooGaussian("gauss_%d%s"%(MH,postfix), "gauss_%d%s"%(MH,postfix), var, mean, gsigma)
         # cb        = ROOT.RooCBShape("cb_%d%s"%(MH,postfix), "cb_%d%s"%(MH,postfix),var, mean, sigma, alpha, sign)
         # function = ROOT.RooAddPdf(pdfName, pdfName,gauss, cb, sigfrac)
@@ -185,21 +184,26 @@ def getMJPdf(w,j,MH,postfix="",jH=None):
             
 		
 parser = optparse.OptionParser()
-parser.add_option("-f","--file",dest="file",default='JJ_BulkGWW_2016_MVV.json',help="input file (JJ_{sig}_2016_MVV.json,JJ_{sig}_2016_MJl1_VV_HPLP.json,JJ_{sig}_2016_MJl2_VV_HPLP.json)")
+parser.add_option("-f","--file",dest="file",default='JJ_BulkGWW_2016_MVV.json',help="input file (JJ_{sig}_2016_MVV.json,JJ_{sig}_2016_MJrandom_VV_HPLP.json)")
 parser.add_option("-v","--var",dest="var",help="mVV or mJ",default='mVV')
+parser.add_option("-y","--year",dest="year",help="2016 or 2017 or 2018",default='2016')
+parser.add_option("-c","--category",dest="category",help="VV_HPHP or VV_HPLP or VH_HPHP etc",default='VV_HPLP')
+parser.add_option("-o","--outdir",dest="outdir",help="output directory",default='../plots/')
+parser.add_option("-i","--indir",dest="indir",help="input directory",default='results_2016/')
+parser.add_option("-n","--name",dest="name",help="you may specify an additional label for the output file",default='test')
 parser.add_option("-l","--leg",dest="leg",help="mVV or mJ",default='l1')
-parser.add_option("-o","--outdir",dest="outdir",help="output directory",default='./')
 parser.add_option("-p","--prelim",dest="prelim",help="with label preliminary or not",default=0)
+
 (options,args) = parser.parse_args()
 
 path = options.outdir
-path = "/portal/ekpbms2/home/dschaefer/DiBoson3D/2016/"
-postfix = "Jet 1 "
-if options.leg == "l2" !=-1: postfix = "Jet 2 "
+
+purity  = options.category
 
 inFileName = options.file
-massPoints = [1200,1700,2000,2400,2800,3200,3600,4000]#,4800,5200]
-#massPoints = [1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800,4000,4200,4400,4600,4800,5000,5200]
+massPoints = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500]
+postfix = "Jet 1 "
+if options.leg == "l2" !=-1: postfix = "Jet 2 "
 varName = {'mVV':'Dijet invariant mass [GeV]','mJ':'%sJet mass [GeV]'%postfix}
 varBins = {'mVV':'[37,1000,5500]','mJ':'[80,55,215]'}
 #w=ROOT.RooWorkspace("w","w")
@@ -211,6 +215,7 @@ colors.append(["#006400","#308014","#228B22","#32CD32","#00CD00","#00EE00","#00F
 colors.append(["#CD8500","#CD950C","#EE9A00","#EEAD0E","#FFA500","#FFB90F","#FFC125","#EEC900","#FFD700","#FFEC8B","#FFF68F"]*3) 
 colors.append(["#8B2500","#CD3700","#EE4000","#FF4500","#CD4F39","#EE5C42","#EE6A50","#FF7256","#FA8072","#FFA07A","#EEB4B4"]*3)
 colors.append(["#EE82EE","#FF00FF","#D02090","#C71585","#B03060 ","#DB7093","#FFB6C1","#FFC0CB"]*3)
+
 def doSingle():
     w=ROOT.RooWorkspace("w","w")
     w.factory(options.var+varBins[options.var])
@@ -273,13 +278,14 @@ def doSingle():
       c1.SaveAs(path+"signalShapes%s_%s.pdf" %(options.var, inFileName.rsplit(".", 1)[0]))
       c1.SaveAs(path+"signalShapes%s_%s.C" %(options.var, inFileName.rsplit(".", 1)[0]))
       c1.SaveAs(path+"signalShapes%s_%s.root" %(options.var, inFileName.rsplit(".", 1)[0]))
-  
+
 def doAll(category,jsons,legs):
     w=ROOT.RooWorkspace("w","w")
     w.factory(options.var+varBins[options.var])
     w.var(options.var).SetTitle(varName[options.var])
     #legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
     c1,pt = getCanvasPaper("c1")
+
     c1.Draw()
     if options.var == 'mVV':
         c1.Divide(1,5,0.0,0.0)
@@ -302,7 +308,7 @@ def doAll(category,jsons,legs):
             frame[-1].SetAxisRange(55,150)
         frame[-1].SetTitle("")
         name = f.split("_")[1]
-        with open(f) as jsonFile:
+        with open(options.indir+f) as jsonFile:
           j = json.load(jsonFile)
           for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
             if options.var == 'mVV': getMVVPdf(w,j,MH,name)
@@ -311,11 +317,11 @@ def doAll(category,jsons,legs):
                     print "no H boson in sample "
                     getMJPdf(w,j,MH,name)
                 if f.find("Vjet")!=-1:
-                    with open(f.replace("Vjet","Hjet")) as jsonFileH:
+                    with open(options.indir+f.replace("Vjet","Hjet")) as jsonFileH:
                         jH = json.load(jsonFileH)
                     getMJPdf(j,MH,name,jH)
                 if f.find("Hjet")!=-1:
-                    with open(f.replace("Hjet","Vjet")) as jsonFileV:
+                    with open(options.indir+f.replace("Hjet","Vjet")) as jsonFileV:
                         jV = json.load(jsonFileV)
                     getMJPdf(w,jV,MH,name,j)
   
@@ -333,8 +339,7 @@ def doAll(category,jsons,legs):
         for ii,f in enumerate(jsons):
             name = jsons[len(jsons)-ii-1].split("_")[1]
             leg[-1].AddEntry(frame[0].findObject(str(2000)+name),legs[len(jsons)-ii-1],"L")
-  
-   
+
     for i in range(1,len(frame)+1):
         c1.cd(i)
         c1.cd(i).SetTickx()
@@ -375,7 +380,6 @@ def doAll(category,jsons,legs):
         frame[i-1].Draw()
         leg[i-1].Draw("same")
     
- 
     
     pt2 = ROOT.TPaveText(0.16,0.62,0.63,0.76,"NDC")
     pt2.SetTextFont(42)
@@ -384,39 +388,43 @@ def doAll(category,jsons,legs):
     pt2.SetFillColor(0)
     pt2.SetBorderSize(0)
     pt2.SetFillStyle(0)
+
     if options.var == 'mJ': pt2.AddText(category)
     pt2.Draw()
-    if options.var =="mVV": category = "Vall"
+#    if options.var =="mVV": category = "Vall"
     if options.prelim=="1":
         cmslabel_sim_prelim(c1,'sim',11)
         c1.Update()
-        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.png"  %(options.var,category))
-        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.pdf"  %(options.var,category))
-        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.C"    %(options.var,category))
-        c1.SaveAs(path+"signalShapes_%s_All_%s_prelim.root" %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.png"  %(options.var,category,options.year,options.name))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.pdf"  %(options.var,category,options.year,options.name))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.C"    %(options.var,category,options.year,options.name))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.root" %(options.var,category,options.year,options.name))
     else:
         cmslabel_sim(c1,'sim',11)
         c1.Update()
         
-        c1.SaveAs(path+"signalShapes_%s_All_%s.png"  %(options.var,category))
-        c1.SaveAs(path+"signalShapes_%s_All_%s.pdf"  %(options.var,category))
-        c1.SaveAs(path+"signalShapes_%s_All_%s.C"    %(options.var,category))
-        c1.SaveAs(path+"signalShapes_%s_All_%s.root" %(options.var,category))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.png"  %(options.var,category,options.year,options.name))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.pdf"  %(options.var,category,options.year,options.name))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.C"    %(options.var,category,options.year,options.name))
+        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.root" %(options.var,category,options.year,options.name))
     
       
 if __name__ == '__main__':
     #doSingle()
+#    legs = ["G_{bulk} #rightarrow WW"]
     legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH"]
-    signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW"]
-    categories = ["VV_HPLP"]#,"VV_HPHP","VH_HPLP","VH_HPHP"]
-    jsons=[]
+#    signals = ["BulkGWW"]
+    signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW","ZprimeZH"]
+    categories = ["VH_LPHP"] #,"VV_HPHP","VH_HPLP","VH_HPHP","VH_LPHP"]
+#    categories = ["VH_LPHP","VV_HPHP","VH_HPLP","VH_HPHP","VH_LPHP"]
     for category in categories:
+        jsons=[]
         for s in signals:
-            if options.var =="mJ":
-                jsons.append("JJ_"+s+"_2016_MJrandom_"+category+".json")
-            else: jsons.append("JJ_"+s+"_2016_MVV.json")
-        if options.var=="mJ":
-            jsons.append("JJ_Hjet_ZprimeZH_2016_MJrandom_"+category+".json")
-        else:
-            jsons.append("JJ_j1ZprimeZH_2016_MVV.json")
+	  if options.var =="mJ":
+            if s != "ZprimeZH": jsons.append("JJ_"+s+"_2016_MJrandom_"+category+".json")
+            else : jsons.append("JJ_Hjet_ZprimeZH_2016_MJrandom_"+category+".json")
+          if options.var =="mVV":
+            if s != "ZprimeZH" and s != "WprimeWZ":  jsons.append("JJ_"+s+"_2016_MVV.json")
+            else: jsons.append("JJ_j1"+s+"_2016_MVV.json")
+
         doAll(category,jsons,legs)
