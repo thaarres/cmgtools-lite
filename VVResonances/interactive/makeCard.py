@@ -45,7 +45,7 @@ purities= ['VH_HPLP','VH_HPHP','VH_LPHP']
 #purities= ['VV_HPLP','VV_HPHP']
 #purities= ['VV_HPLP','VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
-signals = ["BulkGZZ"]
+signals = ["BulkGWW"]
 
 Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sf_qcd,pseudodata,outlabel)
 
@@ -86,9 +86,10 @@ for sig in signals:
       print "rootFileNorm ",rootFileNorm
       Tools.AddNonResBackground(card,dataset,p,rootFile3DPDF,rootFileNorm,ncontrib) 
 
+      #if you run on real data or pseudodata
       rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
       histName="data"
-      scaleData=1.0 #if you run on real data OR PSEUDODATA
+      scaleData=1.0 #if you ru on real data
       if pseudodata=="noVjets":
         print "Using pseudodata without vjets"
         rootFileData = resultsDir[dataset]+"/JJ_PDnoVjets_"+p+".root"

@@ -8,6 +8,7 @@ from optparse import OptionParser
 # python makeInputs.py -p 2016 --run "qcdnorm"
 # python makeInputs.py -p 2016 --run "data"
 # python makeInputs.py -p 2016 --run "pseudo"
+
 parser = OptionParser()
 parser.add_option("-p","--period",dest="period",type="int",default=2016,help="run period")
 parser.add_option("-s","--sorting",dest="sorting",help="b-tag or random sorting",default='random')
@@ -29,6 +30,7 @@ sorting = options.sorting
 
 submitToBatch = options.batch #Set to true if you want to submit kernels + makeData to batch!
 runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! 
+
 dijetBinning = options.binning
 useTriggerWeights = options.trigg
 
@@ -104,9 +106,9 @@ catHtag['NP1'] = '(jj_l1_MassIndependentDeepDoubleBvLJetprobHbb_<%.2f)'%valueLP
 catHtag['NP2'] = '(jj_l2_MassIndependentDeepDoubleBvLJet_probHbb<%.2f)'%valueLP
 
 cuts={}
-
-#cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(passed_METfilters&&passed_PVfilter&&njj>0&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.)' #without rho
-cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(passed_METfilters&&passed_PVfilter&&njj>0&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.&&TMath::Log(jj_l1_softDrop_mass**2/jj_l1_pt**2)<-1.8&&TMath::Log(jj_l2_softDrop_mass**2/jj_l2_pt**2)<-1.8)' #with rho
+cuts['common'] = '((HLT_JJ)*(run>500) + (run<500))*(passed_METfilters&&passed_PVfilter&&njj>0&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.&&TMath::Log(jj_l1_softDrop_mass**2/jj_l1_pt**2)<-1.8&&TMath::Log(jj_l2_softDrop_mass**2/jj_l2_pt**2)<-1.8)'
+cuts['common_VV'] = '((HLT_JJ)*(run>500) + (run<500))*(passed_METfilters&&passed_PVfilter&&njj&&!njj_vbf&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.&&TMath::Log(jj_l1_softDrop_mass**2/jj_l1_pt**2)<-1.8&&TMath::Log(jj_l2_softDrop_mass**2/jj_l2_pt**2)<-1.8)'
+cuts['common_VBF'] = '((HLT_JJ)*(run>500) + (run<500))*(passed_METfilters&&passed_PVfilter&&njj_vbf&&jj_LV_mass>700&&abs(jj_l1_eta-jj_l2_eta)<1.3&&jj_l1_softDrop_mass>0.&&jj_l2_softDrop_mass>0.&&TMath::Log(jj_l1_softDrop_mass**2/jj_l1_pt**2)<-1.8&&TMath::Log(jj_l2_softDrop_mass**2/jj_l2_pt**2)<-1.8)'
 
 #signal regions
 if sorting == 'random':
@@ -151,10 +153,11 @@ cuts['res'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>60&&jj_l1_softDrop_ma
 cuts['resTT'] = '(jj_l1_mergedVTruth==1&&jj_l1_softDrop_mass>140&&jj_l1_softDrop_mass<200)'
 
 #all categories
-categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP']
+categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP','VBF_VV_HPHP','VBF_VV_HPLP']
 
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW_"
+VBFBulkGravWWTemplate="VBF_BulkGravToWW_"
 BulkGravZZTemplate="BulkGravToZZToZhadZhad_"
 ZprimeWWTemplate= "ZprimeToWW_"
 ZprimeZHTemplate="ZprimeToZhToZhadhbb_"
@@ -175,7 +178,6 @@ dataTemplate="JetHT"
 #nonResTemplate="QCD_Pt-" #low stat herwig
 #nonResTemplate="QCD_HT" #medium stat madgraph+pythia
 nonResTemplate="QCD_Pt_" #high stat pythia8
-
 
 if(period == 2016):
     TTemplate= "TT_Mtt-700to1000,TT_Mtt-1000toInf" #do we need a separate fit for ttbar?
@@ -220,11 +222,15 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
         signal_inuse="ZprimeZH"
         signaltemplate_inuse=ZprimeZHTemplate
         xsec_inuse=BRZH
-    elif options.signal.find("BulkGWW")!=-1:
+    elif options.signal.find("BGWW")!=-1 and not 'VBF' in options.signal:
         signal_inuse="BulkGWW"
         signaltemplate_inuse=BulkGravWWTemplate
         xsec_inuse=BRWW
-    elif options.signal.find("BulkGZZ")!=-1:
+    elif options.signal.find("VBFBGWW")!=-1:
+        signal_inuse="VBF_BulkGWW"
+        signaltemplate_inuse=VBFBulkGravWWTemplate
+        xsec_inuse=BRWW
+    elif options.signal.find("BGZZ")!=-1:
         signal_inuse="BulkGZZ"
         signaltemplate_inuse=BulkGravZZTemplate
         xsec_inuse=BRZZ
@@ -287,7 +293,7 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
                 f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random', fixParsSig[signal_inuse],"jj_random_mergedVTruth==1")
                 f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse],"jj_random_mergedHTruth==1")
             else:
-                f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse]) 
+                f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')]) 
         else:
             if signal_inuse.find("H")!=-1: 
                 f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,'l1',fixParsSig[signal_inuse],"jj_l1_mergedVTruth==1")
@@ -307,14 +313,14 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
             f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass > 85 && jj_l1_softDrop_mass <= 85 && jj_l1_softDrop_mass >= 65")
             #f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])
             #f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])
-        elif signal_inuse.find("H")==1 or signal_inuse.find("WZ")==1:
-            f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])
+        else:
+            f.makeSignalShapesMVV("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse.replace('VBF_','')])
     
 
     if options.run.find("all")!=-1 or options.run.find("norm")!=-1:
         print "fit signal norm "
         f.makeSignalYields("JJ_"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,xsec_inuse,{'VH_HPHP':HPSF*HPSF,'VH_HPLP':HPSF*LPSF,'VH_LPHP':HPSF*LPSF,'VH_LPLP':LPSF*LPSF,'VV_HPHP':HPSF*HPSF,'VV_HPLP':HPSF*LPSF,'VH_all':HPSF*HPSF+HPSF*LPSF})
-        f.makeNormalizations(signal_inuse,"JJ_M2000_"+str(period),signaltemplate_inuse+"narrow_2000",0,cuts['nonres'],"nRes")
+        #f.makeNormalizations(signal_inuse,"JJ_M2000_"+str(period),signaltemplate_inuse+"narrow_2000",0,cuts['nonres'],"nRes")
 
 if options.run.find("all")!=-1 or options.run.find("detector")!=-1:
     print "make Detector response"
@@ -332,6 +338,7 @@ if options.run.find("all")!=-1 or options.run.find("qcd")!=-1:
             sys.exit()
         elif options.run.find("all")!=-1 or options.run.find("kernel")!=-1:
             f.mergeKernelJobs("nonRes","JJ_"+str(period))
+	    f.mergeBackgroundShapes("nonRes","JJ_"+str(period))
     else:
         if options.run.find("all")!=-1 or options.run.find("templates")!=-1:
             wait = True
@@ -355,7 +362,7 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
     print "then norm W"
     f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
-    print "then norm Z"
+    #print "then norm Z"
     f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
     f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
 

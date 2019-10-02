@@ -15,7 +15,7 @@ class PostFitTools():
   self.label = label
   self.output = outdir
   self.colors = [ROOT.kBlack,ROOT.kPink-1,ROOT.kAzure+1,ROOT.kAzure+1,210,210,ROOT.kMagenta,ROOT.kMagenta,ROOT.kOrange,ROOT.kOrange,ROOT.kViolet,ROOT.kViolet]
-  
+
   self.ndata = {}
   self.errdata_lo = {}
   self.errdata_hi = {}
@@ -44,7 +44,7 @@ class PostFitTools():
     data_.weightError(lo,hi)
     self.errdata_lo[mj1][mj2][mjj] = lo
     self.errdata_hi[mj1][mj2][mjj] = hi
- 
+
  def setBins(self,hist):
  
      self.xBins = self.getListOfBins(hist,"x")
