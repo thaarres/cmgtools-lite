@@ -26,25 +26,10 @@ vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{},'VH_HPHP':{},'VH_HPLP':{},'VH
 vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
 vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
 vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
-vtag_unc['VH_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
-vtag_unc['VH_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
-vtag_unc['VH_LPHP'] = {'2016':'1.063','2017':'1.043'}
-
-vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VH_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_LPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))'}
-
-'''
-vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{}}
-vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
-vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
-vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
 
 vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))'}
-'''
 
-#purities= ['VH_HPLP']
-purities= ['VH_HPLP','VH_HPHP','VH_LPHP']
-#purities= ['VV_HPLP','VV_HPHP']
-#purities= ['VV_HPLP','VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
+purities= ['VV_HPLP','VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
 signals = ["BulkGWW"]
 
@@ -116,9 +101,7 @@ for sig in signals:
       Tools.AddNonResBackgroundSystematics(card,p)
         
       card.makeCard()
-      print "card and workspace name are: "
-      print cardName
-      print workspaceName
+
       t2wcmd = "text2workspace.py %s -o %s"%(cardName,workspaceName)
       print t2wcmd
       os.system(t2wcmd)
