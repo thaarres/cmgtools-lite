@@ -373,14 +373,14 @@ def save_shape(final_shape,norm_nonres,pTools,sample="pythia"):
      os.system(cmd)
 
 def makeNonResCard():
-
+ print " ############ options.pdfIn", options.pdfIn
  if options.pdfIn.find("VV_HPHP")!=-1: category_pdf = "VV_HPHP"
  elif options.pdfIn.find("VV_HPLP")!=-1: category_pdf = "VV_HPLP"
- if options.pdfIn.find("VH_HPHP")!=-1: category_pdf = "VH_HPHP" 
+ elif options.pdfIn.find("VH_HPHP")!=-1: category_pdf = "VH_HPHP" 
  elif options.pdfIn.find("VH_HPLP")!=-1: category_pdf = "VH_HPLP"
  elif options.pdfIn.find("VH_LPHP")!=-1: category_pdf = "VH_LPHP"
  else: category_pdf = "VV_LPLP"  
-     
+
  dataset = options.year
  sig = 'BulkGWW'
  if 'VBF' in purity: sig = 'VBF_BulkGWW'
@@ -455,7 +455,7 @@ def makeNonResCard():
  t2wcmd = "text2workspace.py %s -o %s"%(cardName,workspaceName)
  print t2wcmd
  os.system(t2wcmd)
- 
+ print " workspaceName ", workspaceName
  return workspaceName
         
 if __name__=="__main__":

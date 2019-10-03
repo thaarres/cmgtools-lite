@@ -7,7 +7,8 @@ from optparse import OptionParser
 # python makeInputs.py -p 2016 --run "qcdkernel"
 # python makeInputs.py -p 2016 --run "qcdnorm"
 # python makeInputs.py -p 2016 --run "data"
-# python makeInputs.py -p 2016 --run "pseudo"
+# python makeInputs_doubleB.py -p 2016 --run "pseudoNOVJETS"
+# python makeInputs_doubleB.py -p 2016 --run "pseudoVJETS"                                                                                                                                                                                                                   
 
 parser = OptionParser()
 parser.add_option("-p","--period",dest="period",type="int",default=2016,help="run period")
@@ -121,11 +122,6 @@ if sorting == 'random':
  print " ################ VV orthogonal  VH CATEGORY ############"
  cuts['VV_HPHP'] = '('+'!'+cuts['VH_all']+'&&'+'(' +  '&&'.join([catVtag['HP1'],catVtag['HP2']]) + ')' + ')'
  cuts['VV_HPLP'] = '(' + '!' + cuts['VH_all'] + '&&' + '(' + '('+  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')' + ')'
-# print " ################ ONLY VV CATEGORY ############"  
-# cuts['VV_HPHP'] = '('  +  '&&'.join([catVtag['HP1'],catVtag['HP2']]) + ')' 
-# cuts['VV_HPLP'] = '('  + '(' +  '&&'.join([catVtag['HP1'],catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([catVtag['HP2'],catVtag['LP1']]) + ')' + ')'
-
-
 else:
  print "Use b-tagging sorting"
  cuts['VH_HPHP'] = '('+  '&&'.join([catHtag['HP1'],catVtag['HP2']]) + ')'
@@ -308,7 +304,7 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
         if signal_inuse.find("H")!=-1:
             f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass <= 150 && jj_l1_softDrop_mass > 105 && jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass > 65 ")
             f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 150 && jj_l2_softDrop_mass > 105 && jj_l1_softDrop_mass <= 105 && jj_l1_softDrop_mass > 65")
-        if signal_inuse.find("WZ")!=-1:
+        elif signal_inuse.find("WZ")!=-1:
             f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l1_softDrop_mass <= 105 && jj_l1_softDrop_mass > 85 && jj_l2_softDrop_mass <= 85 && jj_l2_softDrop_mass >= 65 ")
             f.makeSignalShapesMVV("JJ_j2"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse],"jj_l2_softDrop_mass <= 105 && jj_l2_softDrop_mass > 85 && jj_l1_softDrop_mass <= 85 && jj_l1_softDrop_mass >= 65")
             #f.makeSignalShapesMVV("JJ_j1"+str(signal_inuse)+"_"+str(period),signaltemplate_inuse,fixParsSigMVV[signal_inuse])
@@ -362,7 +358,7 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
     print "then norm W"
     f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
-    #print "then norm Z"
+    print "then norm Z"
     f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
     f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
 
@@ -370,14 +366,14 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
 if options.run.find("all")!=-1 or options.run.find("data")!=-1:
     print " Do data "
     f.makeNormalizations("data","JJ_"+str(period),dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)
-if options.run.find("all")!=-1 or options.run.find("pseudo")!=-1:
-    print " Do pseudodata "
+if options.run.find("all")!=-1 or options.run.find("pseudoNOVJETS")!=-1:
+    print " Do pseudodata without vjets"
     from modules.submitJobs import makePseudoData
     for p in categories: makePseudoData("JJ_"+str(period)+"_nonRes_%s.root"%p,"save_new_shapes_"+str(period)+"_pythia_%s_3D.root"%p,"pythia","JJ_PDnoVjets_%s.root"%p,lumi)
-#    from modules.submitJobs import makePseudoDataVjets
-#    for p in categories: makePseudoDataVjets("/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_%s.root"%p,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_nonRes_3D_%s.root"%p,"pythia","/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/JJ_PD_%s.root"%p,lumi,"/afs/cern.ch/user/t/thaarres/public/forJen/looseDDT/workspace_JJ_13TeV_2017.root",2017,p)
+if options.run.find("all")!=-1 or options.run.find("pseudoVJETS")!=-1:
+    print " Do pseudodata with vjets: DID YOU PRODUCE THE WORKSPACE BEFORE???"
+    from modules.submitJobs import makePseudoDataVjets
+    for p in categories: makePseudoDataVjets("results_"+str(period)+"/JJ_"+str(period)+"_nonRes_%s.root"%p,"results_"+str(period)+"/save_new_shapes_"+str(period)+"_pythia_%s_3D.root"%p,"pythia","JJ_PDVjets_%s.root"%p,lumi,"workspace_JJ_BulkGWW__13TeV_"+str(period)+".root",period,p)
 
-
-#f.mergeBackgroundShapes("nonRes","/portal/ekpbms2/home/dschaefer/DiBoson3D/2016/save_new_shapes_madgraph_HPHP_")
 
 print " ########## I did everything I could! ###### "
