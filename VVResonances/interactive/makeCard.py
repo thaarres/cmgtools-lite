@@ -6,8 +6,9 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 sf_qcd = 1.0
-pseudodata = "Vjets" #"ZprimeZH"
-outlabel = "_VH_pseudoVjets"#"sigonly_ZprimeZH_M2000"
+
+pseudodata = "ZprimeZH"
+outlabel = "sigOnly_ZprimeZH_M2000"
 
 datasets=['2016']#,'2017']
 
@@ -23,15 +24,20 @@ scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
 
 #quick fix to add VH !!!
 vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{},'VH_HPHP':{},'VH_HPLP':{},'VH_LPHP':{}}
+
 vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
 vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
 vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
+vtag_unc['VH_HPHP'] = {'2016':'1.','2017':'1.'}
+vtag_unc['VH_HPLP'] = {'2016':'1.','2017':'1.'}
 
-vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))'}
 
-purities= ['VV_HPLP','VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
+vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_HPHP':'1','VH_HPLP':'1'}
+
+purities= ['VV_HPLP']#,'VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
+
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
-signals = ["BulkGWW"]
+signals = ["ZprimeZH"]
 
 Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sf_qcd,pseudodata,outlabel)
 
@@ -70,11 +76,13 @@ for sig in signals:
       print "rootFile3DPDF ",rootFile3DPDF
       rootFileNorm = resultsDir[dataset]+"/JJ_%s_nonRes_"%dataset+p+".root"   
       print "rootFileNorm ",rootFileNorm
+
       Tools.AddNonResBackground(card,dataset,p,rootFile3DPDF,rootFileNorm,ncontrib) 
 
       #if you run on real data or pseudodata
       rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
       histName="data"
+
       scaleData=1.0 
       if pseudodata=="noVjets":
         print "Using pseudodata without vjets"
@@ -86,13 +94,9 @@ for sig in signals:
         rootFileData = resultsDir[dataset]+"/JJ_PDVjets_"+p+".root"
         histName="data"
         scaleData=1.0
-      if pseudodata=="ZprimeZH":
-       rootFileData = resultsDir[dataset]+"/JJ_ZprimeZH_VH_all_M2000.root"
+      if pseudodata==sig:
+       rootFileData = resultsDir[dataset]+"/JJ_"+sig+"_"+p+"_M"+outlabel.split("_M")[1]+".root"
        histName="data_obs"
-       scaleData=1.0
-      if pseudodata=="WprimeWZ":
-       rootFileData = resultsDir[dataset]+"/JJ_WprimeWZ_VV_HPLP_M4500.root" 
-       histName="data_obs"    
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
       
