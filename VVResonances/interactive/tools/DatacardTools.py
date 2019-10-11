@@ -66,7 +66,7 @@ class DatacardTools():
        
        if self.pseudodata=="":
           card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],1.0)
-       elif self.outlabel.find("sigonly"):
+       elif self.outlabel.find("sigOnly"):
            card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],500.)
        
       if sig.find("WZ")!=-1:
@@ -83,7 +83,7 @@ class DatacardTools():
        
        if self.pseudodata=="":
           card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],1.0)
-       elif self.outlabel.find("sigonly")!=-1:
+       elif self.outlabel.find("sigOnly")!=-1:
            card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],500.)
 
  def AddWResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib):
@@ -109,7 +109,7 @@ class DatacardTools():
        print "outlabel "+self.outlabel
        if self.pseudodata=="":
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets")
-       if self.outlabel.find("sigonly")!=-1:
+       if self.outlabel.find("sigOnly")!=-1:
            print "add small yield"
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets",0.000001)
 
@@ -134,7 +134,7 @@ class DatacardTools():
       
        if self.pseudodata=="":
              card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets") 
-       if self.outlabel.find("sigonly")!=-1:
+       if self.outlabel.find("sigOnly")!=-1:
            card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets",0.000001)
        print "stop Zres background"
    
@@ -144,7 +144,7 @@ class DatacardTools():
           
       if self.pseudodata=="":
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",self.sfQCD)
-      if self.outlabel.find("sigonly")!=-1:
+      if self.outlabel.find("sigOnly")!=-1:
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",0.0000000000001)
  
  def AddData(self,card,fileData,histoName,scaleData):
