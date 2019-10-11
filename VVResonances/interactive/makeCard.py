@@ -6,8 +6,8 @@ from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 sf_qcd = 1.0
-pseudodata = ""#"ZprimeZH"
-outlabel = ""#"sigonly_ZprimeZH_M2000"
+pseudodata = "sigOnly_ZprimeZH_M2000"
+outlabel = pseudodata
 
 datasets=['2016']#,'2017']
 
@@ -19,14 +19,16 @@ lumi_unc = {'2016':1.025,'2017':1.023}
 scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
 scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
 
-vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{}}
+vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{},'VH_HPHP':{},'VH_HPLP':{}}
 vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
 vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136'}    
 vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
+vtag_unc['VH_HPHP'] = {'2016':'1.','2017':'1.'}
+vtag_unc['VH_HPLP'] = {'2016':'1.','2017':'1.'}
 
-vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))'}
+vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_HPHP':'1','VH_HPLP':'1'}
   
-purities= ['VV_HPLP']
+purities= ['VV_HPLP','VV_HPHP','VH_HPHP','VH_HPLP']
 #purities= ['VV_HPLP','VV_HPHP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
 signals = ["ZprimeZH"]
@@ -51,20 +53,26 @@ for sig in signals:
       Tools.AddSignal(card,dataset,p,sig,resultsDir[dataset],ncontrib)                
       ncontrib+=1
 
-      rootFileMVV = resultsDir[dataset]+'/JJ_%s_WJets_MVV_'%dataset+p+'.root' 
-      rootFileNorm = resultsDir[dataset]+'/JJ_%s_WJets_%s.root'%(dataset,p)
+      #rootFileMVV = resultsDir[dataset]+'/JJ_%s_WJets_MVV_'%dataset+p+'.root' 
+      #rootFileNorm = resultsDir[dataset]+'/JJ_%s_WJets_%s.root'%(dataset,p)
+      rootFileMVV = resultsDir[dataset]+'/JJ_2016_WJets_MVV_VV_HPLP.root' 
+      rootFileNorm = resultsDir[dataset]+'/JJ_2016_WJets_VV_HPLP.root'
+      
       Tools.AddWResBackground(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
       ncontrib+=1
       
-      rootFileMVV = resultsDir[dataset]+'/JJ_%s_ZJets_MVV_'%dataset+p+'.root'
-      rootFileNorm = resultsDir[dataset]+"/JJ_%s_ZJets_%s.root"%(dataset,p)
+      #rootFileMVV = resultsDir[dataset]+'/JJ_%s_ZJets_MVV_'%dataset+p+'.root'
+      #rootFileNorm = resultsDir[dataset]+"/JJ_%s_ZJets_%s.root"%(dataset,p)
+      rootFileMVV = resultsDir[dataset]+'/JJ_2016_ZJets_MVV_VV_HPLP.root' 
+      rootFileNorm = resultsDir[dataset]+'/JJ_2016_ZJets_VV_HPLP.root'
       Tools.AddZResBackground(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
       ncontrib+=1
       
 
       rootFile3DPDF = resultsDir[dataset]+'/JJ_2016_nonRes_3D_VV_HPLP.root'
+      rootFileNorm = resultsDir[dataset]+"/JJ_2016_nonRes_VV_HPLP.root" 
       #rootFile3DPDF = resultsDir[dataset]+"/save_new_shapes_pythia_"+p+"_3D.root"
-      rootFileNorm = resultsDir[dataset]+"/JJ_%s_nonRes_"%dataset+p+".root"   
+      #rootFileNorm = resultsDir[dataset]+"/JJ_%s_nonRes_"%dataset+p+".root"   
       Tools.AddNonResBackground(card,dataset,p,rootFile3DPDF,rootFileNorm,ncontrib) 
 
       rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
@@ -73,13 +81,9 @@ for sig in signals:
 #      rootFileData = "results_2016/JJ_2016_nonRes_VV_HPLP.root"   
 #      histName="nonRes"
 #      scaleData=lumi[dataset] #if you run on MC for transfer-kernel
-      if pseudodata=="ZprimeZH":
-       rootFileData = resultsDir[dataset]+"/JJ_ZprimeZH_VH_all_M2000.root"
+      if pseudodata.find("sigOnly")!=-1:
+       rootFileData = resultsDir[dataset]+"/pseudodata_"+pseudodata+"_"+p+".root"
        histName="data_obs"
-       scaleData=1.0
-      if pseudodata=="WprimeWZ":
-       rootFileData = resultsDir[dataset]+"/JJ_WprimeWZ_VV_HPLP_M4500.root" 
-       histName="data_obs"    
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
       
