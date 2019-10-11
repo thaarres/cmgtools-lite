@@ -133,9 +133,10 @@ samples={}
 graphs={'MEAN':ROOT.TGraphErrors(),'SIGMA':ROOT.TGraphErrors(),'ALPHA1':ROOT.TGraphErrors(),'N1':ROOT.TGraphErrors(),'ALPHA2':ROOT.TGraphErrors(),'N2':ROOT.TGraphErrors()}
 
 testcorr= False
+
 if options.sample.find("ZH")!=-1 or options.sample.find('Zh')!=-1 or options.sample.find("WZ")!=-1 or options.sample.find('WH')!=-1:
     testcorr = True
-
+print " ######### testcorr ",testcorr
 for filename in os.listdir(args[0]):
     if not (filename.find(options.sample)!=-1):
         continue
@@ -188,6 +189,7 @@ if (options.sample.find("H")!=-1 or options.sample.find("h")!=-1 or options.samp
     else:
         print 'add sigma hist'
         graph_sum_sigma = ROOT.TH2F("corr_sigma","corr_sigma",2,array("f",[55,105,215]),2,array("f",[55,105,215]))
+
     if samples[mass].find("WZ")!=-1:
         print 'mean for WZ signal' 
         graph_sum_mean = ROOT.TH2F("corr_mean","corr_mean",2,array("f",[76,86,94]),2,array("f",[76,86,94]))
@@ -268,12 +270,10 @@ for mass in sorted(samples.keys()):
 	    if len(parVal) > 1:
              fitter.w.var(parVal[0]).setVal(float(parVal[1]))
              fitter.w.var(parVal[0]).setConstant(1)
-    
-    
-  
-    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0)])
-    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1)])
-    
+
+#    fitter.importBinnedData(histo,['MVV'],'data')
+    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Save()])
+    fitter.fit('model','data',[ROOT.RooFit.SumW2Error(0),ROOT.RooFit.Minos(1),ROOT.RooFit.Save()])
     
     fitter.projection("model","data","MVV","debugVV_"+options.output+"_"+str(mass)+".png",roobins)
 
@@ -291,13 +291,18 @@ for name,graph in graphs.iteritems():
     graph.Write(name)
  
 if testcorr==True:
+
+    print "############### testcorr ###############"
     for mass in allgraphs.keys():
         graph_sum_sigma.Add(allgraphs_sigma[mass])
         graph_sum_mean.Add(allgraphs[mass])
     graph_sum_sigma.Scale(1/float(N))
-    graph_sum_mean .Scale(1/float(N))
+    graph_sum_mean.Scale(1/float(N))
+    print "sum mean",  graph_sum_mean
+    print "sum sigma",  graph_sum_sigma
     graph_sum_sigma.Write()
     graph_sum_mean .Write()
+
 
 F.Close()
 
