@@ -94,8 +94,8 @@ for sig in signals:
         rootFileData = resultsDir[dataset]+"/JJ_PDVjets_"+p+".root"
         histName="data"
         scaleData=1.0
-      if pseudodata=="ZprimeZH":
-       rootFileData = resultsDir[dataset]+"/JJ_ZprimeZH_"+p+"_M2000.root"
+      if pseudodata==sig:
+       rootFileData = resultsDir[dataset]+"/JJ_"+sig+"_"+p+"_M"+outlabel.split("_M")[1]+".root"
        histName="data_obs"
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
