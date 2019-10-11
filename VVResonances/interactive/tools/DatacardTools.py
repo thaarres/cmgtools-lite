@@ -69,9 +69,9 @@ class DatacardTools():
        card.conditionalProduct2("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig,"{MJ1,MJ2}")
        card.sumSimple("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
        
-       if self.pseudodata=="":
+       if self.outlabel.find("sigOnly")==-1:
           card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],1.0)
-       elif self.outlabel.find("sigOnly"):
+       else:
            card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],500.)
        
       if sig.find("WZ")!=-1:
@@ -86,9 +86,9 @@ class DatacardTools():
        card.conditionalProduct2("%s_c2"%sig,"%s_Wqq1_c2"%sig,"%s_Wqq2_c2"%sig,"%s_MVV_c2"%sig,"{MJ1,MJ2}")
        card.sumSimple("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
        
-       if self.pseudodata=="":
+       if self.outlabel.find("sigOnly")==-1:
           card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],1.0)
-       elif self.outlabel.find("sigOnly")!=-1:
+       else:
            card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],500.)
 
  
@@ -97,7 +97,7 @@ class DatacardTools():
        sys.path.append(resultsDir)
        module_name = 'JJ_WJets_%s'%category
        module = __import__(module_name)  
-       
+       print module_name
        # W+jets 
        card.addHistoShapeFromFile("Wjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
        card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l1","MJ1","",getattr(module,'Wjets_TTbar_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])
