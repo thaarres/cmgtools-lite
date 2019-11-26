@@ -8,7 +8,7 @@ cmd='combineCards.py '
 sf_qcd = 1.0
 
 pseudodata = "Vjets"
-outlabel = "sigOnly_ZprimeZH_M2000"
+outlabel = "ZprimeZH"
 
 datasets=['2016']#,'2017']
 
@@ -83,7 +83,6 @@ for sig in signals:
       #if you run on real data or pseudodata
       rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
       histName="data"
-
       scaleData=1.0 
       if pseudodata=="noVjets":
         print "Using pseudodata without vjets"
