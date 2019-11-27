@@ -7,8 +7,8 @@ cmd='combineCards.py '
 
 sf_qcd = 1.0
 
-pseudodata = "ZprimeZH"
-outlabel = "sigOnly_ZprimeZH_M2000"
+pseudodata = "Vjets"
+outlabel = "ZprimeZH"
 
 datasets=['2016']#,'2017']
 
@@ -39,7 +39,8 @@ purities= ['VV_HPLP']#,'VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
 signals = ["ZprimeZH"]
 
-Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sf_qcd,pseudodata,outlabel)
+doCorrelation = True 
+Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sf_qcd,pseudodata,outlabel,doCorrelation)
 
 for sig in signals:
   cmd ="combineCards.py"
@@ -82,7 +83,6 @@ for sig in signals:
       #if you run on real data or pseudodata
       rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
       histName="data"
-
       scaleData=1.0 
       if pseudodata=="noVjets":
         print "Using pseudodata without vjets"
