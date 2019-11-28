@@ -3,7 +3,9 @@ import sys,copy
 import tdrstyle
 tdrstyle.setTDRStyle()
 from  CMGTools.VVResonances.plotting.CMS_lumi import *
-
+from CMGTools.VVResonances.plotting.tdrstyle import *
+setTDRStyle()
+import CMS_lumi
 from time import sleep
 gROOT.SetBatch(True)
 # infile = sys.argv[1]
@@ -14,6 +16,70 @@ cols = [46,30]
 colors = ["#4292c6","#41ab5d","#ef3b2c","#ffd300","#fdae61","#abd9e9","#2c7bb6"]
 mstyle = [8,4]
 
+prelim = True
+
+def getCanvasPaper(cname):
+ gStyle.SetOptStat(0)
+ #change the CMS_lumi variables (see CMS_lumi.py)
+ CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
+ CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
+ CMS_lumi.lumi_13TeV = "77.3 fb^{-1}"
+ CMS_lumi.writeExtraText = 1
+ CMS_lumi.extraOverCmsTextSize=0.6
+ if prelim:
+    CMS_lumi.extraText = "Simulation Preliminary"
+ else:
+    CMS_lumi.extraText = "Simulation"
+ CMS_lumi.writeExtraText = 1
+ # CMS_lumi.extraText = " "
+ CMS_lumi.lumi_sqrtS = "13 TeV"# (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+ iPos = 0
+ if( iPos==0 ): CMS_lumi.relPosX = 0.014
+ #iPos = 11
+ iPos = 11
+ if( iPos==0 ): CMS_lumi.relPosX = 0.30
+ H_ref = 600 
+ W_ref = 800 
+ W = W_ref
+ H  = H_ref
+ iPeriod = 0
+ # references for T, B, L, R
+ T = 0.08*H_ref
+ B = 0.12*H_ref 
+ L = 0.15*W_ref
+ R = 0.04*W_ref
+ canvas = TCanvas(cname,cname,50,50,W,H)
+ canvas.SetFillColor(0)
+ canvas.SetBorderMode(0)
+ canvas.SetFrameFillStyle(0)
+ canvas.SetFrameBorderMode(0)
+ canvas.SetLeftMargin( L/W )
+ canvas.SetRightMargin( R/W )
+ canvas.SetTopMargin( T/H )
+ canvas.SetBottomMargin( B/H )
+ canvas.SetTickx(0)
+ canvas.SetTicky(0)
+ legend = TLegend(0.6809045,0.6363636,0.9522613,0.9020979,"","brNDC")
+ # legend = TLegend(0.52,0.65,0.92,0.9,"","brNDC")
+ legend.SetBorderSize(0)
+ legend.SetLineColor(1)
+ legend.SetLineStyle(1)
+ legend.SetLineWidth(1)
+ legend.SetFillColor(0)
+ legend.SetFillStyle(0)
+ legend.SetTextFont(42)
+ 
+ pt = TPaveText(0.1746231,0.6031469,0.5251256,0.7517483,"NDC")
+ # pt.SetTextFont(72)
+ pt.SetTextSize(0.04)
+ pt.SetTextAlign(12)
+ pt.SetFillColor(0)
+ pt.SetBorderSize(0)
+ pt.SetFillStyle(0)
+ 
+ 
+ return canvas, legend, pt
+ 
 def beautify(h1,color,linestyle=1,markerstyle=8):
     h1.SetLineColor(color)
     h1.SetMarkerColor(color)
@@ -82,10 +148,16 @@ def doSignalEff():
     datasHP=[]
     datasLP=[]
     
+    c, l, pt = getCanvasPaper("mjet")
     
-    c = getCanvas()
-    l = getLegend(0.7788945,0.723362,0.9974874,0.879833)
-    l2 = getLegend(0.7788945,0.1783217,0.9974874,0.2482517)
+    pt = TPaveText(0.1746231,0.6031469,0.5251256,0.7517483,"NDC")
+    # pt.SetTextFont(72)
+    pt.SetTextSize(0.04)
+    pt.SetTextAlign(12)
+    pt.SetFillColor(0)
+    pt.SetBorderSize(0)
+    pt.SetFillStyle(0)
+    l2 = getLegend(0.7298995,0.1328671,0.8982412,0.2587413)
     gStyle.SetOptStat(0)
     gStyle.SetOptTitle(0)
     
@@ -117,14 +189,22 @@ def doSignalEff():
         l.AddEntry(fHPHP,titles[i],"L")
     l2.AddEntry(fitsHP[0],"HPHP","LP")    
     l2.AddEntry(fitsLP[0],"HPLP","LP")    
+
+    fitsHP[0].GetYaxis().SetNdivisions(503)
+    fitsHP[0].GetXaxis().SetNdivisions(505)
+    fitsHP[0].GetYaxis().SetTitleOffset(1.2)
+    fitsHP[0].GetYaxis().SetTitleSize(0.06)
+    fitsHP[0].GetYaxis().SetLabelSize(0.06)
+    fitsHP[0].GetXaxis().SetTitleOffset(0.94)
+    fitsHP[0].GetXaxis().SetTitleSize(0.06)
+    fitsHP[0].GetXaxis().SetLabelSize(0.06)
+    pt.AddText("m_{jj} > 1126 GeV")
+    pt.AddText("|#Delta#eta_{jj}| < 1.3")
+    pt.AddText("55 < m_{jet} < 215 GeV")
+    
     fitsHP[0].GetXaxis().SetTitle("M_{X} (GeV)")
     fitsHP[0].GetYaxis().SetTitle("Signal efficiency")
-    fitsHP[0].GetYaxis().SetNdivisions(4,5,0)
-    fitsHP[0].GetXaxis().SetNdivisions(9,2,0)
-    fitsHP[0].GetYaxis().SetTitleOffset(0.97)
-    fitsHP[0].GetXaxis().SetTitleOffset(0.94)
-    fitsHP[0].GetXaxis().SetRangeUser(1126, 5500.)
-    fitsHP[0].GetYaxis().SetRangeUser(0.0, 0.25)
+    fitsHP[0].GetYaxis().SetRangeUser(0., 0.25)
     fitsHP[0].Draw("C")
     for i,(gHP,gLP) in enumerate(zip(datasHP,datasLP)): 
         gLP.Draw("Psame")
@@ -134,12 +214,15 @@ def doSignalEff():
     c.Update()
     l.Draw("same")
     l2.Draw("same")
-    cmslabel_sim_prelim(c,'sim',11)
+    CMS_lumi.CMS_lumi(c, 0, 11)
+    # pt.Draw()
     c.Update()
-    c.SaveAs(path+"signalEff.png")
-    c.SaveAs(path+"signalEff.pdf")
-    c.SaveAs(path+"signalEff.C")
-    
+    name = path+"signalEff"
+    if prelim: name = path+"signalEff"+"_prelim"
+    c.SaveAs(name+".png")
+    c.SaveAs(name+".pdf")
+    c.SaveAs(name+".C")
+
 def doJetMass(leg="l1"):
     gStyle.SetOptFit(0)
     signals = ["ZprimeWW","BulkGWW","WprimeWZ","BulkGZZ"]
@@ -155,16 +238,15 @@ def doJetMass(leg="l1"):
     
     vars = ["mean","sigma"]
     vars = ["mean","sigma","alpha","n","alpha2","n2"]
-    for var in vars:
+    vartitles = ["Jet mass mean (GeV)","Jet mass width (GeV)","#alpha","n","#alpha_2","n_2"]
+    for var,vartitle in zip(vars,vartitles):
         fitsHP=[]
         fitsLP=[]
         datasHP=[]
         datasLP=[]
         
-        c = getCanvas()
-        l = getLegend(0.7788945,0.723362,0.9974874,0.879833)
-        l2 = getLegend(0.7788945,0.1783217,0.9974874,0.2482517)
-        l3 = getLegend(0.7788945,0.1783217,0.9974874,0.2482517)
+        c, l, pt = getCanvasPaper("mjet")
+        l2 = getLegend(0.7298995,0.1328671,0.8982412,0.2587413)
         gStyle.SetOptStat(0)
         gStyle.SetOptTitle(0)
         
@@ -188,14 +270,25 @@ def doJetMass(leg="l1"):
         l2.AddEntry(datasHP[0],"HPHP","LP")    
         l2.AddEntry(datasLP[0],"HPLP","LP")    
         datasHP[0].GetXaxis().SetTitle("M_{X} (GeV)")
-        datasHP[0].GetYaxis().SetTitle(var+" (GeV)")
-        datasHP[0].GetYaxis().SetNdivisions(4,5,0)
-        datasHP[0].GetXaxis().SetNdivisions(9,2,0)
-        datasHP[0].GetYaxis().SetTitleOffset(0.97)
-        datasHP[0].GetXaxis().SetTitleOffset(0.94)
+        datasHP[0].GetYaxis().SetTitle(vartitle)
         datasHP[0].GetXaxis().SetRangeUser(1126, 5500.)
+        datasHP[0].GetYaxis().SetNdivisions(507)
+        datasHP[0].GetXaxis().SetNdivisions(508)
+        datasHP[0].GetYaxis().SetTitleOffset(1.2)
+        datasHP[0].GetYaxis().SetTitleSize(0.06)
+        datasHP[0].GetYaxis().SetLabelSize(0.06)
+        datasHP[0].GetXaxis().SetTitleOffset(0.94)
+        datasHP[0].GetXaxis().SetTitleSize(0.06)
+        datasHP[0].GetXaxis().SetLabelSize(0.06)
+        pt.AddText("m_{jj} > 1126 GeV")
+        pt.AddText("|#Delta#eta_{jj}| < 1.3")
+        pt.AddText("55 < m_{jet} < 215 GeV")
+        
+        # cmslabel_sim(canvas2,'2017',11)
+        
+        
         if var == "mean": datasHP[0].GetYaxis().SetRangeUser(70,110)
-        if var == "sigma": datasHP[0].GetYaxis().SetRangeUser(0,20)
+        if var == "sigma": datasHP[0].GetYaxis().SetRangeUser(0,25)
         if var == "alpha": datasHP[0].GetYaxis().SetRangeUser(0,5)
         if var == "n": datasHP[0].GetYaxis().SetRangeUser(0,4)
         if var == "alpha2": datasHP[0].GetYaxis().SetRangeUser(0,5)
@@ -209,13 +302,15 @@ def doJetMass(leg="l1"):
         datasHP[0].GetXaxis().SetRangeUser(1126, 5500.)
         l.Draw("same")
         l2.Draw("same")
-        cmslabel_sim_prelim(c,'sim',11)
-        pt = getPavetext()
+        CMS_lumi.CMS_lumi(c, 0, 11)
+        # pt.Draw()
         c.Update()
-        c.SaveAs(path+"Signal_mjet%s_"%leg+var+".png")
-        c.SaveAs(path+"Signal_mjet%s_"%leg+var+".pdf")
-        c.SaveAs(path+"Signal_mjet%s_"%leg+var+".C")
-    
+        name = path+"Signal_mjet%s_"%leg+var
+        if prelim: name = path+"Signal_mjet%s_"%leg+var+"_prelim"
+        c.SaveAs(name+".png")
+        c.SaveAs(name+".pdf")
+        c.SaveAs(name+".C")
+      
 def doYield():
     FHPLP = TFile("JJ_"+sys.argv[1]+"_HPLP_yield.root","READ")
     FHPHP = TFile("JJ_"+sys.argv[1]+"_HPHP_yield.root","READ")
@@ -262,7 +357,7 @@ def doYield():
         text = TLatex()
         text.DrawLatex(3500,0.00020,model)
         l.Draw("same")
-        cmslabel_sim(c,'2016',11)
+        cmslabel_final(c,'2016',11)
         c.Update()
         #sleep(112600)
         c.SaveAs(path+"signalFit/"+sys.argv[1]+"_Yield_"+var+"_fit.png")
@@ -342,7 +437,7 @@ def doMVV():
             # fitsLP[i].Draw("Csame")
         l.Draw("same")
         # l2.Draw("same")
-        cmslabel_sim_prelim(c,'sim',11)
+        cmslabel_final(c,'sim',11)
         pt = getPavetext()
         c.Update()
         c.SaveAs(path+"Signal_mVV_"+var+".png")
@@ -401,7 +496,7 @@ def doMJFit():
         fHPLP.Draw("sameL")
         fHPHP.Draw("sameL")
         l.Draw("same")
-        cmslabel_sim(c,'2016',11)
+        cmslabel_final(c,'2016',11)
         c.Update()
         c.SaveAs(path+"signalFit/"+sys.argv[1]+"_MJ_"+var+"_fit.png")
         #sleep(10)
@@ -503,7 +598,7 @@ def doResolution():
     plotY_hp.DrawNormalized('HIST')
     plotY_lp.DrawNormalized('HISTSAME')
     lg.Draw("same")
-    cmslabel_sim(c,'2016',11)
+    cmslabel_final(c,'2016',11)
     c.Update()
     c.SaveAs(path+"detectorresolution_mjet.png")
     
@@ -536,7 +631,7 @@ def doResolution():
     plotX_hp.DrawNormalized('HIST')
     plotX_lp.DrawNormalized('HISTSAME')
     lg.Draw("same")
-    cmslabel_sim(c,'2016',11)
+    cmslabel_final(c,'2016',11)
     c.Update()
     c.SaveAs(path+"detectorresolution_mvv.png")
     
@@ -797,11 +892,11 @@ def compSignalMVV():
         
 if __name__ == '__main__':
   
-  # doSignalEff()
-  # doJetMass("l1")
+  doSignalEff()
+  doJetMass("l1")
   # doJetMass("l2")
   # doMJFit()
-  doMVV()
+  # doMVV()
   # doYield()
   # doResolution()
   # doKernelMVV()
