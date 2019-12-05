@@ -16,7 +16,7 @@ parser.add_option("-s","--sorting",dest="sorting",help="b-tag or random sorting"
 parser.add_option("-b","--binning",action="store_false",dest="binning",help="use dijet binning or not",default=True)
 parser.add_option("--batch",action="store_false",dest="batch",help="submit to batch or not ",default=True)
 parser.add_option("--trigg",action="store_true",dest="trigg",help="add trigger weights or not ",default=False)
-parser.add_option("--run",dest="run",help="decide which parts of the code should be run right now possible optoins are: all : run everything, sigmvv: run signal mvv fit sigmj: run signal mj fit, signorm: run signal norm, vjets: run vjets , qcdtemplates: run qcd templates, qcdkernel: run qcd kernel, qcdnorm: run qcd merge and norm, detector: run detector fit , data : run the data or pseudodata scripts ",default="all")
+parser.add_option("--run",dest="run",help="decide which parts of the code should be run right now possible optoins are: all : run everything, sigmvv: run signal mvv fit sigmj: run signal mj fit, signorm: run signal norm, vjets: run vjets, tt: run ttbar , qcdtemplates: run qcd templates, qcdkernel: run qcd kernel, qcdnorm: run qcd merge and norm, detector: run detector fit , data : run the data or pseudodata scripts ",default="all")
 parser.add_option("--signal",dest="signal",default="BGWW",help="which signal do you want to run? options are BulkGWW, BulkGZZ, WprimeWZ, ZprimeWW, ZprimeZH")
 
 
@@ -181,8 +181,7 @@ else:
     TTemplate= "TTToHadronic" #do we need a separate fit for ttbar?
 WresTemplate= "WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
 ZresTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf"
-resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf,"+str(TTemplate)
-
+resTemplate= "ZJetsToQQ_HT400to600,ZJetsToQQ_HT600to800,ZJetsToQQ_HT800toInf,WJetsToQQ_HT400to600,WJetsToQQ_HT600to800,WJetsToQQ_HT800toInf"
 
 #ranges and binning
 minMJ=55.0
@@ -346,19 +345,23 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     print "for V+jets"
     print "first we fit"
     f.fitVJets("JJ_WJets",resTemplate,1.,1.)
-    print "and then we make kernels"
-    print " did you run Detector response  for this period? otherwise the kernels steps will not work!"
-    print "first kernel W"
-    f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
-    print "then kernel Z"
-    f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
-    print "then norm W"
-    f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
-    print "then norm Z"
-    f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
-    f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
+    
+    #print "and then we make kernels"
+    #print " did you run Detector response  for this period? otherwise the kernels steps will not work!"
+    #print "first kernel W"
+    #f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
+    #print "then kernel Z"
+    #f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
+    #print "then norm W"
+    #f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
+    #print "then norm Z"
+    #f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
 
-
+if options.run.find("all")!=-1 or options.run.find("tt")!=-1:
+  f.fitTT   ("JJ_TT",TTemplate,1.,)    
+  #f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
+  #f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
+  
 if options.run.find("all")!=-1 or options.run.find("data")!=-1:
     print " Do data "
     f.makeNormalizations("data","JJ_"+str(period),dataTemplate,1,'1',"normD") #run on data. Currently run on pseudodata only (below)

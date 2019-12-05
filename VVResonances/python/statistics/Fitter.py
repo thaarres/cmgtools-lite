@@ -262,8 +262,9 @@ class Fitter(object):
         getattr(self.w,'import')(erfexp,ROOT.RooFit.Rename(name))
         self.w.factory("RooGaussian::gaus1("+poi+",mean1[80,60,100],sigma1[10,0,200])")
         self.w.factory("RooGaussian::gaus2("+poi+",mean2[0,200],sigma2[0,200])")
-        self.w.factory("SUM::gaus(f[0,1]*gaus1,gaus2)")
-        self.w.factory("PROD::"+name+"(gaus,"+name+"Erf)")
+        self.w.factory("SUM::gaus(f_g1[0,1]*gaus1,gaus2)")
+        self.w.factory("SUM::"+name+"(f_res[0,1]*gaus,"+name+"Erf)")
+        # self.w.factory("PROD::"+name+"(gaus,"+name+"Erf)")
 
 
 
