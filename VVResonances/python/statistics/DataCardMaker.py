@@ -30,7 +30,7 @@ class DataCardMaker:
         self.systematics.append({'name':name,'kind':kind,'values':values })
 
 
-    def addMVVSignalParametricShape(self,name,variable,jsonFile,scale ={},resolution={}):
+    def addMVVSignalParametricShape(self,name,variable,jsonFile,scale ={},resolution={},doCorrelation=True):
         self.w.factory("MH[2000]")
         self.w.var("MH").setConstant(1)
        
@@ -63,29 +63,23 @@ class DataCardMaker:
         ALPHA2Var="_".join(["ALPHA2",name,self.tag])
         N2Var="_".join(["N2",name,self.tag])
         N1Var="_".join(["N1",name,self.tag])
-        if name.find("H")!=-1 or name.find("WZ")!=-1:
+        if doCorrelation:
+            print "MVV sigma & mean will be correlated to jet mass"
             self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*"+info['corr_sigma']+"*(1+"+resolutionStr+")',{MH,MJ1,MJ2},"+resolutionSysts[0]+")")
             self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*"+info['corr_mean']+"*(1+"+scaleStr+")',{MH,MJ1,MJ2},"+scaleSysts[0]+")")
-            
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))  
-        else:    
+        else:
+            print "MVV sigma & mean will NOT be correlated to jet mass"
             self.w.factory("expr::"+SCALEVar+"('("+info['MEAN']+")*(1+"+scaleStr+")',MH,"+','.join(scaleSysts)+")")
             self.w.factory("expr::"+SIGMAVar+"('("+info['SIGMA']+")*(1+"+resolutionStr+")',MH,"+','.join(resolutionSysts)+")")
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
-            self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))     
+        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA2Var,param=info['ALPHA2']))
+        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=ALPHA1Var,param=info['ALPHA1']))
+        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N1Var,param=info['N1']))
+        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=N2Var,param=info['N2']))  
                 
-            
-
-        
-        
 
         pdfName="_".join([name,self.tag])
         vvMass = ROOT.RooDoubleCB(pdfName,pdfName,self.w.var(MVV),self.w.function(SCALEVar),self.w.function(SIGMAVar),self.w.function(ALPHA1Var),self.w.function(N1Var),self.w.function(ALPHA2Var),self.w.function(N2Var))
+        vvMass.setStringAttribute("CACHEPARAMINT",MVV+":MJ1:MJ2")
  	getattr(self.w,'import')(vvMass,ROOT.RooFit.RenameVariable(pdfName,pdfName))
         f.close()
 	
@@ -360,13 +354,11 @@ class DataCardMaker:
         scaleSysts=[]
         resolutionSysts=[]
         for syst,factor in scale.iteritems():
-            if self.w.var(syst) != None: continue
-            self.w.factory(syst+"[0,-0.1,0.1]")
+            if self.w.var(syst) == None: self.w.factory(syst+"[0,-0.1,0.1]")
             scaleStr=scaleStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             scaleSysts.append(syst)
         for syst,factor in resolution.iteritems():
-            if self.w.var(syst) != None: continue
-            self.w.factory(syst+"[0,-0.5,0.5]")
+            if self.w.var(syst) == None: self.w.factory(syst+"[0,-0.5,0.5]")
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
 
             resolutionSysts.append(syst)
@@ -414,13 +406,11 @@ class DataCardMaker:
         scaleSysts=[]
         resolutionSysts=[]
         for syst,factor in scale.iteritems():
-            if self.w.var(syst) != None: continue
-            self.w.factory(syst+"[0,-0.1,0.1]")
+            if self.w.var(syst) == None: self.w.factory(syst+"[0,-0.1,0.1]")
             scaleStr=scaleStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             scaleSysts.append(syst)
         for syst,factor in resolution.iteritems():
-            if self.w.var(syst) != None: continue
-            self.w.factory(syst+"[0,-0.5,0.5]")
+            if self.w.var(syst) == None: self.w.factory(syst+"[0,-0.5,0.5]")
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
 
             resolutionSysts.append(syst)
@@ -467,13 +457,11 @@ class DataCardMaker:
         scaleSysts=[]
         resolutionSysts=[]
         for syst,factor in scale.iteritems():
-            #if self.w.var(syst) != None: continue
-            self.w.factory(syst+"[0,-0.1,0.1]")
+            if self.w.var(syst) == None: self.w.factory(syst+"[0,-0.1,0.1]")
             scaleStr=scaleStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             scaleSysts.append(syst)
         for syst,factor in resolution.iteritems():
-            #if self.w.var(syst) != None: continue
-            self.w.factory(syst+"[0,-0.5,0.5]")
+            if self.w.var(syst) == None: self.w.factory(syst+"[0,-0.5,0.5]")
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             resolutionSysts.append(syst)
        
@@ -1340,10 +1328,7 @@ class DataCardMaker:
         print "import summed pdf "+pdfName
         self.w.factory("SUM::{name}(expr::{name2}_ratio1('(1-{f})',{f})*{name1},{f}*{name2})".format(name=pdfName,name1=pdfName1,f=variable,name2=pdfName2))
        
-            
-      
-
-    def conditionalProduct(self,name,pdf1,varName,pdf2,pdf3,tag1="",tag2="",tag3=""):
+    def conditionalProduct(self,name,pdf1,varName,pdf2,tag1="",tag2=""):
         pdfName="_".join([name,self.tag])
 
         if tag1=="":
@@ -1354,12 +1339,8 @@ class DataCardMaker:
             pdfName2="_".join([pdf2,self.tag])
         else:
             pdfName2="_".join([pdf2,tag2])
-        if tag3=="":    
-            pdfName3="_".join([pdf3,self.tag])
-        else:
-            pdfName3="_".join([pdf3,tag3])
-	    
-        self.w.factory("PROD::{name}({name1}|{x},{name2}|{x},{name3})".format(name=pdfName,name1=pdfName1,x=varName,name2=pdfName2,name3=pdfName3))
+
+        self.w.factory("PROD::{name}({name1}|{x},{name2})".format(name=pdfName,name1=pdfName1,x=varName,name2=pdfName2))
         
     def conditionalProduct2(self,name,pdf1,pdf2,pdf3,varName,tag1="",tag2="",tag3=""):
         pdfName="_".join([name,self.tag])
@@ -1759,6 +1740,7 @@ class DataCardMaker:
             self.w.var(p).setMin(mini)
             self.w.var(p).setMax(maxi)
             self.w.var(p).setBins(bins)
+            self.w.var(p).setBins(bins,"cache")
         dataHist=ROOT.RooDataHist(name,name,cList,histogram)
 
         getattr(self.w,'import')(dataHist,ROOT.RooFit.RenameVariable(name,name))
