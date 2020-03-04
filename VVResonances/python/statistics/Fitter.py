@@ -3,6 +3,7 @@ import json
 from numpy import random
 from array import array
 import sys,commands
+from  CMGTools.VVResonances.plotting.CMS_lumi import *
 
 class Fitter(object):
     def __init__(self,poi = ['x']):
@@ -262,8 +263,8 @@ class Fitter(object):
         getattr(self.w,'import')(erfexp,ROOT.RooFit.Rename(name))
         self.w.factory("RooGaussian::gaus1("+poi+",mean1[80,60,100],sigma1[10,0,200])")
         self.w.factory("RooGaussian::gaus2("+poi+",mean2[0,200],sigma2[0,200])")
-        self.w.factory("SUM::gaus(f_g1[0,1]*gaus1,gaus2)")
-        self.w.factory("SUM::"+name+"(f_res[0,1]*gaus,"+name+"Erf)")
+        self.w.factory("SUM::gaus(f_g1[0.,1.]*gaus1,gaus2)")
+        self.w.factory("SUM::"+name+"(f_res[0.,1.]*gaus,"+name+"Erf)")
         # self.w.factory("PROD::"+name+"(gaus,"+name+"Erf)")
 
 
@@ -1056,7 +1057,7 @@ class Fitter(object):
         return self.w.pdf(model)
 
     def getLegend(self):
-        self.legend = ROOT.TLegend(0.7510112,0.7183362,0.8502143,0.919833)
+        self.legend = ROOT.TLegend(0.7010112,0.6583362,0.8502143,0.879833)
         self.legend.SetTextSize(0.032)
         self.legend.SetLineColor(0)
         self.legend.SetShadowColor(0)
@@ -1089,16 +1090,15 @@ class Fitter(object):
                 print "No fit result found (fitresults.root), plotting model only"
 	
         if binning:
-	 self.w.data(data).plotOn(self.frame,ROOT.RooFit.Binning(binning))
-         if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning), ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed)) #ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE)
-	 else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Binning(binning))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+	 self.w.data(data).plotOn(self.frame,ROOT.RooFit.Name( data ),ROOT.RooFit.Binning(binning),ROOT.RooFit.LineStyle(1), ROOT.RooFit.LineColor(ROOT.kBlack))
+         if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name(model),ROOT.RooFit.Binning(binning), ROOT.RooFit.DrawOption("L"), R,ROOT.RooFit.LineStyle(1), ROOT.RooFit.LineColor(ROOT.kBlack)) #ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE)
+	 else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name(model),ROOT.RooFit.Binning(binning),ROOT.RooFit.LineStyle(1), ROOT.RooFit.LineColor(ROOT.kBlack))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
 	else: 
-	 self.w.data(data).plotOn(self.frame)
-	 if fr: self.w.pdf(model).plotOn(self.frame, ROOT.RooFit.DrawOption("L"), ROOT.RooFit.LineWidth(2), ROOT.RooFit.LineColor(ROOT.kRed)) #ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE)
-         else: self.w.pdf(model).plotOn(self.frame)#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
+	 self.w.data(data).plotOn(self.frame,ROOT.RooFit.Name( data ),ROOT.RooFit.LineColor(ROOT.kBlack),ROOT.RooFit.LineStyle(1))
+	 if fr: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name(model), ROOT.RooFit.DrawOption("L"),ROOT.RooFit.LineStyle(1), ROOT.RooFit.LineColor(ROOT.kBlack)) #ROOT.RooFit.VisualizeError(fr, 1, ROOT.kFALSE)
+         else: self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name(model),ROOT.RooFit.LineColor(ROOT.kBlack),ROOT.RooFit.LineStyle(1))#,ROOT.Normalization(ROOT.RooAbsReal.RelativeExpected,1.0))# ROOT.RooFit.Normalization(integral, ROOT.RooAbsReal.NumEvent))
 
-        self.legend = self.getLegend()
-        self.legend.AddEntry( self.w.pdf(model)," Full PDF","l")
+        
         
         self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "signalResonanceGaus" ),ROOT.RooFit.Components("signalResonanceGaus"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kRed))#  ,ROOT.RooFit.Normalization( integral, ROOT.RooAbsReal.NumEvent))
         if self.frame.findObject( "signalResonanceGaus"):self.legend.AddEntry( self.frame.findObject( "signalResonanceGaus" ),"Gaussian","l")
@@ -1116,20 +1116,37 @@ class Fitter(object):
         if self.frame.findObject( "modelB"):self.legend.AddEntry( self.frame.findObject( "modelB" ),"BG comp.","l")
         else: print "No modelB in WS"
         
-        self.w.pdf(model).plotOn(self.frame)
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "gaus1" ),ROOT.RooFit.Components("gaus1"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kPink+2))
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "gaus2" ),ROOT.RooFit.Components("gaus2"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kRed-10))
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.Name( "modelErf" ),ROOT.RooFit.Components("modelErf"),ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kTeal-7))
+        
+        
+        
+        #Draw full pdf again
+        self.w.pdf(model).plotOn(self.frame,ROOT.RooFit.LineStyle(1),ROOT.RooFit.LineColor(ROOT.kBlack))
+        
+        self.legend = self.getLegend()
+        if filename.find("TT")!=-1: self.legend.AddEntry(self.frame.findObject( data ),"tt MC","ep")
+        self.legend.AddEntry( self.frame.findObject( model )," Full PDF","l")
+        if self.frame.findObject( "modelErf"):self.legend.AddEntry( self.frame.findObject( "modelErf" ),"ErfExp comp.","l")
+        if self.frame.findObject( "gaus1"):self.legend.AddEntry( self.frame.findObject( "gaus1" ),"Gauss 1 comp.","l")
+        if self.frame.findObject( "gaus2"):self.legend.AddEntry( self.frame.findObject( "gaus2" ),"Gauss 2 comp.","l")
+        
         self.c=ROOT.TCanvas("c","c")
+        self.frame.SetMinimum(0.0)
+        #self.frame.SetMaximum(2.0)
         if logy:
           self.frame.SetMinimum(0.00001)
-          self.frame.SetMaximum(1.0)
+          self.frame.SetMaximum(1.8)
           self.c.SetLogy()
         self.c.cd()
         self.frame.Draw()
-        self.frame.GetYaxis().SetTitle('events')
+        self.frame.GetYaxis().SetTitle('Weighted MC events')
         self.frame.GetXaxis().SetTitle(xtitle)
         self.frame.SetTitle('')
         self.c.Draw()
-
-        self.legend.Draw("same")	    
+        cmslabel_sim_prelim(self.c,'sim',11)
+        self.legend.Draw("same")	 
         self.c.SaveAs(filename)
         pullDist = self.frame.pullHist()
         return self.frame.chiSquare()

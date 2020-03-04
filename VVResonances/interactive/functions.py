@@ -220,18 +220,17 @@ class AllFunctions():
      print("\r"+"Fitting ttbar in category %s" %c)
      if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],self.cuts['acceptance']])
      else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],self.cuts['acceptance']])
-     rootFile=filename+"_"+c+".root"
+     outname=filename+"_"+c
      pwd = os.getcwd()
      directory=pwd+"/"+self.samples
 
      print self.cuts["acceptance"]
      fixPars="1"  #"n:0.8,alpha:1.9"
-     cmd='vvMakeTTShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -m {minMJ} -M {maxMJ} --store "{filename}_{purity}.py" --minMVV {minMVV} --maxMVV {maxMVV} {addOption} --corrFactor {xsec} {samples} {lumi}'.format(template=template,cut=cut,rootFile=rootFile,minMJ=self.minMJ,maxMJ=self.maxMJ,filename=filename,purity=c,minMVV=self.minMVV,maxMVV=self.maxMVV,addOption="",xsec=xsec, samples=directory,lumi=self.lumi)
+     cmd='vvMakeTTShapes.py -s "{template}" -c "{cut}"  -o "{outname}" -m {minMJ} -M {maxMJ} --store "{filename}_{purity}.py" --minMVV {minMVV} --maxMVV {maxMVV} {addOption} --corrFactor {xsec} {samples} {lumi}'.format(template=template,cut=cut,outname=outname,minMJ=self.minMJ,maxMJ=self.maxMJ,filename=filename,purity=c,minMVV=self.minMVV,maxMVV=self.maxMVV,addOption="",xsec=xsec, samples=directory,lumi=self.lumi)
      cmd+=self.HCALbinsMVV
      print "going to execute command: "
      print str(cmd)
      os.system(cmd)
-     sys.exit()
      
 
  #this one I still have to fix and test, do not use submitToBatch yet
