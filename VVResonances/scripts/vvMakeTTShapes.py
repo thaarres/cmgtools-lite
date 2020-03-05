@@ -99,25 +99,25 @@ def doFit(th1_projY,mjj_mean,mjj_error,N):
     fitter.w.var("sigma1").setVal(6.7507e+00)
     fitter.w.var("sigma2").setVal(1.3369e+01)
     
-    fitter.w.var("c_0")   .setMax(0.5*-5.8573e-02)
-    fitter.w.var("c_1")   .setMin(0.5*4.4386e+02) #offset
-    fitter.w.var("c_2")   .setMin(0.5*1.0707e+02) #width
-    fitter.w.var("f_g1")  .setMin(0.5*7.8678e-02)
-    fitter.w.var("f_res") .setMin(0.5*5.9669e-01)
-    fitter.w.var("mean1") .setMin(0.5*8.1225e+01)
-    fitter.w.var("mean2") .setMin(0.5*1.7409e+02)
-    fitter.w.var("sigma1").setMin(0.5*6.7507e+00)
-    fitter.w.var("sigma2").setMin(0.5*1.3369e+01)
-
-    fitter.w.var("c_0")   .setMin(1.5*-5.8573e-02)
-    fitter.w.var("c_1")   .setMax(1.5*4.4386e+02) #offset
-    fitter.w.var("c_2")   .setMax(1.5*1.0707e+02) #width
-    fitter.w.var("f_g1")  .setMax(1.5*7.8678e-02)
-    fitter.w.var("f_res") .setMax(1.5*5.9669e-01)
-    fitter.w.var("mean1") .setMax(1.5*8.1225e+01)
-    fitter.w.var("mean2") .setMax(1.5*1.7409e+02)
-    fitter.w.var("sigma1").setMax(1.5*6.7507e+00)
-    fitter.w.var("sigma2").setMax(1.5*1.3369e+01)
+    # fitter.w.var("c_0")   .setMax(0.5*-5.8573e-02)
+    # fitter.w.var("c_1")   .setMin(0.5*4.4386e+02) #offset
+    # fitter.w.var("c_2")   .setMin(0.5*1.0707e+02) #width
+    # fitter.w.var("f_g1")  .setMin(0.5*7.8678e-02)
+    # fitter.w.var("f_res") .setMin(0.5*5.9669e-01)
+    # fitter.w.var("mean1") .setMin(0.5*8.1225e+01)
+    # fitter.w.var("mean2") .setMin(0.5*1.7409e+02)
+    # fitter.w.var("sigma1").setMin(0.5*6.7507e+00)
+    # fitter.w.var("sigma2").setMin(0.5*1.3369e+01)
+    #
+    # fitter.w.var("c_0")   .setMin(1.5*-5.8573e-02)
+    # fitter.w.var("c_1")   .setMax(1.5*4.4386e+02) #offset
+    # fitter.w.var("c_2")   .setMax(1.5*1.0707e+02) #width
+    # fitter.w.var("f_g1")  .setMax(1.5*7.8678e-02)
+    # fitter.w.var("f_res") .setMax(1.5*5.9669e-01)
+    # fitter.w.var("mean1") .setMax(1.5*8.1225e+01)
+    # fitter.w.var("mean2") .setMax(1.5*1.7409e+02)
+    # fitter.w.var("sigma1").setMax(1.5*6.7507e+00)
+    # fitter.w.var("sigma2").setMax(1.5*1.3369e+01)
  
   else:
     for var,graph in graphs.iteritems():
