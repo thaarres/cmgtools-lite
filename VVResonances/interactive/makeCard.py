@@ -7,8 +7,8 @@ cmd='combineCards.py '
 
 sf_qcd = 1.0
 
-pseudodata = "Vjets"
-outlabel = "ZprimeZH"
+pseudodata = "ZprimeZH" #"Vjets"
+outlabel = "sigonly_M4500" # ZprimeZH
 
 datasets=['2016']#,'2017']
 
@@ -19,7 +19,7 @@ lumi = {'2016':35900,'2017':41367}
 lumi_unc = {'2016':1.025,'2017':1.023}
 
 scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
-scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
+scalesHiggs = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
 
 
 #quick fix to add VH !!!
@@ -34,7 +34,7 @@ vtag_unc['VH_HPLP'] = {'2016':'1.','2017':'1.'}
 
 vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_HPHP':'1','VH_HPLP':'1'}
 
-purities= ['VV_HPLP']#,'VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
+purities= ['VH_HPLP']#,'VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
 
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
 signals = ["ZprimeZH"]
