@@ -1,6 +1,6 @@
 from functions import *
 from optparse import OptionParser
-from cuts import cuts, HPSF16, HPSF17, LPSF16, LPSF17, dijetbins, HCALbinsMVVSignal, minMJ,maxMJ,binsMJ, minMVV, maxMVV, binsMVV, minMX, maxMX
+from cuts import cuts, HPSF16, HPSF17, LPSF16, LPSF17, dijetbins, HCALbinsMVVSignal, minMJ,maxMJ,binsMJ, minMVV, maxMVV, binsMVV, minMX, maxMX, catVtag, catHtag
 ## import cuts of the analysis from separate file
 
 # python makeInputs.py -p 2016 --run "detector"
@@ -286,20 +286,20 @@ if options.run.find("all")!=-1 or options.run.find("qcd")!=-1:
         f.makeNormalizations("nonRes","JJ_"+str(period),nonResTemplate,0,cuts['nonres'],"nRes")
 
 if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:    
-    #print "for V+jets"
-    #print "first we fit"
-    #f.fitVJets("JJ_WJets",resTemplate,1.,1.)
-    #print "and then we make kernels"
-    #print " did you run Detector response  for this period? otherwise the kernels steps will not work!"
-    #print "first kernel W"
-    #f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
-    #print "then kernel Z"
-    #f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
-    #print "then norm W"
+    print "for V+jets"
+    print "first we fit"
+    f.fitVJets("JJ_WJets",resTemplate,1.,1.)
+    print "and then we make kernels"
+    print " did you run Detector response  for this period? otherwise the kernels steps will not work!"
+    print "first kernel W"
+    f.makeBackgroundShapesMVVKernel("WJets","JJ_"+str(period),WresTemplate,cuts['nonres'],"1D",0,1.,1.)
+    print "then kernel Z"
+    f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+str(period),ZresTemplate,cuts['nonres'],"1D",0,1.,1.)
+    print "then norm W"
     f.makeNormalizations("WJets","JJ_"+str(period),WresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
     print "then norm Z"
     f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
-#    f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
+    f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") # ... so we do not need this
 
 
 if options.run.find("all")!=-1 or options.run.find("data")!=-1:

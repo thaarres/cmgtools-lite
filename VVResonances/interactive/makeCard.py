@@ -1,6 +1,7 @@
 from tools.DatacardTools import *
 import sys,os
 import ROOT
+import json
 ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
 from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
@@ -12,7 +13,7 @@ outlabel = "sigonly_M4500" # ZprimeZH
 
 datasets=['2016']#,'2017']
 
-doVjets=True
+doVjets= True
 resultsDir = {'2016':'results_2016','2017':'results_2017'}
 
 lumi = {'2016':35900,'2017':41367}
@@ -34,7 +35,7 @@ vtag_unc['VH_HPLP'] = {'2016':'1.','2017':'1.'}
 
 vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_HPHP':'1','VH_HPLP':'1'}
 
-purities= ['VH_HPLP']#,'VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
+purities= ['VV_HPLP']#,'VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
 
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
 signals = ["ZprimeZH"]
@@ -95,7 +96,7 @@ for sig in signals:
         histName="data"
         scaleData=1.0
       if pseudodata==sig:
-       rootFileData = resultsDir[dataset]+"/JJ_"+sig+"_"+p+"_M"+outlabel.split("_M")[1]+".root"
+       rootFileData = resultsDir[dataset]+"/JJ_"+sig+"_VH_all_M"+outlabel.split("_M")[1]+".root"
        histName="data_obs"
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
@@ -103,6 +104,7 @@ for sig in signals:
       Tools.AddSigSystematics(card,sig,dataset,p,1)
       Tools.AddResBackgroundSystematics(card,p)
       Tools.AddNonResBackgroundSystematics(card,p)
+      Tools.AddTaggingSystematics(card,sig,dataset,p,resultsDir[dataset]+'/migrationunc.json')
         
       card.makeCard()
 
