@@ -84,6 +84,9 @@ class myTree:
     jj_l1_mergedHTruth           = rootint()
     jj_l2_mergedHTruth           = rootint()
     
+    jj_l1_mergedZbbTruth           = rootint()
+    jj_l2_mergedZbbTruth           = rootint()
+    
     jj_l1_jetTag           = bytearray(6)
     jj_l2_jetTag           = bytearray(6)
     
@@ -109,6 +112,9 @@ class myTree:
         self.newTree.Branch("jj_l2_mergedVTruth",self.jj_l2_mergedVTruth,"jj_l2_mergedVTruth/i")
         self.newTree.Branch("jj_l1_mergedHTruth",self.jj_l1_mergedHTruth,"jj_l1_mergedHTruth/i")
         self.newTree.Branch("jj_l2_mergedHTruth",self.jj_l2_mergedHTruth,"jj_l2_mergedHTruth/i")
+        
+        self.newTree.Branch("jj_l1_mergedZbbTruth",self.jj_l1_mergedZbbTruth,"jj_l1_mergedZbbTruth/i")
+        self.newTree.Branch("jj_l2_mergedZbbTruth",self.jj_l2_mergedZbbTruth,"jj_l2_mergedZbbTruth/i")
    
         self.newTree.Branch("jj_l1_jetTag",self.jj_l1_jetTag,"jj_l1_jetTag[6]/C")
         self.newTree.Branch("jj_l2_jetTag",self.jj_l1_jetTag,"jj_l2_jetTag[6]/C")
@@ -130,6 +136,8 @@ class myTree:
             self.jj_l2_mergedVTruth.ri = event.jj_l2_mergedVTruth
             self.jj_l1_mergedHTruth.ri = event.jj_l1_mergedHTruth
             self.jj_l2_mergedHTruth.ri = event.jj_l2_mergedHTruth
+            self.jj_l1_mergedZbbTruth.ri = event.jj_l1_mergedZbbTruth
+            self.jj_l2_mergedZbbTruth.ri = event.jj_l2_mergedZbbTruth
             self.category[:7] = cat 
             # this depends now on the actual cuts in the analysis!!
             if event.jj_l1_DeepBoosted_ZHbbvsQCD > event.jj_l1_DeepBoosted_ZHbbvsQCD__0p02:
