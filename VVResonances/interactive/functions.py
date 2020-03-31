@@ -33,11 +33,13 @@ class AllFunctions():
   os.system(cmd)
 
  def makeSignalShapesMJ(self,filename,template,leg,fixPars,addcuts="1"):
-
-  for c in self.categories:
+  # for now remove the category part from these fits -> left code in until we have green light from all 
+  #for c in self.categories:
   
-   if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],addcuts])
-   else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],addcuts])
+   #if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],addcuts])
+   #else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],addcuts])
+   if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],addcuts])
+   else: cut='*'.join([self.cuts['common_VV'],addcuts])
      
    rootFile=filename+"_MJ"+leg+"_"+c+".root"   
    cmd='vvMakeSignalMJShapes.py -s "{template}" -c "{cut}"  -o "{rootFile}" -V "jj_{leg}_softDrop_mass" -m {minMJ} -M {maxMJ} -f "{fixPars}" --minMX {minMX} --maxMX {maxMX} {samples} '.format(template=template,cut=cut,rootFile=rootFile,leg=leg,minMJ=self.minMJ,maxMJ=self.maxMJ,minMX=self.minMX,maxMX=self.maxMX,fixPars=fixPars[c.replace('VBF_','')]["fixPars"],samples=self.samples)
