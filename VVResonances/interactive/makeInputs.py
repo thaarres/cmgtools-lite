@@ -108,9 +108,7 @@ else:
 
 #all categories
 categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP','VBF_VV_HPHP','VBF_VV_HPLP']
-categories=['VH_HPHP']
-
-                                                                                                                                                                                   
+                                                                                                                                                          
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW_"
 VBFBulkGravWWTemplate="VBF_BulkGravToWW_"
