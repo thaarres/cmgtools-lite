@@ -55,8 +55,8 @@ if options.name.find("BulkGZZ")!=-1:
 period = "2016"
 if options.name.find("2017")!=-1: period = "2017"
 
-if options.label.find("sigonly")!=-1:
-    doFit=False
+#if options.label.find("sigonly")!=-1:
+    #doFit=False
 
 
 def calculateChi2ForSig(hsig,pred,axis,logfile,label):
@@ -364,7 +364,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
         scaling = 500.
         eff = 0.02
     
-    if hsig:
+    if hsig and (options.name.find('sigonly')!=-1  and doFit==0):
       print hsig.Integral()
       if hsig.Integral()!=0.:   
         hsig.Scale(scaling/normsig)
@@ -482,7 +482,7 @@ def MakePlots(histos,hdata,hsig,axis,nBins,normsig = 1.,errors=None):
     
     #for pulls
     if errors ==None: errors=[0,0];
-    if options.name.find('sigOnly')!=-1: graphs = addPullPlot(hdata,hsig,nBins,errors[0])
+    if options.name.find('sigonly')!=-1: graphs = addPullPlot(hdata,hsig,nBins,errors[0])
     else:
         graphs = addPullPlot(hdata,histos[0],nBins,errors[0])
     # graphs = addRatioPlot(hdata,histos[0],nBins,errors[0])
@@ -927,7 +927,10 @@ def draw_error_band(histo_central,norm1,err_norm1,rpdf1,x_min,proj):
      syst[j] = ROOT.TGraph(number_point+1);
      
      #paramters value are randomized using rfres and this can be done also if they are not decorrelate
-     par_tmp = ROOT.RooArgList(fitresult_bkg_only.randomizePars())
+     if options.label.find("sigonly")==-1:
+        par_tmp = ROOT.RooArgList(fitresult_bkg_only.randomizePars())
+     else:
+        par_tmp = ROOT.RooArgList(fitresult.randomizePars())
      iter = par_pdf1.createIterator()
      var = iter.Next()
 
@@ -1040,7 +1043,7 @@ if __name__=="__main__":
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
      print options.name
-     purity = options.name.split('_')[3]+"_"+ options.name.split('_')[4]
+     purity = "HPLP"#options.name.split('_')[3]+"_"+ options.name.split('_')[4]
      print purity
      #if options.input.find("VV") !=-1: purity="VV_"+purity
      #elif options.input.find("VH") !=-1: purity="VH_"+purity
@@ -1118,7 +1121,7 @@ if __name__=="__main__":
      if options.fitSignal:
       workspace.var("MH").setVal(options.signalMass)
       workspace.var("MH").setConstant(1)
-      #workspace.var("r").setRange(0,1000)
+      workspace.var("r").setRange(0,2000)
       #workspace.var("r").setVal(9)
       print "signalName ",signalName
       print "Expected signal yields:",(args[pdf1Name].getComponents())["n_exp_final_binJJ_"+purity+"_13TeV_"+period+"_proc_"+signalName+""].getVal(),"("+period+")"
@@ -1128,8 +1131,9 @@ if __name__=="__main__":
      print
      if doFit:
         fitresult = model.fitTo(data_all,ROOT.RooFit.SumW2Error(not(options.data)),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1),ROOT.RooFit.NumCPU(8))  
-        
-        fitresult_bkg_only = model_b.fitTo(data_all,ROOT.RooFit.SumW2Error(not(options.data)),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1),ROOT.RooFit.NumCPU(8))  
+        if options.label.find("sigonly")==-1:
+            fitresult_bkg_only = model_b.fitTo(data_all,ROOT.RooFit.SumW2Error(not(options.data)),ROOT.RooFit.Minos(0),ROOT.RooFit.Verbose(0),ROOT.RooFit.Save(1),ROOT.RooFit.NumCPU(8))
+        else: fitresult_bkg_only = fitresult
         
        
         
@@ -1334,4 +1338,4 @@ if __name__=="__main__":
      
      logfile.close()
 
-     print purity
+     

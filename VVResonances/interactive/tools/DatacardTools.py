@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys, os
+import json
 
 class DatacardTools():
 
- def __init__(self,scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sfQCD,pseudodata,outlabel,doCorrelation):
+ def __init__(self,scales,scalesHiggs,vtag_pt_dependence,lumi_unc,vtag_unc,sfQCD,pseudodata,outlabel,doCorrelation=True):
   
   self.scales=scales
   self.vtag_pt_dependence=vtag_pt_dependence
@@ -141,9 +142,11 @@ class DatacardTools():
        print "outlabel "+self.outlabel
        if self.pseudodata=="" or self.pseudodata=="Vjets":
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets")
-       if self.outlabel.find("sigOnly")!=-1:
+       if self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
            print "add small yield"
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets",0.000001)
+       else:
+           card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets")
 
  def AddZResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib):  
        print "add Zres background"
@@ -166,18 +169,20 @@ class DatacardTools():
       
        if self.pseudodata=="" or self.pseudodata=="Vjets":
              card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets") 
-       if self.outlabel.find("sigOnly")!=-1:
+       if self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
            card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets",0.000001)
+       else:
+             card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets") 
        print "stop Zres background"
    
  def AddNonResBackground(self,card,dataset,category,rootFile3DPDF,rootFileNorm,ncontrib):
       
       card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile3DPDF,"histo",['PT:CMS_VV_JJ_nonRes_PT_'+category,'OPT:CMS_VV_JJ_nonRes_OPT_'+category,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+category,'altshape:CMS_VV_JJ_nonRes_altshape_'+category,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+category],False,0) ,    
           
-      if self.pseudodata=="" or self.pseudodata=="noVjets" or self.pseudodata=="Vjets":
-          card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",self.sfQCD)
-      if self.outlabel.find("sigOnly")!=-1:
+      if self.outlabel.find("sigonly")!=-1 or self.outlabel.find("sigOnly")!=-1:
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",0.0000000000001)
+      else:
+          card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",self.sfQCD)
  
  def AddData(self,card,fileData,histoName,scaleData):
   
@@ -193,11 +198,30 @@ class DatacardTools():
       card.addSystematic("CMS_pdf","lnN",{'%s'%sig:1.01})    
       if correlate:
        card.addSystematic("CMS_lumi","lnN",{'%s'%sig:self.lumi_unc[dataset],"Wjets":self.lumi_unc[dataset],"Zjets":self.lumi_unc[dataset]})   
-       card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:self.vtag_unc[category][dataset],"Wjets":self.vtag_unc[category][dataset],"Zjets":self.vtag_unc[category][dataset]})
+       #card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:self.vtag_unc[category][dataset],"Wjets":self.vtag_unc[category][dataset],"Zjets":self.vtag_unc[category][dataset]})
       else: 
        card.addSystematic("CMS_lumi","lnN",{'%s'%sig:self.lumi_unc[dataset]})
-       card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:self.vtag_unc[category][dataset]})  
-              
+       #card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:self.vtag_unc[category][dataset]})  
+      
+    
+ def AddTaggingSystematics(self,card,signal,dataset,p,jsonfile): 
+     with open(jsonfile) as json_file:
+        data = json.load(json_file)
+     sig = signal
+     if signal.find('Zprime')!=-1 and signal.find("ZH")!=-1: sig = "ZprimeToZh" 
+     if signal.find('Zprime')!=-1 and signal.find("WW")!=-1: sig = "ZprimeToWW"
+     if signal.find('Wprime')!=-1 and signal.find("WH")!=-1: sig = "WprimeToWh" 
+     if signal.find('Wprime')!=-1 and signal.find("WZ")!=-1: sig = "WprimeToWZ"
+     if signal.find('BulkGWW')!=-1 : sig = "BulkGravToWW" 
+     if signal.find('BulkGZZ')!=-1 : sig = "BulkGravToZZ"
+     uncup   = data[sig+"_"+dataset+"_CMS_VV_JJ_DeepJet_Htag_eff"][p+"_up"]
+     uncdown = data[sig+"_"+dataset+"_CMS_VV_JJ_DeepJet_Htag_eff"][p+"_down"]
+     card.addSystematic("CMS_VV_JJ_DeepJet_Htag_eff","lnN",{'%s'%signal: str(uncup)+"/"+ str(uncdown),'Wjets': str(uncup)+"/"+ str(uncdown),'Zjets': str(uncup)+"/"+ str(uncdown)})
+     uncup   = data[sig+"_"+dataset+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_up"]
+     uncdown = data[sig+"_"+dataset+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_down"]
+     card.addSystematic("CMS_VV_JJ_DeepJet_Vtag_eff","lnN",{'%s'%signal: str(uncup)+"/"+ str(uncdown),'Wjets': str(uncup)+"/"+ str(uncdown),'Zjets': str(uncup)+"/"+ str(uncdown)})
+     
+     
  def AddResBackgroundSystematics(self,card,category):
  
        card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjets':1.2})

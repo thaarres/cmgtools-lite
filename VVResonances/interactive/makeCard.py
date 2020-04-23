@@ -1,25 +1,26 @@
 from tools.DatacardTools import *
 import sys,os
 import ROOT
+import json
 ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
 from CMGTools.VVResonances.statistics.DataCardMaker import DataCardMaker
 cmd='combineCards.py '
 
 sf_qcd = 1.0
 
-pseudodata = "Vjets"
-outlabel = "ZprimeZH"
+pseudodata = "ZprimeZH" #"Vjets"
+outlabel = "sigonly_M4500" # ZprimeZH
 
 datasets=['2016']#,'2017']
 
-doVjets=True
+doVjets= True
 resultsDir = {'2016':'results_2016','2017':'results_2017'}
 
 lumi = {'2016':35900,'2017':41367}
 lumi_unc = {'2016':1.025,'2017':1.023}
 
 scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
-scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
+scalesHiggs = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
 
 
 #quick fix to add VH !!!
@@ -95,7 +96,7 @@ for sig in signals:
         histName="data"
         scaleData=1.0
       if pseudodata==sig:
-       rootFileData = resultsDir[dataset]+"/JJ_"+sig+"_"+p+"_M"+outlabel.split("_M")[1]+".root"
+       rootFileData = resultsDir[dataset]+"/JJ_"+sig+"_VH_all_M"+outlabel.split("_M")[1]+".root"
        histName="data_obs"
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
@@ -103,6 +104,7 @@ for sig in signals:
       Tools.AddSigSystematics(card,sig,dataset,p,1)
       Tools.AddResBackgroundSystematics(card,p)
       Tools.AddNonResBackgroundSystematics(card,p)
+      Tools.AddTaggingSystematics(card,sig,dataset,p,resultsDir[dataset]+'/migrationunc.json')
         
       card.makeCard()
 
