@@ -15,7 +15,7 @@ maxMJ=215.0
 binsMJ=80
 
 
-minMVV=1126.0
+minMVV=838.00
 maxMVV=7600.0
 
 binsMVV=100
