@@ -8,13 +8,15 @@ cmd='combineCards.py '
 
 sf_qcd = 1.0
 
-pseudodata = "ZprimeZH" #"Vjets"
-outlabel = "sigonly_M4500" # ZprimeZH
+pseudodata = "Vjets"
+outlabel = "ZprimeZH"
 
 datasets=['2016']#,'2017']
 
 doVjets= True
+doTT= True
 resultsDir = {'2016':'results_2016','2017':'results_2017'}
+# resultsDir = {'2016':'./','2017':'results_2017'}
 
 lumi = {'2016':35900,'2017':41367}
 lumi_unc = {'2016':1.025,'2017':1.023}
@@ -63,28 +65,35 @@ for sig in signals:
 
       if doVjets:
         print "including W/Z jets in datacard"
-        rootFileMVV = resultsDir[dataset]+'/JJ_%s_WJets_MVV_'%dataset+p+'.root' 
+        rootFileMVV = resultsDir[dataset]+'/JJ_%s_WJets_MVV_'%dataset+p+'.root'
         rootFileNorm = resultsDir[dataset]+'/JJ_%s_WJets_%s.root'%(dataset,p)
         Tools.AddWResBackground(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
         ncontrib+=1
-        
+
         rootFileMVV = resultsDir[dataset]+'/JJ_%s_ZJets_MVV_'%dataset+p+'.root'
         rootFileNorm = resultsDir[dataset]+"/JJ_%s_ZJets_%s.root"%(dataset,p)
         Tools.AddZResBackground(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
+        ncontrib+=1
+        
+      if doTT:
+        print "including tt+jets in datacard"
+        rootFileMVV = resultsDir[dataset]+'/JJ_%s_TTJets_MVV_'%dataset+p+'.root' 
+        rootFileNorm = resultsDir[dataset]+'/JJ_%s_TTJets_%s.root'%(dataset,p)
+        Tools.AddTTBackground(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
         ncontrib+=1
 
       #rootFile3DPDF = resultsDir[dataset]+'/JJ_2016_nonRes_3D_VV_HPLP.root'
       rootFile3DPDF = resultsDir[dataset]+"/save_new_shapes_%s_pythia_"%dataset+p+"_3D.root"
       print "rootFile3DPDF ",rootFile3DPDF
-      rootFileNorm = resultsDir[dataset]+"/JJ_%s_nonRes_"%dataset+p+".root"   
+      rootFileNorm = resultsDir[dataset]+"/JJ_%s_nonRes_"%dataset+p+".root"
       print "rootFileNorm ",rootFileNorm
 
-      Tools.AddNonResBackground(card,dataset,p,rootFile3DPDF,rootFileNorm,ncontrib) 
+      Tools.AddNonResBackground(card,dataset,p,rootFile3DPDF,rootFileNorm,ncontrib)
 
       #if you run on real data or pseudodata
       rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
       histName="data"
-      scaleData=1.0 
+      scaleData=1.0
       if pseudodata=="noVjets":
         print "Using pseudodata without vjets"
         rootFileData = resultsDir[dataset]+"/JJ_PDnoVjets_"+p+".root"
@@ -100,12 +109,12 @@ for sig in signals:
        histName="data_obs"
        scaleData=1.0
       Tools.AddData(card,rootFileData,histName,scaleData)
-      
+
       Tools.AddSigSystematics(card,sig,dataset,p,1)
       Tools.AddResBackgroundSystematics(card,p)
       Tools.AddNonResBackgroundSystematics(card,p)
       Tools.AddTaggingSystematics(card,sig,dataset,p,resultsDir[dataset]+'/migrationunc.json')
-        
+
       card.makeCard()
 
       t2wcmd = "text2workspace.py %s -o %s"%(cardName,workspaceName)
@@ -115,9 +124,9 @@ for sig in signals:
 
     print "#####################################"
 
-    #make combined 
+    #make combined
     if len(purities)>1:
-      print "#######     going to combine purity categories: ",purities    
+      print "#######     going to combine purity categories: ",purities
       combo_card = cardName.replace("VV_HPHP","").replace("VV_HPLP","").replace("VV_LPLP","").replace("VH_HPHP","").replace("VH_HPLP","").replace("VH_LPHP","")
       combo_workspace = workspaceName.replace("VV_HPHP","").replace("VV_HPLP","").replace("VV_LPLP","").replace("VH_HPHP","").replace("VH_HPLP","").replace("VH_LPHP","")
       os.system('rm %s'%combo_card)
@@ -129,7 +138,7 @@ for sig in signals:
       os.system(t2wcmd)
       print "#####################################"
 
-  if len(datasets)>1:   
+  if len(datasets)>1:
     #make combine 2016+2017 card
     print "more than one year, making combined cards"
     combo_card = 'datacard_'+cat.replace("_HPHP","").replace("_HPLP","").replace("_LPLP","").replace('_2016','').replace('_2017','')+'.txt'

@@ -114,7 +114,26 @@ class DatacardTools():
        else:
            card.addParametricYieldWithUncertainty("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_%s_yield.json"%(sig,dataset,category),1,'CMS_tau21_PtDependence',self.vtag_pt_dependence[category],500.)
 
- 
+ def AddTTBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib):
+       print "add TT+jets background"  
+       print("Parameters are: \n card={},dataset={},category={},rootFileMVV={},rootFileNorm={},resultsDir={},ncontrib={} \n".format(card.tag,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib))
+       card.addMJJTTJetsParametricShape("TTJets_mjetRes_l1","MJ1",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'f_g1':1.,'f_res':1.},varToReplace="MJJ")
+       card.addMJJTTJetsParametricShape("TTJets_mjetRes_l2","MJ2",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'f_g1':1.,'f_res':1.},varToReplace="MJJ")
+       card.addHistoShapeFromFile("TTJets_mjj",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_TTJets_PTZ_'+category,'OPT:CMS_VV_JJ_TTJets_OPTZ_'+category],False,0)
+       print("Done with mjj!!")
+       card.conditionalProduct2('TTJets','TTJets_mjetRes_l1','TTJets_mjetRes_l2','TTJets_mjj','MJ1,MJ2,MJJ',tag1="",tag2="",tag3="")
+       print("Done with conditionalProduct2!!")    
+       
+       print "outlabel "+self.outlabel
+       if self.pseudodata=="" or self.pseudodata=="Vjets":
+           card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets")
+       elif self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
+           print "add small yield"
+           card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"WJets",0.000001)
+       else:
+           card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets")
+           
+       
  def AddWResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib):
        print "add Wres background"  
        sys.path.append(resultsDir)
@@ -137,7 +156,7 @@ class DatacardTools():
        print "outlabel "+self.outlabel
        if self.pseudodata=="" or self.pseudodata=="Vjets":
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets")
-       if self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
+       elif self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
            print "add small yield"
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets",0.000001)
        else:
@@ -164,7 +183,7 @@ class DatacardTools():
       
        if self.pseudodata=="" or self.pseudodata=="Vjets":
              card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets") 
-       if self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
+       elif self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
            card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets",0.000001)
        else:
              card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets") 
@@ -221,10 +240,13 @@ class DatacardTools():
  
        card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjets':1.2})
        card.addSystematic("CMS_VV_JJ_Zjets_norm","lnN",{'Zjets':1.2})    
+       card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJets':1.2})    
        card.addSystematic("CMS_VV_JJ_Wjets_PTZ_"+category,"param",[0,0.1]) #0.333
        card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+category,"param",[0,0.1]) #0.333
        card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+category,"param",[0,0.1]) #0.333
        card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+category,"param",[0,0.1]) #0.333
+       card.addSystematic("CMS_VV_JJ_TTJets_PTZ_"+category,"param",[0,0.1]) #0.333
+       card.addSystematic("CMS_VV_JJ_TTJets_OPTZ_"+category,"param",[0,0.1]) #0.333
 
  def AddNonResBackgroundSystematics(self,card,category):
 
