@@ -26,7 +26,7 @@ maxMX=6000.0
 
 #gen level cuts for templates    
 minGenMJ=20.
-makGenMJ=300.
+maxGenMJ=300.
 minGenMVV=800.0
 maxGenMVV=6000.0
 if widerMVV: maxGenMVV=8000.0
