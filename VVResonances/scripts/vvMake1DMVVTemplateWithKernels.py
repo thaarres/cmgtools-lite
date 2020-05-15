@@ -354,6 +354,7 @@ c.SetLeftMargin(0.11)
 c.SetTopMargin(0.11)
 finalHistograms["histo_nominal"].SetLineColor(ROOT.kBlue)
 finalHistograms["histo_nominal"].GetYaxis().SetTitle("arbitrary scale")
+finalHistograms["histo_nominal"].GetYaxis().SetRangeUser(10E-8,10E-1)
 finalHistograms["histo_nominal"].GetYaxis().SetTitleOffset(1.5)
 finalHistograms["histo_nominal"].GetXaxis().SetTitle("dijet mass")
 sf = finalHistograms["histo_nominal"].Integral()
@@ -385,19 +386,15 @@ data.Draw("same")
 c.SetLogy()
 
 
-l = ROOT.TLegend(0.17,0.2,0.6,0.33)
+l = ROOT.TLegend(0.77,0.72,0.86,0.8)
 l.AddEntry(data,"simulation","lp")
 l.AddEntry(finalHistograms["histo_nominal"],"template","l")
 l.AddEntry(histogram_pt_up,"#propto m_{jj}","l")
 l.AddEntry(histogram_opt_up,"#propto 1/m_{jj}","l")
 l.Draw("same")
 
-tmplabel = "nonRes"
-if 'Jets' in sampleTypes: tmplabel="Jets"
-if options.output.find('HPLP')!=-1: tmplabel+='_HPLP'
-if options.output.find('HPHP')!=-1: tmplabel+='_HPHP'
-if 'W' in sampleTypes: tmplabel="W"+tmplabel
-if 'Z' in sampleTypes: tmplabel="Z"+tmplabel
+tmplabel = options.output.replace('.root','')
+if 'TT' in sampleTypes: tmplabel="Z"+tmplabel
 c.SaveAs("debug_mVV_kernels_"+tmplabel+".pdf")
 print "for debugging save","debug_mVV_kernels_"+tmplabel+".pdf"
 

@@ -116,13 +116,12 @@ class DatacardTools():
 
  def AddTTBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib):
        print "add TT+jets background"  
-       print("Parameters are: \n card={},dataset={},category={},rootFileMVV={},rootFileNorm={},resultsDir={},ncontrib={} \n".format(card.tag,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib))
-       card.addMJJTTJetsParametricShape("TTJets_mjetRes_l1","MJ1",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'f_g1':1.,'f_res':1.},varToReplace="MJJ")
-       card.addMJJTTJetsParametricShape("TTJets_mjetRes_l2","MJ2",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'f_g1':1.,'f_res':1.},varToReplace="MJJ")
+
+       card.addMJJTTJetsParametricShape("TTJets_mjetRes_l1","MJ1",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'CMS_f_g1':1.},{'CMS_f_res':1.})
+       card.addMJJTTJetsParametricShape("TTJets_mjetRes_l2","MJ2",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'CMS_f_g1':1.},{'CMS_f_res':1.})
        card.addHistoShapeFromFile("TTJets_mjj",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_TTJets_PTZ_'+category,'OPT:CMS_VV_JJ_TTJets_OPTZ_'+category],False,0)
-       print("Done with mjj!!")
-       card.conditionalProduct2('TTJets','TTJets_mjetRes_l1','TTJets_mjetRes_l2','TTJets_mjj','MJ1,MJ2,MJJ',tag1="",tag2="",tag3="")
-       print("Done with conditionalProduct2!!")    
+       
+       card.conditionalProduct2('TTJets','TTJets_mjetRes_l1','TTJets_mjetRes_l2','TTJets_mjj','MJ1,MJ2,MJJ',tag1="",tag2="",tag3="")   
        
        print "outlabel "+self.outlabel
        if self.pseudodata=="" or self.pseudodata=="Vjets":
@@ -202,6 +201,10 @@ class DatacardTools():
   
       card.importBinnedData(fileData,histoName,["MJ1","MJ2","MJJ"],'data_obs',scaleData)
   
+ def AddTTSystematics(self,card,sig,dataset,category):
+    card.addSystematic("CMS_f_g1","param",[0.0,0.02])
+    card.addSystematic("CMS_f_res","param",[0.0,0.02])
+   
  def AddSigSystematics(self,card,sig,dataset,category,correlate):
 
       card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])

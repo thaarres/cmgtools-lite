@@ -250,17 +250,19 @@ class DataCardMaker:
 
 
 
-    def addMJJTTJetsParametricShape(self,name,variable,jsonFile,scale ={},resolution={},fraction={},varToReplace="MJJ"):
+    def addMJJTTJetsParametricShape(self,name,variable,jsonFile,scale ={},resolution={},fractionGauss={},fractionRes={},varToReplace="MJJ"):
         self.w.factory("MH[2000]")
         self.w.var("MH").setConstant(1)
        
         scaleStr='0'
         resolutionStr='0'
-        fractionStr='0'
+        fractionGaussStr='0'
+        fractionResStr='0'
 
         scaleSysts=[]
         resolutionSysts=[]
-        fractionSysts=[]
+        fractionGaussSysts=[]
+        fractionResSysts=[]
         for syst,factor in scale.iteritems():
             self.w.factory(syst+"[0,-0.1,0.1]")
             scaleStr=scaleStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
@@ -269,61 +271,77 @@ class DataCardMaker:
             self.w.factory(syst+"[0,-0.5,0.5]")
             resolutionStr=resolutionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
             resolutionSysts.append(syst)
-        for syst,factor in fraction.iteritems():
+        for syst,factor in fractionGauss.iteritems():
             self.w.factory(syst+"[0,-50,50]")
-            fractionStr=fractionStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
-            fractionSysts.append(syst)
+            fractionGaussStr=fractionGaussStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
+            fractionGaussSysts.append(syst)
+        for syst,factor in fractionRes.iteritems():
+            self.w.factory(syst+"[0,-50,50]")
+            fractionResStr=fractionResStr+"+{factor}*{syst}".format(factor=factor,syst=syst)
+            fractionResSysts.append(syst)    
        
         MJJ=variable            
-        self.w.factory(variable+"[0,1000]")
+        try:
+          self.w.factory(variable+"[0,1000]")
+        except:
+          print("Variable {} already in workspace!".format(variable))
 
         f=open(jsonFile)
         info=json.load(f)
 
         mean1Var="_".join(["mean1",name,self.tag])
-        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=mean1Var,param=info['mean1'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MJJ,{vv_systs})".format(name=mean1Var,param=info['mean1'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace))
 
         mean2Var="_".join(["mean2",name,self.tag])
-        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=mean2Var,param=info['mean2'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MJJ,{vv_systs})".format(name=mean2Var,param=info['mean2'],vv_syst=scaleStr,vv_systs=','.join(scaleSysts)).replace("MH",varToReplace))
 
         sigma1Var="_".join(["sigma1",name,self.tag])
-        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=sigma1Var,param=info['sigma1'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MJJ,{vv_systs})".format(name=sigma1Var,param=info['sigma1'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)).replace("MH",varToReplace))
 
         sigma2Var="_".join(["sigma2",name,self.tag])
-        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MH,{vv_systs})".format(name=sigma2Var,param=info['sigma2'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('({param})*(1+{vv_syst})',MJJ,{vv_systs})".format(name=sigma2Var,param=info['sigma2'],vv_syst=resolutionStr,vv_systs=','.join(resolutionSysts)).replace("MH",varToReplace))
 
         c1Var="_".join(["c_1",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=c1Var,param=info['c_1']).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('MJJ*0+{param}',MJJ)".format(name=c1Var,param=info['c_1']).replace("MH",varToReplace))
 
         c0Var="_".join(["c_0",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=c0Var,param=info['c_0']).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('MJJ*0+{param}',MJJ)".format(name=c0Var,param=info['c_0']).replace("MH",varToReplace))
 
         c2Var="_".join(["c_2",name,self.tag])
-        self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=c2Var,param=info['c_2']).replace("MH",varToReplace))
+        self.w.factory("expr::{name}('MJJ*0+{param}',MJJ)".format(name=c2Var,param=info['c_2']).replace("MH",varToReplace))
 
-        Fg1Var="_".join(["f_g1",name,self.tag])
-        self.w.factory("expr::{name}('min((MH*0+{param})*(1+{vv_syst}),1.0)',MH,{vv_systs})".format(name=Fg1Var,param=info['f_g1'],vv_syst=fractionStr,vv_systs=','.join(fractionSysts)).replace("MH",varToReplace))
         
-        FresVar="_".join(["f_res",name,self.tag])
-        self.w.factory("expr::{name}('min((MH*0+{param})*(1+{vv_syst}),1.0)',MH,{vv_systs})".format(name=FresVar,param=info['f_res'],vv_syst=fractionStr,vv_systs=','.join(fractionSysts)).replace("MH",varToReplace))
-        
-        pdfNameBKG="_".join([name+"nonRes",self.tag])
-        erfExp = ROOT.RooErfExpPdf(pdfNameBKG,pdfNameBKG,self.w.var(MJJ),self.w.function(c0Var),self.w.function(c1Var),self.w.function(c2Var))
-        getattr(self.w,'import')(erfExp,ROOT.RooFit.RenameVariable(pdfNameBKG,pdfNameBKG))
-
         pdfNameW="_".join([name+"PeakW",self.tag])
-        self.w.factory("RooGaussian::{name}({var},{mean1},{sigma1})".format(name=pdfNameW,var=MJJ,mean1=mean1Var,sigma1=sigma1Var).replace("MH",varToReplace))
+        self.w.factory("RooGaussian::{name}({var},{mean1},{sigma1})".format(name=pdfNameW,var=MJJ,mean1=mean1Var,sigma1=sigma1Var).replace("MH",variable))
   
         pdfNameTop="_".join([name+"PeakTop",self.tag])
-        self.w.factory("RooGaussian::{name}({var},{mean2},{sigma2})".format(name=pdfNameTop,var=MJJ,mean2=mean2Var,sigma2=sigma2Var).replace("MH",varToReplace))
+        self.w.factory("RooGaussian::{name}({var},{mean2},{sigma2})".format(name=pdfNameTop,var=MJJ,mean2=mean2Var,sigma2=sigma2Var).replace("MH",variable))
+        
+        Fg1Var="_".join(["f_g1",name,self.tag])
+        self.w.factory("expr::{name}('min((0+{param})*(1+{vv_syst}),1.0)',MJJ,{vv_systs})".format(name=Fg1Var, param=info['f_g1'],vv_syst=fractionGaussStr,vv_systs=','.join(fractionGaussSysts)).replace("MH",varToReplace))
+        
         
         pdfNamePeaks="_".join([name+"PeakWTop",self.tag])
         self.w.factory("SUM::{name}({f}*{PDF1},{PDF2})".format(name=pdfNamePeaks,f=Fg1Var,PDF1=pdfNameW,PDF2=pdfNameTop))
 
+        # pdfName="_".join([name,self.tag])
+#         self.w.factory("SUM::{name}({f}*{PDF1},{PDF2})".format(name=pdfName,f=FresVar,PDF1=pdfNamePeaks,PDF2=pdfNameBKG))
+#
+        # FresVar="_".join(["f_res",name,self.tag])
+        # self.w.factory("expr::{name}('min((0+{param})*(1+{vv_syst}),1.0)',MJJ,{vv_systs})".format(name=FresVar,param=info['f_res'],vv_syst=fractionResStr,vv_systs=','.join(fractionResSysts)).replace("MH",varToReplace))
+        #
+        pdfNameBKG="_".join([name+"nonRes",self.tag])
+        erfExp = ROOT.RooErfExpPdf(pdfNameBKG,pdfNameBKG,self.w.var(MJJ),self.w.function(c0Var),self.w.function(c1Var),self.w.function(c2Var))
+        getattr(self.w,'import')(erfExp,ROOT.RooFit.RenameVariable(pdfNameBKG,pdfNameBKG))
+        
+        
+        FresVar="_".join(["f_res",name,self.tag])
+        self.w.factory("expr::{name}('0+{param}',MJJ)".format(name=FresVar,param=info['f_res']).replace("MH",varToReplace))
 
         pdfName="_".join([name,self.tag])
         self.w.factory("SUM::{name}({f}*{PDF1},{PDF2})".format(name=pdfName,f=FresVar,PDF1=pdfNamePeaks,PDF2=pdfNameBKG))
         f.close()
+        
         
     def addMJJTopMergedParametricShape(self,name,variable,jsonFile,scale ={},resolution={},fraction={},varToReplace="MH"):
         self.w.factory("MH[2000]")

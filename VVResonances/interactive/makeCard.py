@@ -114,7 +114,7 @@ for sig in signals:
       Tools.AddResBackgroundSystematics(card,p)
       Tools.AddNonResBackgroundSystematics(card,p)
       Tools.AddTaggingSystematics(card,sig,dataset,p,resultsDir[dataset]+'/migrationunc.json')
-
+      Tools.AddTTSystematics(card,sig,dataset,p)
       card.makeCard()
 
       t2wcmd = "text2workspace.py %s -o %s"%(cardName,workspaceName)
