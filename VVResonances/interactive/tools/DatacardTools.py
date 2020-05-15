@@ -121,7 +121,9 @@ class DatacardTools():
        card.addMJJTTJetsParametricShape("TTJets_mjetRes_l2","MJ2",resultsDir+"/JJ_TTJets_%s.json"%(category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},{'CMS_f_g1':1.},{'CMS_f_res':1.})
        card.addHistoShapeFromFile("TTJets_mjj",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_TTJets_PTZ_'+category,'OPT:CMS_VV_JJ_TTJets_OPTZ_'+category],False,0)
        
-       card.conditionalProduct2('TTJets','TTJets_mjetRes_l1','TTJets_mjetRes_l2','TTJets_mjj','MJ1,MJ2,MJJ',tag1="",tag2="",tag3="")   
+       # card.conditionalProduct2('TTJets','TTJets_mjetRes_l1','TTJets_mjetRes_l2','TTJets_mjj','MJ1,MJ2,MJJ',tag1="",tag2="",tag3="")
+       card.product("TTJets_mjetRes","TTJets_mjetRes_l1","TTJets_mjetRes_l2")
+       card.conditionalProduct("TTJets",'TTJets_mjj',"MJ1,MJ2","TTJets_mjetRes")
        
        print "outlabel "+self.outlabel
        if self.pseudodata=="" or self.pseudodata=="Vjets":

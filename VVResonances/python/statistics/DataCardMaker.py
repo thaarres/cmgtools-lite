@@ -281,10 +281,10 @@ class DataCardMaker:
             fractionResSysts.append(syst)    
        
         MJJ=variable            
-        try:
-          self.w.factory(variable+"[0,1000]")
-        except:
-          print("Variable {} already in workspace!".format(variable))
+        # try:
+        #   self.w.factory(variable+"[0,1000]")
+        # except:
+        #   print("Variable {} already in workspace!".format(variable))
 
         f=open(jsonFile)
         info=json.load(f)
