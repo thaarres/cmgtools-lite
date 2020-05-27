@@ -130,7 +130,7 @@ class DatacardTools():
            card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets")
        elif self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1:
            print "add small yield"
-           card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"WJets",0.000001)
+           card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets",0.000001)
        else:
            card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets")
            
