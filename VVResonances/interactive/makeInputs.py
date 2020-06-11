@@ -107,8 +107,8 @@ else:
 
 
 #all categories
-categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP','VBF_VV_HPHP','VBF_VV_HPLP']
-                                                                                                                                                          
+categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP']#,'VBF_VV_HPHP','VBF_VV_HPLP']
+categories=['VV_HPLP']                                                                                                                                     
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW_"
 VBFBulkGravWWTemplate="VBF_BulkGravToWW_"
@@ -307,9 +307,9 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     f.makeNormalizations("ZJets","JJ_"+str(period),ZresTemplate,0,cuts['nonres'],"nRes","",HPSF,LPSF)
 
 if options.run.find("all")!=-1 or options.run.find("tt")!=-1:
-    f.fitTT   ("JJ_TT",TTemplate,1.,)
-    f.makeBackgroundShapesMVVKernel("TTJets","JJ_"+str(period),TTemplate,cuts['nonres'],"1D",0,1.,1.)
-    f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","") 
+    f.fitTT   ("JJ_%s_TTJets"%(period),TTemplate,1.,)
+    # f.makeBackgroundShapesMVVKernel("TTJets","JJ_"+str(period),TTemplate,cuts['nonres'],"1D",0,1.,1.)
+    # f.makeNormalizations("TTJets","JJ_"+str(period),TTemplate,0,cuts['nonres'],"nRes","")
   
 if options.run.find("all")!=-1 or options.run.find("data")!=-1:
     print " Do data "
@@ -322,5 +322,9 @@ if options.run.find("all")!=-1 or options.run.find("pseudoVJETS")!=-1:
     print " Do pseudodata with vjets: DID YOU PRODUCE THE WORKSPACE BEFORE???"
     from modules.submitJobs import makePseudoDataVjets
     for p in categories: makePseudoDataVjets("results_"+str(period)+"/JJ_"+str(period)+"_nonRes_%s.root"%p,"results_"+str(period)+"/save_new_shapes_"+str(period)+"_pythia_%s_3D.root"%p,"pythia","JJ_PDVjets_%s.root"%p,lumi,"results_"+str(period)+"/workspace_JJ_BulkGWW_"+p+"_13TeV_"+str(period)+"_VjetsPrep.root",period,p)
+if options.run.find("all")!=-1 or options.run.find("pseudoALL")!=-1:
+    print " Do pseudodata. DID YOU PRODUCE THE WORKSPACE BEFORE???"
+    from modules.submitJobs import makePseudoDataVjetsTT
+    for p in categories: makePseudoDataVjetsTT("results_"+str(period)+"/JJ_"+str(period)+"_nonRes_%s.root"%p,"results_"+str(period)+"/save_new_shapes_"+str(period)+"_pythia_%s_3D.root"%p,"pythia","JJ_PD_%s.root"%p,lumi,"workspace_JJ_ZprimeZH_%s_13TeV_%sZprimeZH.root"%(p,str(period)),period,p)
 
 print " ########## I did everything I could! ###### "

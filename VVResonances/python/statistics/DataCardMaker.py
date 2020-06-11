@@ -1454,6 +1454,24 @@ class DataCardMaker:
             pdfName3="_".join([pdf3,tag3])
 	    
         self.w.factory("PROD::{name}({name1},{name2},{name3}| {x})".format(name=pdfName,name1=pdfName1,x=varName,name2=pdfName2,name3=pdfName3))    
+        
+    def conditionalProduct3(self,name,pdf1,pdf2,pdf3,varName,tag1="",tag2="",tag3=""):
+          pdfName="_".join([name,self.tag])
+
+          if tag1=="":
+              pdfName1="_".join([pdf1,self.tag])
+          else:
+              pdfName1="_".join([pdf1,tag1])
+          if tag2=="":    
+              pdfName2="_".join([pdf2,self.tag])
+          else:
+              pdfName2="_".join([pdf2,tag2])
+          if tag3=="":    
+              pdfName3="_".join([pdf3,self.tag])
+          else:
+              pdfName3="_".join([pdf3,tag3])
+	    
+          self.w.factory("PROD::{name}({name1},{name2}| {x},{name3}| {x})".format(name=pdfName,name1=pdfName1,x=varName,name2=pdfName2,name3=pdfName3))
 
     def product(self,name,pdf1,pdf2):
         pdfName="_".join([name,self.tag])
