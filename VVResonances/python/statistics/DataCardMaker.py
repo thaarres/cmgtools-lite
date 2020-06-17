@@ -318,29 +318,24 @@ class DataCardMaker:
         self.w.factory("RooGaussian::{name}({var},{mean2},{sigma2})".format(name=pdfNameTop,var=MJJ,mean2=mean2Var,sigma2=sigma2Var).replace("MH",variable))
         
         Fg1Var="_".join(["f_g1",name,self.tag])
-        self.w.factory("expr::{name}('min((0+{param})*(1+{vv_syst}),1.0)',MJJ,{vv_systs})".format(name=Fg1Var, param=info['f_g1'],vv_syst=fractionGaussStr,vv_systs=','.join(fractionGaussSysts)).replace("MH",varToReplace))
-        
+        self.w.factory("expr::{name}('min((0+{param})*(1+{vv_syst}),1.0)',MJJ)".format(name=Fg1Var, param=info['f_g1'],vv_syst=fractionGaussStr,vv_systs=','.join(fractionGaussSysts)).replace("MH",varToReplace))
         
         pdfNamePeaks="_".join([name+"PeakWTop",self.tag])
-        self.w.factory("SUM::{name}({f}*{PDF1},{PDF2})".format(name=pdfNamePeaks,f=Fg1Var,PDF1=pdfNameW,PDF2=pdfNameTop))
+        expr = "'{frac}*{PDF1}+(1-{frac})*{PDF2}',MJJ,{var},{frac},{PDF1},{PDF2}".format(name=pdfNamePeaks,frac=Fg1Var,PDF1=pdfNameW,PDF2=pdfNameTop,var=MJJ) 
+        self.w.factory("EXPR::%s(%s)"%(pdfNamePeaks,expr))
 
-        # pdfName="_".join([name,self.tag])
-#         self.w.factory("SUM::{name}({f}*{PDF1},{PDF2})".format(name=pdfName,f=FresVar,PDF1=pdfNamePeaks,PDF2=pdfNameBKG))
-#
-        # FresVar="_".join(["f_res",name,self.tag])
-        # self.w.factory("expr::{name}('min((0+{param})*(1+{vv_syst}),1.0)',MJJ,{vv_systs})".format(name=FresVar,param=info['f_res'],vv_syst=fractionResStr,vv_systs=','.join(fractionResSysts)).replace("MH",varToReplace))
-        #
         pdfNameBKG="_".join([name+"nonRes",self.tag])
         erfExp = ROOT.RooErfExpPdf(pdfNameBKG,pdfNameBKG,self.w.var(MJJ),self.w.function(c0Var),self.w.function(c1Var),self.w.function(c2Var))
         getattr(self.w,'import')(erfExp,ROOT.RooFit.RenameVariable(pdfNameBKG,pdfNameBKG))
-        
-        
+           
         FresVar="_".join(["f_res",name,self.tag])
         self.w.factory("expr::{name}('0+{param}',MJJ)".format(name=FresVar,param=info['f_res']).replace("MH",varToReplace))
-
         pdfName="_".join([name,self.tag])
-        self.w.factory("SUM::{name}({f}*{PDF1},{PDF2})".format(name=pdfName,f=FresVar,PDF1=pdfNamePeaks,PDF2=pdfNameBKG))
+        
+        self.w.factory("EXPR::{name}('{f}*{PDF1}+(1-{f})*{PDF2}',MJJ,{var},{f},{PDF1},{PDF2})".format(name=pdfName,f=FresVar,PDF1=pdfNamePeaks,PDF2=pdfNameBKG,var=MJJ))
+        print("SUCCESS!!!!!")
         f.close()
+        self.w.Print()
         
         
     def addMJJTopMergedParametricShape(self,name,variable,jsonFile,scale ={},resolution={},fraction={},varToReplace="MH"):
@@ -1470,8 +1465,9 @@ class DataCardMaker:
               pdfName3="_".join([pdf3,self.tag])
           else:
               pdfName3="_".join([pdf3,tag3])
-	    
+          # self.w.factory("PROD::{name}({name1},{name2}| {x},{name3}| {x})".format(name=pdfName,name1=pdfName1,x=varName,name2=pdfName2,name3=pdfName3))
           self.w.factory("PROD::{name}({name1},{name2}| {x},{name3}| {x})".format(name=pdfName,name1=pdfName1,x=varName,name2=pdfName2,name3=pdfName3))
+          # self.w.factory("PROD::{name}(mjj,mj1| {MJJ},{mj2}| {{MJJ}})".format(name=pdfName,mjj=pdfName1,MJJ=varName,mj1=pdfName2,{mj2}=pdfName3))
 
     def product(self,name,pdf1,pdf2):
         pdfName="_".join([name,self.tag])
@@ -1481,6 +1477,7 @@ class DataCardMaker:
 
     def product3D(self,name,pdf1,pdf2,pdf3):
         print self.tag
+        print("!!!!Using product3D!!!! ")
         pdfName="_".join([name,self.tag])
         pdfName1="_".join([pdf1,self.tag])
         pdfName2="_".join([pdf2,self.tag])

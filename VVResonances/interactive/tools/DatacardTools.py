@@ -124,8 +124,9 @@ class DatacardTools():
        # card.conditionalProduct2('TTJets','TTJets_mjetRes_l1','TTJets_mjetRes_l2','TTJets_mjj','MJ1,MJ2,MJJ',tag1="",tag2="",tag3="")
        # card.product("TTJets_mjetRes","TTJets_mjetRes_l1","TTJets_mjetRes_l2")
        # card.conditionalProduct("TTJets",'TTJets_mjj',"MJ1,MJ2","TTJets_mjetRes")
-       card.conditionalProduct3('TTJets','TTJets_mjetRes_l1','TTJets_mjj','TTJets_mjetRes_l2','MJJ',tag1="",tag2="",tag3="")
-       
+       card.conditionalProduct3('TTJets','TTJets_mjj','TTJets_mjetRes_l1','TTJets_mjetRes_l2','MJJ',tag1="",tag2="",tag3="")
+       # print("USING product3D!!!!")
+       # card.product3D('TTJets','TTJets_mjj','TTJets_mjetRes_l1','TTJets_mjetRes_l2')
        print "outlabel "+self.outlabel
        if self.pseudodata=="" or self.pseudodata=="Vjets":
            card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets")
@@ -207,6 +208,9 @@ class DatacardTools():
  def AddTTSystematics(self,card,sig,dataset,category):
     card.addSystematic("CMS_f_g1","param",[0.0,0.02])
     card.addSystematic("CMS_f_res","param",[0.0,0.02])
+    card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJets':1.2})  
+    card.addSystematic("CMS_VV_JJ_TTJets_PTZ_"+category,"param",[0,0.1]) #0.333
+    card.addSystematic("CMS_VV_JJ_TTJets_OPTZ_"+category,"param",[0,0.1]) #0.333
    
  def AddSigSystematics(self,card,sig,dataset,category,correlate):
 
@@ -246,13 +250,11 @@ class DatacardTools():
  
        card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjets':1.2})
        card.addSystematic("CMS_VV_JJ_Zjets_norm","lnN",{'Zjets':1.2})    
-       card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJets':1.2})    
        card.addSystematic("CMS_VV_JJ_Wjets_PTZ_"+category,"param",[0,0.1]) #0.333
        card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+category,"param",[0,0.1]) #0.333
        card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+category,"param",[0,0.1]) #0.333
        card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+category,"param",[0,0.1]) #0.333
-       card.addSystematic("CMS_VV_JJ_TTJets_PTZ_"+category,"param",[0,0.1]) #0.333
-       card.addSystematic("CMS_VV_JJ_TTJets_OPTZ_"+category,"param",[0,0.1]) #0.333
+       
 
  def AddNonResBackgroundSystematics(self,card,category):
 

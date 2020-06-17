@@ -108,7 +108,7 @@ else:
 
 #all categories
 categories=['VH_HPHP','VH_HPLP','VH_LPHP','VV_HPHP','VV_HPLP']#,'VBF_VV_HPHP','VBF_VV_HPLP']
-categories=['VV_HPLP']                                                                                                                                     
+# categories=['VH_HPHP']
 #list of signal samples --> nb, radion and vbf samples to be added
 BulkGravWWTemplate="BulkGravToWW_"
 VBFBulkGravWWTemplate="VBF_BulkGravToWW_"
@@ -323,7 +323,7 @@ if options.run.find("all")!=-1 or options.run.find("pseudoVJETS")!=-1:
     from modules.submitJobs import makePseudoDataVjets
     for p in categories: makePseudoDataVjets("results_"+str(period)+"/JJ_"+str(period)+"_nonRes_%s.root"%p,"results_"+str(period)+"/save_new_shapes_"+str(period)+"_pythia_%s_3D.root"%p,"pythia","JJ_PDVjets_%s.root"%p,lumi,"results_"+str(period)+"/workspace_JJ_BulkGWW_"+p+"_13TeV_"+str(period)+"_VjetsPrep.root",period,p)
 if options.run.find("all")!=-1 or options.run.find("pseudoALL")!=-1:
-    print " Do pseudodata. DID YOU PRODUCE THE WORKSPACE BEFORE???"
+    print " Do pseudodata with tt+Vjets+QCD!!!. DID YOU PRODUCE THE WORKSPACE BEFORE???"
     from modules.submitJobs import makePseudoDataVjetsTT
     for p in categories: makePseudoDataVjetsTT("results_"+str(period)+"/JJ_"+str(period)+"_nonRes_%s.root"%p,"results_"+str(period)+"/save_new_shapes_"+str(period)+"_pythia_%s_3D.root"%p,"pythia","JJ_PD_%s.root"%p,lumi,"workspace_JJ_ZprimeZH_%s_13TeV_%sZprimeZH.root"%(p,str(period)),period,p)
 

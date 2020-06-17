@@ -1870,7 +1870,7 @@ def makePseudoDataVjetsTT(input,kernel,mc,output,lumi,workspace,year,purity):
  hout_ttjets = ROOT.TH3F('ttjets','ttjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
  
  nEventsTT = o_norm_ttjets.getVal()
- print "Expected tt+jets events: ",nEventsZ
+ print "Expected tt+jets events: ",nEventsTT
  modelTTjets.Print('v')
  # import sys; sys.exit()
  ttjets = modelTTjets.generate(args,int(nEventsTT))

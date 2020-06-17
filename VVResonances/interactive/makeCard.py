@@ -36,7 +36,7 @@ vtag_unc['VH_LPHP'] = {'2016':'1.','2017':'1.'}
 vtag_pt_dependence = {'VV_HPHP':'((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))','VV_HPLP':'((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))','VH_HPHP':'1','VH_HPLP':'1','VH_LPHP':'1','VH_LPLP':'1'}
 
 purities= ['VV_HPLP','VV_HPHP','VH_HPLP','VH_HPHP','VH_LPHP']
-# purities= ['VV_HPLP']
+purities= ['VV_HPHP']
 #signals = ["BulkGWW", "BulkGZZ","ZprimeWW","WprimeWZ","VprimeWV","'ZprimeZH'"]
 signals = ["ZprimeZH"]
 
@@ -105,7 +105,7 @@ for sig in signals:
       Tools.AddResBackgroundSystematics(card,p)
       Tools.AddNonResBackgroundSystematics(card,p)
       Tools.AddTaggingSystematics(card,sig,dataset,p,resultsDir[dataset]+'/migrationunc.json')
-      # Tools.AddTTSystematics(card,sig,dataset,p)
+      Tools.AddTTSystematics(card,sig,dataset,p)
       card.makeCard()
 
       t2wcmd = "text2workspace.py %s -o %s"%(cardName,workspaceName)
