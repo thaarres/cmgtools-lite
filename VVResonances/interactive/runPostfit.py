@@ -1,4 +1,5 @@
-#python runFitPlots_vjets_signal_oneyear_splitRes.py -n workspace_JJ_ZprimeZH_HPLP_13TeV_2016.root  -l sigonly -i 2016/JJ_nonRes_HPLP.root -M 2000 -s
+#python runPostfit.py -n workspace_JJ_ZprimeZH_VH_LPHP_13TeV_2016ZprimeZH.root -i results_2016_tt/pseudo40/JJ_PD_VH_LPHP.root -l "VH_LPHP"
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 import os, sys, re, optparse,pickle,shutil,json
@@ -6,33 +7,27 @@ import time
 from array import array
 import math
 import CMS_lumi
-#ROOT.gErrorIgnoreLevel = ROOT.kWarning
+
 ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
-
-#ROOT.gSystem.Load("Util_cxx.so")
-#from ROOT import draw_error_band
-
-#python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_"+signalName+".root  -l comboHPHP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPHP.root -M 1200 -s
-#python runFitPlots_vjets_signal_bigcombo_splitRes.py -n workspace_combo_"+signalName+".root  -l comboHPLP -i /afs/cern.ch/user/j/jngadiub/public/2016/JJ_nonRes_HPLP.root -M 1200
 
 addTT = False 
 doFit = True
 parser = optparse.OptionParser()
-parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
+parser.add_option("-o","--output",dest="output",help="Output folder name",default='postfit_plots/')
 parser.add_option("-n","--name",dest="name",help="Input workspace",default='workspace.root')
-parser.add_option("-i","--input",dest="input",help="Input nonRes histo",default='JJ_HPHP.root')
+parser.add_option("-i","--input",dest="input",help="Input nonRes histo",default='results_2016_tt/pseudo40/JJ_PD_VH_LPHP.root')
 parser.add_option("-x","--xrange",dest="xrange",help="set range for x bins in projection",default="0,-1")
 parser.add_option("-y","--yrange",dest="yrange",help="set range for y bins in projection",default="0,-1")
 parser.add_option("-z","--zrange",dest="zrange",help="set range for z bins in projection",default="0,-1")
 parser.add_option("-p","--projection",dest="projection",help="choose which projection should be done",default="xyz")
-parser.add_option("-d","--data",dest="data",action="store_true",help="make also postfit plots",default=True)
 parser.add_option("-l","--label",dest="label",help="add extra label such as pythia or herwig",default="")
+parser.add_option("-d","--data",dest="data",action="store_true",help="Is data",default=True)
 #parser.add_option("--log",dest="log",help="write fit result to log file",default="fit_results.log")
 parser.add_option("--pdfz",dest="pdfz",help="name of pdfs lie PTZUp etc",default="")
 parser.add_option("--pdfx",dest="pdfx",help="name of pdfs lie PTXUp etc",default="")
 parser.add_option("--pdfy",dest="pdfy",help="name of pdfs lie PTYUp etc",default="")
 parser.add_option("-s","--signal",dest="fitSignal",action="store_true",help="do S+B fit",default=False)
-parser.add_option("-M","--mass",dest="signalMass",type=float,help="signal mass",default=1560.)
+parser.add_option("-M","--mass",dest="signalMass",type=float,help="signal mass",default=2000.)
 parser.add_option("--prelim",dest="prelim",type=int,help="add preliminary label",default=0)
 parser.add_option("--log",dest="log",help="write output in logfile given as argument here!",default="chi2.log")
 
@@ -1027,6 +1022,11 @@ def getChi2proj(histo_pdf,histo_data,minx=-1,maxx=-1):
     return [chi2,ndof]   
 
 if __name__=="__main__":
+  
+     outdir = options.output
+     if not os.path.exists(outdir):
+       os.system('mkdir '+outdir)
+       
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
 
