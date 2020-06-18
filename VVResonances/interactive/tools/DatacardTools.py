@@ -127,6 +127,10 @@ class DatacardTools():
        card.conditionalProduct3('TTJets','TTJets_mjj','TTJets_mjetRes_l1','TTJets_mjetRes_l2','MJJ',tag1="",tag2="",tag3="")
        # print("USING product3D!!!!")
        # card.product3D('TTJets','TTJets_mjj','TTJets_mjetRes_l1','TTJets_mjetRes_l2')
+       # card.conditionalProduct('TTJets_c1','TTJets_mjetRes_l1','MJJ','TTJets_mjj')
+       # card.conditionalProduct('TTJets_c2','TTJets_mjetRes_l2','MJJ','TTJets_mjj')
+       # card.product3D('TTJets','TTJets_mjj','TTJets_c1','TTJets_c2')
+       
        print "outlabel "+self.outlabel
        if self.pseudodata=="" or self.pseudodata=="Vjets":
            card.addFixedYieldFromFile('TTJets',ncontrib,rootFileNorm,"TTJets")
